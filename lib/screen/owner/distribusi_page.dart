@@ -20,19 +20,7 @@ class _DistribusiPageState extends State<DistribusiPage> {
     var nama = ["Dari", "Tujuan"];
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DashboardAdminMenu()),
-            );
-          },
-          icon: Icon(Icons.arrow_back_ios_new_sharp),
-        ),
-        title: Text("Halaman Distribusi"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text("Halaman Distribusi"), centerTitle: true),
       body: SafeArea(
         child: Center(
           child: Container(
