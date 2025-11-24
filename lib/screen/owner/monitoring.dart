@@ -2,7 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/widget/dll/legen_item.dart';
+import 'package:kerprak/widget/list/monitoring/monitoring_makanan.dart';
 import 'package:kerprak/widget/list/monitoring/monitoring_pendapatan.dart';
+import 'package:kerprak/widget/list/monitoring/monitoring_pengeluaran.dart';
 import 'package:provider/provider.dart';
 
 class Monitoring extends StatefulWidget {
@@ -12,7 +14,15 @@ class Monitoring extends StatefulWidget {
   State<Monitoring> createState() => _MonitoringState();
 }
 
+Future<void> _loadData() async {
+  await Future.delayed(Duration(milliseconds: 500));
+  // Di sini bisa panggil API / Provider untuk refresh data
+}
+
+enum MonitoringType { semua, pendapatan, pengeluaran, makanan }
+
 class _MonitoringState extends State<Monitoring> {
+  MonitoringType _current = MonitoringType.semua; // default halaman
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,10 +32,34 @@ class _MonitoringState extends State<Monitoring> {
         child: ListView(
           padding: EdgeInsets.only(top: 10),
           children: [
-            ListTile(title: Text("Semua"), onTap: () {}),
-            ListTile(title: Text("Pendapatan"), onTap: () {}),
-            ListTile(title: Text("Pengeluaran"), onTap: () {}),
-            ListTile(title: Text("Makanan"), onTap: () {}),
+            ListTile(
+              title: Text("Semua"),
+              onTap: () {
+                setState(() => _current = MonitoringType.semua);
+                Navigator.pop(context); // tutup drawer
+              },
+            ),
+            ListTile(
+              title: Text("Pendapatan"),
+              onTap: () {
+                setState(() => _current = MonitoringType.pendapatan);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text("Pengeluaran"),
+              onTap: () {
+                setState(() => _current = MonitoringType.pengeluaran);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text("Makanan"),
+              onTap: () {
+                setState(() => _current = MonitoringType.makanan);
+                Navigator.pop(context);
+              },
+            ),
           ],
         ),
       ),
@@ -170,7 +204,34 @@ class _MonitoringState extends State<Monitoring> {
                 },
               ),
             ),
-            Expanded(child: MonitoringPendapatan()),
+            Expanded(
+              child: FutureBuilder<void>(
+                future: _loadData(), // fungsi Future untuk load data
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    ); // loading
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text("Terjadi kesalahan: ${snapshot.error}"),
+                    );
+                  } else {
+                    // Data sudah siap, tampilkan sesuai _current
+                    switch (_current) {
+                      case MonitoringType.semua:
+                        return Center(child: Text("Monitoring Keseluruhan"));
+                      case MonitoringType.pendapatan:
+                        return MonitoringPendapatan();
+                      case MonitoringType.pengeluaran:
+                        return MonitoringPengeluaran();
+                      case MonitoringType.makanan:
+                        return MonitoringMakanan();
+                    }
+                  }
+                },
+              ),
+            ),
           ],
         ),
       ),

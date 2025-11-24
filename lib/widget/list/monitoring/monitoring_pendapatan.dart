@@ -51,7 +51,11 @@ class _MonitoringPendapatanState extends State<MonitoringPendapatan> {
         Expanded(
           child: Consumer2<Penjualans, SearchProvider>(
             builder: (context, penjualans, search, child) {
-              // filter penjualans berdasarkan nama_makanan
+              final nomorMap = {
+                for (var i = 0; i < penjualans.datas.length; i++)
+                  penjualans.datas[i]: i,
+              };
+
               final filtered = penjualans.datas.where((penjualan) {
                 return penjualan.detail.any(
                   (detail) => search.filtered.any(
@@ -65,9 +69,9 @@ class _MonitoringPendapatanState extends State<MonitoringPendapatan> {
               return ListView.builder(
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
-                  int i = filtered.length - (index + 1);
-                  var p = filtered[i];
-                  return ExpandableCard(index: index, penjualan: p);
+                  var p = filtered[index];
+                  int nomorPenjualan = nomorMap[p]!;
+                  return ExpandableCard(index: nomorPenjualan, penjualan: p);
                 },
               );
             },
