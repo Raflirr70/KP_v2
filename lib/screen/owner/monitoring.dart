@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/widget/dll/legen_item.dart';
+import 'package:kerprak/widget/list/monitoring/monitoring_keseluruhan.dart';
 import 'package:kerprak/widget/list/monitoring/monitoring_makanan.dart';
 import 'package:kerprak/widget/list/monitoring/monitoring_pendapatan.dart';
 import 'package:kerprak/widget/list/monitoring/monitoring_pengeluaran.dart';
@@ -19,10 +20,10 @@ Future<void> _loadData() async {
   // Di sini bisa panggil API / Provider untuk refresh data
 }
 
-enum MonitoringType { semua, pendapatan, pengeluaran, makanan }
+enum MonitoringType { keseluruhan, pendapatan, pengeluaran, makanan }
 
 class _MonitoringState extends State<Monitoring> {
-  MonitoringType _current = MonitoringType.semua; // default halaman
+  MonitoringType _current = MonitoringType.keseluruhan; // default halaman
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +36,7 @@ class _MonitoringState extends State<Monitoring> {
             ListTile(
               title: Text("Semua"),
               onTap: () {
-                setState(() => _current = MonitoringType.semua);
+                setState(() => _current = MonitoringType.keseluruhan);
                 Navigator.pop(context); // tutup drawer
               },
             ),
@@ -219,8 +220,8 @@ class _MonitoringState extends State<Monitoring> {
                   } else {
                     // Data sudah siap, tampilkan sesuai _current
                     switch (_current) {
-                      case MonitoringType.semua:
-                        return Center(child: Text("Monitoring Keseluruhan"));
+                      case MonitoringType.keseluruhan:
+                        return MonitoringKeseluruhan();
                       case MonitoringType.pendapatan:
                         return MonitoringPendapatan();
                       case MonitoringType.pengeluaran:

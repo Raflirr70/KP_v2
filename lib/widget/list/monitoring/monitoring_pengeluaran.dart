@@ -150,16 +150,16 @@ class _MonitoringPengeluaranState extends State<MonitoringPengeluaran> {
                           );
                         },
                       ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Padding(
-                          padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
-                          child: Text(
-                            "Rp ${listPengeluaran[cabIndex].total_harga} ",
-                            textAlign: TextAlign.end,
-                          ),
-                        ),
-                      ),
+                      // SizedBox(
+                      //   width: double.infinity,
+                      //   child: Padding(
+                      //     padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                      //     child: Text(
+                      //       "Rp ${listPengeluaran[cabIndex].total_harga} ",
+                      //       textAlign: TextAlign.end,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   );
                 },

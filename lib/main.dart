@@ -9,11 +9,12 @@ import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/model/user.dart';
+import 'package:kerprak/screen/karyawan/homePage_karyawan.dart';
 import 'package:kerprak/screen/login.dart';
 import 'package:kerprak/screen/owner/monitoring.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   runApp(
     MultiProvider(
       providers: [
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Monitoring Ampera",
       debugShowCheckedModeBanner: false,
-      home: Monitoring(),
+      home: HomepageKaryawan(),
     );
   }
 }

@@ -10,6 +10,7 @@ class Laporan {
   int? total_pengeluaran;
   List<Penjualans> penjualan = [];
   List<Pengeluarans> pengeluaran = [];
+  DateTime? tanggal;
 
   Laporan(this.id);
 }
