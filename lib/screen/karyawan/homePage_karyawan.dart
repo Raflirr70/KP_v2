@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 
 class HomepageKaryawan extends StatelessWidget {
@@ -82,7 +83,14 @@ class HomepageKaryawan extends StatelessWidget {
                       title: "Pengeluaran",
                       icon: Icons.account_balance_wallet,
                       color: Colors.redAccent,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PengeluaranPage(),
+                          ),
+                        );
+                      },
                     ),
                     _menuItem(
                       title: "Konsumsi",
