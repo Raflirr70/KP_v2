@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 
 class HomepageKaryawan extends StatelessWidget {
   const HomepageKaryawan({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -69,7 +69,14 @@ class HomepageKaryawan extends StatelessWidget {
                       title: "Penjualan",
                       icon: Icons.shopping_cart,
                       color: Colors.blueAccent,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PenjualanPage(),
+                          ),
+                        );
+                      },
                     ),
                     _menuItem(
                       title: "Pengeluaran",
