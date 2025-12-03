@@ -12,10 +12,8 @@ class User {
 }
 
 class Users extends ChangeNotifier {
-  final List<User> _datas = [
-    User(1, "owner", "steve", "steve@gmail.com", "123456"),
-    User(2, "karyawan", "ujang", "ujang@gmail.com", "123456"),
-  ];
+  final List<User> _datas = [];
+  bool isLoading = true;
 
   List<User> get datas => _datas;
 
@@ -40,24 +38,70 @@ class Users extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> get_data() async {
+  // Load semua data dari Firestore dan update _datas
+  Future<void> fetchData() async {
+    isLoading = true;
+    notifyListeners();
     try {
-      // Ambil dokumen dari Firestore
-      DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
           .instance
-          .collection("akun")
-          .doc("P6u50eyj9EZK69caVDRokD94Bwp2")
+          .collection('akun')
           .get();
 
-      // Jika dokumen ada, kembalikan data-nya
-      if (doc.exists) {
-        return doc.data();
-      } else {
-        return null; // dokumen tidak ada
-      }
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          var data = doc.data();
+          return User(
+            data['id'] ?? 0,
+            data['role'] ?? '',
+            data['nama'] ?? '',
+            data['email'] ?? '',
+            data['password'] ?? '',
+          );
+        }).toList(),
+      );
+      isLoading = false;
+
+      notifyListeners();
     } catch (e) {
-      print("Error mengambil data: $e");
-      return null; // terjadi error
+      print("Error fetchData: $e");
+    }
+  }
+
+  // ================== Fungsi Tambah Karyawan ==================
+  Future<void> tambahKaryawan({
+    required String nama,
+    required String email,
+    required String password,
+    String role = "karyawan",
+  }) async {
+    try {
+      // 1. Buat akun di Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // 2. Simpan data karyawan di Firestore
+      DocumentReference docRef = FirebaseFirestore.instance
+          .collection('akun')
+          .doc(userCredential.user!.uid.toString());
+      await docRef.set({'nama': nama, 'email': email});
+
+      // 3. Tambahkan ke list lokal
+      _datas.add(
+        User(
+          docRef.id.hashCode, // ID lokal bisa dari hash ID dokumen
+          role,
+          nama,
+          email,
+          password,
+        ),
+      );
+
+      fetchData();
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      print("Error tambahKaryawan: $e");
     }
   }
 }
