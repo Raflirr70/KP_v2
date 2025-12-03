@@ -10,9 +10,17 @@ import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/homePage_karyawan.dart';
+import 'package:kerprak/screen/login.dart';
+import 'package:kerprak/screen/owner/homePage_admin.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MultiProvider(
       providers: [
@@ -40,7 +48,60 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Monitoring Ampera",
       debugShowCheckedModeBanner: false,
-      home: HomepageKaryawan(),
+      home: AuthCheck(),
+    );
+  }
+}
+
+class AuthCheck extends StatelessWidget {
+  const AuthCheck({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Masih loading
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        // Belum login
+        if (!snapshot.hasData) {
+          return LoginPage();
+        }
+        return HomepageKaryawan();
+        // final user = snapshot.data!;
+
+        // Sudah login → ambil data role user
+        // return FutureBuilder(
+        //   future: FirebaseFirestore.instance
+        //       .collection("user")
+        //       .doc(user.uid)
+        //       .get(),
+        //   builder: (context, roleSnapshot) {
+        //     if (roleSnapshot.connectionState == ConnectionState.waiting) {
+        //       return Center(child: CircularProgressIndicator());
+        //     }
+
+        //     // Jika dokumennya tidak ada
+        //     if (!roleSnapshot.hasData || !roleSnapshot.data!.exists) {
+        //       return Center(child: Text("User tidak ditemukan"));
+        //     }
+
+        //     final data = roleSnapshot.data!;
+        //     final role = data["role"];
+
+        //     if (role == "admin") {
+        //       return HomepageAdmin(email: user.email!);
+        //     } else if (role == "karyawan") {
+        //       return HomepageKaryawan();
+        //     } else {
+        //       return Center(child: Text("Role tidak dikenali"));
+        //     }
+        //   },
+        // );
+      },
     );
   }
 }

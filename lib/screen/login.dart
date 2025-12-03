@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/main.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/owner/homePage_admin.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,10 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
-
-  bool _obscure = true;
-  bool _isLoading = false;
-  bool _rememberMe = false;
+  bool _obscure = false;
 
   void _showMessage(String msg, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -28,31 +28,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _onLoginPressed() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    final email = _emailCtrl.text.trim();
-    final password = _passwordCtrl.text;
-
-    // 🔥 Cek ke provider
-    final users = Provider.of<Users>(context, listen: false);
-    final user = users.login(email, password);
-
-    await Future.delayed(const Duration(seconds: 1)); // efek loading saja
-    setState(() => _isLoading = false);
-
-    if (user != null) {
-      _showMessage("Login berhasil");
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomepageAdmin(email: user.nama)),
+  Future<void> _Login() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailCtrl.text,
+        password: _passwordCtrl.text,
       );
-    } else {
-      _passwordCtrl.clear();
-      _showMessage("Email atau password salah", error: true);
+    } on FirebaseAuthException catch (e) {
+      _showMessage(e.message ?? "Login gagal", error: true);
     }
   }
 
@@ -100,10 +83,8 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _onLoginPressed,
-                      child: _isLoading
-                          ? const CircularProgressIndicator()
-                          : const Text("Masuk"),
+                      onPressed: _Login,
+                      child: Text("Masuk"),
                     ),
                   ),
                 ],

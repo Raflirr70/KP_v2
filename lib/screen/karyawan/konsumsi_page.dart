@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:kerprak/model/pengeluaran.dart';
+import 'package:kerprak/model/penjualan.dart';
 
-class PengeluaranPage extends StatefulWidget {
-  const PengeluaranPage({super.key});
+class KonsumsiPage extends StatefulWidget {
+  const KonsumsiPage({super.key});
 
   @override
-  State<PengeluaranPage> createState() => _PengeluaranPageState();
+  State<KonsumsiPage> createState() => _KonsumsiPageState();
 }
 
-class _PengeluaranPageState extends State<PengeluaranPage> {
+class _KonsumsiPageState extends State<KonsumsiPage> {
   bool _showSummary = true;
+  String formatTimeOfDay(TimeOfDay tod) {
+    final hour = tod.hourOfPeriod.toString().padLeft(2, '0');
+    final minute = tod.minute.toString().padLeft(2, '0');
+    final period = tod.period == DayPeriod.am ? "AM" : "PM";
+
+    return "$hour:$minute $period";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,77 +108,37 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                     ),
                   );
                 },
-                child: _showSummary
-                    ? Card(
-                        key: ValueKey("summary"),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _summaryBox(
-                                  "Total Hari Ini",
-                                  "Rp 320.000",
-                                  Colors.redAccent,
-                                  Icons.money_off,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: _summaryBox(
-                                  "Transaksi",
-                                  "6 Item",
-                                  Colors.deepOrange,
-                                  Icons.list,
-                                ),
-                              ),
-                            ],
+                child: Card(
+                  key: ValueKey("summary"),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _summaryBox(
+                            "Konsumsi",
+                            "2",
+                            Colors.deepOrange,
+                            Icons.local_dining,
                           ),
                         ),
-                      )
-                    : SizedBox.shrink(key: ValueKey("empty")),
-              ),
-            ),
-
-            // ==================== LABEL ====================
-            InkWell(
-              onTap: () => setState(() => _showSummary = !_showSummary),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.wallet, color: Colors.redAccent),
-                    SizedBox(width: 8),
-                    Text(
-                      "Daftar Pengeluaran",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: Colors.grey[800],
-                      ),
+                      ],
                     ),
-                    SizedBox(width: 8),
-                    Icon(Icons.wallet, color: Colors.redAccent),
-                  ],
+                  ),
                 ),
               ),
             ),
 
             SizedBox(height: 10),
 
-            // ==================== LIST PENGELUARAN ====================
+            // ==================== LIST PENJUALAN ====================
             Expanded(
-              child: Consumer<Pengeluarans>(
+              child: Consumer<Penjualans>(
                 builder: (context, value, child) {
-                  final filtered = value.datas
-                      .where((e) => e.id_cabang == 2)
-                      .toList();
-
-                  if (filtered.isEmpty) {
+                  if (value.datas.isEmpty) {
                     return Center(
                       child: Text(
-                        "Tidak ada stock tersedia",
+                        "Belum ada data Konsumsi",
                         style: TextStyle(color: Colors.grey),
                       ),
                     );
@@ -178,13 +146,13 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
 
                   return ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 10),
-                    itemCount: filtered.length + 1,
+                    itemCount: 4,
                     itemBuilder: (context, index) {
-                      if (filtered.length != index) {
-                        final p = filtered[index];
+                      if (index != 3) {
+                        final p = value.datas[index];
                         return Card(
                           elevation: 3,
-                          color: Colors.red[50],
+                          color: Colors.deepOrange[50],
                           margin: EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -197,12 +165,12 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Judul + Harga
+                                // Nama menu + total jual
                                 Row(
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        p.nama_pengeluaran,
+                                        formatTimeOfDay(p.jam!),
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
@@ -210,11 +178,11 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                       ),
                                     ),
                                     Text(
-                                      "Rp ${p.jumlah_unit}",
+                                      "Rp ${p.total_harga}",
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent,
+                                        color: Colors.deepOrange,
                                       ),
                                     ),
                                   ],
@@ -222,21 +190,44 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
 
                                 SizedBox(height: 6),
 
-                                // Keterangan lebih kecil
+                                // Jumlah terjual + tanggal
                                 Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 14,
-                                      color: Colors.grey,
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.shopping_bag,
+                                          size: 14,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          " Porsi",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      p.total_harga.toString(),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[700],
-                                      ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 13,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          p.total_harga.toString(),
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -249,7 +240,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                         onTap: () {},
                         child: Card(
                           elevation: 3,
-                          color: Colors.red[100],
+                          color: Colors.deepOrange[100],
                           margin: EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -274,29 +265,27 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
   // =================== SUMMARY BOX ===================
   Widget _summaryBox(String label, String value, Color color, IconData icon) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 14),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 26),
-          SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 14,
               color: color,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 14,
               color: color,
               fontWeight: FontWeight.w600,
             ),

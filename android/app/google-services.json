@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "213182381352",
+    "project_id": "ampera-saiyo",
+    "storage_bucket": "ampera-saiyo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213182381352:android:95bd8a112d040e257b241d",
+        "android_client_info": {
+          "package_name": "com.example.kerprak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2f6hxkcTs-R3Ih-78lywKyo9lLizCLO0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
