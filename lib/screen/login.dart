@@ -28,17 +28,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _Login() async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailCtrl.text,
-        password: _passwordCtrl.text,
-      );
-    } on FirebaseAuthException catch (e) {
-      _showMessage(e.message ?? "Login gagal", error: true);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,13 +68,19 @@ class _LoginPageState extends State<LoginPage> {
                         v!.isEmpty ? "Password tidak boleh kosong" : null,
                   ),
                   const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _Login,
-                      child: Text("Masuk"),
-                    ),
+                  Consumer<Users>(
+                    builder: (context, value, child) {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            value.Login(_emailCtrl.text, _passwordCtrl.text);
+                          },
+                          child: Text("Masuk"),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

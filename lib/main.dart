@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/distribusi.dart';
@@ -61,46 +62,38 @@ class AuthCheck extends StatelessWidget {
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Masih loading
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
+        if (!snapshot.hasData) return LoginPage();
 
-        // Belum login
-        if (!snapshot.hasData) {
-          return LoginPage();
-        }
-        return HomepageKaryawan();
-        // final user = snapshot.data!;
+        return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          future: FirebaseFirestore.instance
+              .collection("akun")
+              .doc("P6u50eyj9EZK69caVDRokD94Bwp2")
+              .get(),
+          builder: (context, roleSnapshot) {
+            // return Text("roleSnapshot.toString()");
+            if (roleSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-        // Sudah login → ambil data role user
-        // return FutureBuilder(
-        //   future: FirebaseFirestore.instance
-        //       .collection("user")
-        //       .doc(user.uid)
-        //       .get(),
-        //   builder: (context, roleSnapshot) {
-        //     if (roleSnapshot.connectionState == ConnectionState.waiting) {
-        //       return Center(child: CircularProgressIndicator());
-        //     }
+            if (!roleSnapshot.hasData || !roleSnapshot.data!.exists) {
+              return Center(child: Text("User tidak ditemukan"));
+            }
 
-        //     // Jika dokumennya tidak ada
-        //     if (!roleSnapshot.hasData || !roleSnapshot.data!.exists) {
-        //       return Center(child: Text("User tidak ditemukan"));
-        //     }
+            final data = roleSnapshot.data!.data();
+            if (data == null)
+              return Center(child: Text("User tidak ditemukan"));
 
-        //     final data = roleSnapshot.data!;
-        //     final role = data["role"];
+            final role = data["role"];
 
-        //     if (role == "admin") {
-        //       return HomepageAdmin(email: user.email!);
-        //     } else if (role == "karyawan") {
-        //       return HomepageKaryawan();
-        //     } else {
-        //       return Center(child: Text("Role tidak dikenali"));
-        //     }
-        //   },
-        // );
+            if (role == "admin") {
+              return HomepageAdmin(nama: data["nama"]);
+            } else if (role == "karyawan") {
+              return HomepageKaryawan();
+            } else {
+              return Center(child: Text("Role tidak dikenali"));
+            }
+          },
+        );
       },
     );
   }

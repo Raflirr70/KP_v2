@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class User {
   int id;
@@ -27,14 +29,35 @@ class Users extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Fungsi login beneran
-  User? login(String email, String pass) {
+  Future<void> Login(String _emailCtrl, String _passwordCtrl) async {
     try {
-      return _datas.firstWhere(
-        (u) => u.email == email.trim() && u.password == pass,
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailCtrl,
+        password: _passwordCtrl,
       );
+    } on FirebaseAuthException catch (e) {
+      print(e);
+    }
+  }
+
+  Future<Map<String, dynamic>?> get_data() async {
+    try {
+      // Ambil dokumen dari Firestore
+      DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore
+          .instance
+          .collection("akun")
+          .doc("P6u50eyj9EZK69caVDRokD94Bwp2")
+          .get();
+
+      // Jika dokumen ada, kembalikan data-nya
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        return null; // dokumen tidak ada
+      }
     } catch (e) {
-      return null;
+      print("Error mengambil data: $e");
+      return null; // terjadi error
     }
   }
 }

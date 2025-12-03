@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
@@ -6,40 +7,81 @@ import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
 import 'package:provider/provider.dart';
 
 class HomepageAdmin extends StatefulWidget {
-  final String email;
-  const HomepageAdmin({super.key, required this.email});
+  final String nama;
+  const HomepageAdmin({super.key, required this.nama});
 
   @override
   State<HomepageAdmin> createState() => _HomepageAdminState();
 }
 
 class _HomepageAdminState extends State<HomepageAdmin> {
+  final _user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16), // atur radius sesukamu
+          ),
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.blueAccent,
+            title: Row(
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.temple_buddhist_outlined),
+                    SizedBox(width: 5),
+                    Text(
+                      "Cipanas",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text("asd", style: TextStyle(fontSize: 10)),
+                    Text(
+                      "Admin",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 5),
+                InkWell(
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                  },
+                  child: Icon(Icons.account_circle_rounded, size: 30),
+                ),
+              ],
+            ),
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueAccent, Colors.lightBlueAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 30),
-            SizedBox(
-              height: 50,
-              key: Key("Navigasi"),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text("Nama User", style: TextStyle(fontSize: 13)),
-                      Text("Role User", style: TextStyle(fontSize: 9)),
-                    ],
-                  ),
-                  Icon(Icons.account_circle_rounded, size: 40),
-                ],
-              ),
-            ),
             Container(
               margin: EdgeInsets.only(top: 0, left: 10, right: 10),
               padding: EdgeInsets.all(10),
