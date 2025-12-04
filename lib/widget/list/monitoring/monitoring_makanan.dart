@@ -29,11 +29,11 @@ class _MonitoringMakananState extends State<MonitoringMakanan> {
                   children: [
                     Text("Detail Makanan"),
                     Spacer(),
-                    Expanded(
-                      child: SearchSimple(
-                        data: vm.datas.map((e) => e.nama).toList(),
-                      ),
-                    ),
+                    // Expanded(
+                    //   child: SearchSimple(
+                    //     data: vm.datas.map((e) => e.nama).toList(),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

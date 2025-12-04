@@ -35,14 +35,14 @@ class _MonitoringPendapatanState extends State<MonitoringPendapatan> {
             children: [
               Text("Detail Penjualan"),
               Spacer(),
-              Expanded(
-                child: SearchSimple(
-                  data: Penjualans().datas
-                      .expand((p) => p.detail.map((d) => d.nama_makanan))
-                      .toSet() // remove duplicates
-                      .toList(),
-                ),
-              ),
+              // Expanded(
+              //   child: SearchSimple(
+              //     data: Penjualans().datas
+              //         .expand((p) => p.detail.map((d) => d.nama_makanan))
+              //         .toSet() // remove duplicates
+              //         .toList(),
+              //   ),
+              // ),
             ],
           ),
         ),

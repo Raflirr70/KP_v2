@@ -35,11 +35,11 @@ class _DaftarPengeluaranState extends State<DaftarPengeluaran> {
             builder: (context, value, child) {
               return Column(
                 children: [
-                  SearchSimple(
-                    data: value.datas.map((e) => e.nama_pengeluaran).toList(),
-                  ),
-                  SizedBox(height: 10, width: 250, child: Divider(height: 2)),
-                  ListPengeluaran(value: value),
+                  // SearchSimple(
+                  //   data: value.datas.map((e) => e.nama_pengeluaran).toList(),
+                  // ),
+                  // SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  // ListPengeluaran(value: value),
                 ],
               );
             },

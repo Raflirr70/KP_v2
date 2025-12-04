@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kerprak/model/search.dart';
+import 'package:provider/provider.dart';
 
 class User {
   int id;
@@ -102,6 +104,34 @@ class Users extends ChangeNotifier {
       notifyListeners();
     } on FirebaseAuthException catch (e) {
       print("Error tambahKaryawan: $e");
+    }
+  }
+
+  Future<void> hapusKaryawan(User user) async {
+    try {
+      // 1️⃣ Hapus dari Firestore
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('akun')
+          .where('email', isEqualTo: user.email)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // 2️⃣ Hapus dari Firebase Auth
+      // Catatan: Firebase Auth hanya bisa menghapus user yang sedang login
+      // Jika ingin menghapus user lain, harus pakai Admin SDK di server
+      // if (FirebaseAuth.instance.currentUser?.email == user.email) {
+      //   await FirebaseAuth.instance.currentUser!.delete();
+      // }
+
+      // 3️⃣ Hapus dari list lokal
+      _datas.removeWhere((u) => u.email == user.email);
+      notifyListeners();
+    } catch (e) {
+      print("Error hapusKaryawan: $e");
     }
   }
 }

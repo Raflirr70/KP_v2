@@ -37,13 +37,13 @@ class _MonitoringPengeluaranState extends State<MonitoringPengeluaran> {
                 children: [
                   Text("Monitoring Pengeluaran"),
                   SizedBox(width: 12),
-                  Expanded(
-                    child: SearchSimple(
-                      data: pengeluaran.datas
-                          .map((e) => e.nama_pengeluaran)
-                          .toList(),
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: SearchSimple(
+                  //     data: pengeluaran.datas
+                  //         .map((e) => e.nama_pengeluaran)
+                  //         .toList(),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

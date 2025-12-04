@@ -91,6 +91,10 @@ void showTambahKaryawanDialog(BuildContext context) {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               try {
+                                // Simpan reference ke ScaffoldMessenger SEBELUM menutup dialog
+                                final messenger = ScaffoldMessenger.of(context);
+
+                                // Tambah karyawan
                                 await Provider.of<Users>(
                                   context,
                                   listen: false,
@@ -103,25 +107,20 @@ void showTambahKaryawanDialog(BuildContext context) {
                                 // Tutup dialog
                                 Navigator.of(context).pop();
 
-                                // Notifikasi sukses di atas
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                // Tampilkan snackbar
+                                messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(
                                       "Berhasil menambahkan karyawan!",
                                     ),
                                     behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.fromLTRB(
-                                      20,
-                                      20,
-                                      20,
-                                      0,
-                                    ), // muncul di atas
+                                    margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
                                     backgroundColor: Colors.green,
                                     duration: Duration(seconds: 2),
                                   ),
                                 );
                               } catch (e) {
-                                // Notifikasi error di bawah
+                                // Jika error, tampilkan snackbar dari context dialog
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
@@ -134,6 +133,7 @@ void showTambahKaryawanDialog(BuildContext context) {
                               }
                             }
                           },
+
                           child: Text("Simpan"),
                         ),
                       ),

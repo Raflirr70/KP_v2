@@ -45,9 +45,9 @@ class _DaftarMakananState extends State<DaftarMakanan> {
             child: Center(
               child: Column(
                 children: [
-                  SearchSimple(data: value.datas.map((e) => e.nama).toList()),
-                  SizedBox(height: 10, width: 250, child: Divider(height: 2)),
-                  ListMakanan(value: value),
+                  // SearchSimple(data: value.datas.map((e) => e.nama).toList()),
+                  // SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  // ListMakanan(value: value),
                 ],
               ),
             ),

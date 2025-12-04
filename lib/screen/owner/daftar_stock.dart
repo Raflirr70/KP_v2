@@ -46,10 +46,10 @@ class _DaftarStockState extends State<DaftarStock> {
             child: Center(
               child: Column(
                 children: [
-                  SearchSimple(data: makanan.datas.map((e) => e.nama).toList()),
-                  SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  // SearchSimple(data: makanan.datas.map((e) => e.nama).toList()),
+                  // SizedBox(height: 10, width: 250, child: Divider(height: 2)),
 
-                  Expanded(child: ListStock(value: makanan)),
+                  // Expanded(child: ListStock(value: makanan)),
                 ],
               ),
             ),

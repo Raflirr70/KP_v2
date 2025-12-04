@@ -17,7 +17,7 @@ Future<void> alerPenghapusanKaryawan(
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text(
               "Batal",
               style: TextStyle(color: Colors.blueAccent),
@@ -25,7 +25,7 @@ Future<void> alerPenghapusanKaryawan(
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.of(context).pop();
               onDelete(); // panggil callback
             },
             child: const Text(
