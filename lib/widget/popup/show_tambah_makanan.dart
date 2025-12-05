@@ -88,7 +88,6 @@ void showTambahMakananDialog(BuildContext context) {
                                   id: "", // sementara kosong, Firestore generate
                                   nama: nama,
                                   harga: harga,
-                                  stocks: [],
                                 );
 
                                 // Simpan ke Firestore

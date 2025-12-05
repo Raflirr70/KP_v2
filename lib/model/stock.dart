@@ -1,59 +1,152 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Stock {
-  String id; // id dokumen stock
-  String refCabang; // path referensi cabang ("cabang/<id>")
+  String id;
+  String idCabang;
+  String idMakanan;
   int jumlahStock;
 
-  Stock({required this.id, required this.refCabang, required this.jumlahStock});
+  Stock({
+    required this.id,
+    required this.idCabang,
+    required this.idMakanan,
+    required this.jumlahStock,
+  });
 
   factory Stock.fromMap(String id, Map<String, dynamic> map) {
     return Stock(
       id: id,
-      refCabang: map['cabang'], // ← path referensi
-      jumlahStock: map['jumlah_stock'],
+      idCabang: map['id_cabang'] ?? '',
+      idMakanan: map['id_makanan'] ?? '',
+      jumlahStock: map['jumlah_makanan'] ?? 0,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {"cabang": refCabang, "jumlah_stock": jumlahStock};
   }
 }
 
 class Stocks extends ChangeNotifier {
-  List<Stock> _datas = [];
+  final List<Stock> _datas = [];
+  bool isLoading = false;
+
   List<Stock> get datas => _datas;
 
-  /// GET STOCK berdasarkan id makanan
-  Future<void> getStock(String idMakanan) async {
+  /// Ambil semua stock
+  Future<void> getAllStocks() async {
+    isLoading = true;
+    notifyListeners();
+    print("Masuk fungsi");
+
     try {
-      final ref = FirebaseFirestore.instance
-          .collection("makanan")
-          .doc(idMakanan)
-          .collection("stock");
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .get();
 
-      final snapshot = await ref.get();
-
-      _datas = snapshot.docs.map((d) => Stock.fromMap(d.id, d.data())).toList();
-
-      notifyListeners();
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          var data = doc.data();
+          return Stock.fromMap(doc.id, data);
+        }).toList(),
+      );
     } catch (e) {
-      print("Error getStock: $e");
+      print("Error getMakanan: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /// Ambil semua stock
+  Future<void> getStocksById(String idMakanan) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where("id_makanan", isEqualTo: idMakanan)
+          .get();
+
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          var data = doc.data();
+          return Stock.fromMap(doc.id, data);
+        }).toList(),
+      );
+    } catch (e) {
+      print("Error getMakanan: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<int> getTotalStockByCabang(String idMakanan) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where("id_makanan", isEqualTo: idMakanan)
+          .get();
+
+      int total = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>; // ⬅ WAJIB CAST
+        total += (data['jumlah_makanan'] ?? 0) as int; // ⬅ ACCESS AMAN
+      }
+
+      return total;
+    } catch (e) {
+      print("Error getTotalStockByCabang: $e");
+      return 0;
     }
   }
 
-  /// Ambil jumlah stok berdasarkan id cabang
-  int getJumlah(String idCabang) {
-    final stock = _datas.firstWhere(
-      (d) => d.refCabang == "cabang/$idCabang",
-      orElse: () => Stock(id: "", refCabang: "", jumlahStock: 0),
-    );
-    return stock.jumlahStock;
-  }
+  /// Simpan atau update stock
+  Future<void> saveStock({
+    required String idMakanan,
+    required String idCabang,
+    required int jumlahStock,
+  }) async {
+    try {
+      // Query: cari dulu apakah stok ini sudah ada
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where("id_makanan", isEqualTo: idMakanan)
+          .where("id_cabang", isEqualTo: idCabang)
+          .limit(1)
+          .get();
 
-  /// Total seluruh cabang
-  int getTotal() {
-    return _datas.fold(0, (sum, s) => sum + s.jumlahStock);
+      if (snapshot.docs.isNotEmpty) {
+        // ============================================
+        // UPDATE DATA
+        // ============================================
+        final docId = snapshot.docs.first.id;
+
+        await FirebaseFirestore.instance.collection('stock').doc(docId).update({
+          "jumlah_makanan": jumlahStock,
+        });
+
+        print("UPDATE STOCK: $idCabang = $jumlahStock");
+      } else {
+        // ============================================
+        // CREATE DATA BARU
+        // ============================================
+        await FirebaseFirestore.instance.collection('stock').add({
+          "id_makanan": idMakanan,
+          "id_cabang": idCabang,
+          "jumlah_makanan": jumlahStock,
+        });
+
+        print("CREATE STOCK: $idCabang = $jumlahStock");
+      }
+
+      await getStocksById(idMakanan); // refresh data
+    } catch (e) {
+      print("Error saveStock: $e");
+    }
   }
 }

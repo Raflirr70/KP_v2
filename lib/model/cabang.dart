@@ -36,7 +36,7 @@ class Cabangs extends ChangeNotifier {
       _datas.addAll(
         snapshot.docs.map((doc) {
           var data = doc.data();
-          return Cabang(id: data['id'] ?? '', nama: data['nama'] ?? '');
+          return Cabang(id: doc.id ?? '', nama: data['nama'] ?? '');
         }).toList(),
       );
     } catch (e) {

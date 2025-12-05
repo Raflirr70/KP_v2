@@ -11,15 +11,6 @@ class ListKaryawan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (users.isEmpty) {
-      return Center(
-        child: Text(
-          "Tidak ada karyawan tersedia",
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-      );
-    }
-
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       itemCount: users.length + 1,

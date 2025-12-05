@@ -1,35 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:kerprak/model/stock.dart';
+import 'package:flutter/foundation.dart';
+import 'stock.dart'; // pastikan Stock sudah diperbaiki seperti sebelumnya
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class Makanan {
-  String id; // ID dokumen Firestore
+  String id;
   String nama;
   int harga;
-  List<Stock> stocks;
 
-  Makanan({
-    required this.id,
-    required this.nama,
-    required this.harga,
-    required this.stocks,
-  });
+  Makanan({required this.id, required this.nama, required this.harga});
 
   // Convert dari Firestore
-  factory Makanan.fromMap(
-    String id,
-    Map<String, dynamic> map,
-    List<Stock> stocks,
-  ) {
+  factory Makanan.fromMap(String id, Map<String, dynamic> map) {
+    final hargaField = map['harga'];
     return Makanan(
       id: id,
-      nama: map['nama'],
-      harga: map['harga'],
-      stocks: stocks,
+      nama: map['nama'] ?? '',
+      harga: hargaField is int
+          ? hargaField
+          : int.tryParse(hargaField.toString()) ?? 0,
     );
   }
 
-  // Convert ke Firestore
   Map<String, dynamic> toMap() {
     return {"nama": nama, "harga": harga};
   }
@@ -43,10 +37,9 @@ class Makanans extends ChangeNotifier {
 
   Future<void> tambahMakanan(Makanan makanan) async {
     final doc = FirebaseFirestore.instance.collection("makanan").doc();
-
     await doc.set(makanan.toMap());
 
-    // Tambahkan id setelah disimpan
+    // Simpan ID dokumen
     makanan.id = doc.id;
     _datas.add(makanan);
     notifyListeners();
@@ -65,23 +58,7 @@ class Makanans extends ChangeNotifier {
 
       for (var doc in snapshot.docs) {
         final data = doc.data();
-
-        // --- Ambil subcollection stock ---
-        final stockSnap = await doc.reference.collection('stock').get();
-
-        List<Stock> stocks = stockSnap.docs.map((s) {
-          return Stock.fromMap(s.id, s.data());
-        }).toList();
-
-        // --- Tambahkan makanan ke list ---
-        _datas.add(
-          Makanan(
-            id: doc.id, // INI WAJIB doc.id
-            nama: data['nama'] ?? '',
-            harga: data['harga'] ?? 0,
-            stocks: stocks,
-          ),
-        );
+        _datas.add(Makanan.fromMap(doc.id, data));
       }
     } catch (e) {
       print("Error getMakanan: $e");

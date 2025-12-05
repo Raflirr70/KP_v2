@@ -164,7 +164,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
               child: Consumer<Pengeluarans>(
                 builder: (context, value, child) {
                   final filtered = value.datas
-                      .where((e) => e.id_cabang == 2)
+                      .where((e) => e.idCabang == 2)
                       .toList();
 
                   if (filtered.isEmpty) {
@@ -202,7 +202,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        p.nama_pengeluaran,
+                                        p.namaPengeluaran,
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
@@ -210,7 +210,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                       ),
                                     ),
                                     Text(
-                                      "Rp ${p.jumlah_unit}",
+                                      "Rp ${p.jumlahUnit}",
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -232,7 +232,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                     ),
                                     SizedBox(width: 6),
                                     Text(
-                                      p.total_harga.toString(),
+                                      p.totalHarga.toString(),
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: Colors.grey[700],

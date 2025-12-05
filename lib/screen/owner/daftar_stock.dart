@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/stock.dart';
+import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/screen/owner/daftar_makanan.dart';
 import 'package:kerprak/widget/list/list_stock.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
@@ -23,6 +24,9 @@ class _DaftarStockState extends State<DaftarStock> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Makanans>(context, listen: false).getMakanan();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Cabangs>(context, listen: false).getCabang();
     });
 
     _searchController.addListener(() {
