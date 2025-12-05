@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/search.dart';
+import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/owner/daftar_stock.dart';
 import 'package:kerprak/widget/list/list_makanan.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
@@ -15,10 +16,40 @@ class DaftarMakanan extends StatefulWidget {
 }
 
 class _DaftarMakananState extends State<DaftarMakanan> {
+  final _searchController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Makanans>(context, listen: false).getMakanan();
+    });
+
+    _searchController.addListener(() {
+      setState(() {}); // Trigger rebuild untuk filter list
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<Makanans>(
       builder: (context, value, child) {
+        if (value.isLoading) return Center(child: CircularProgressIndicator());
+
+        // Filter langsung tanpa provider
+        List<Makanan> filtered = value.datas
+            .where(
+              (u) => u.nama.toLowerCase().contains(
+                _searchController.text.toLowerCase(),
+              ),
+            )
+            .toList();
+
         return Scaffold(
           appBar: AppBar(
             title: Text("Menu Makanan"),
@@ -45,9 +76,9 @@ class _DaftarMakananState extends State<DaftarMakanan> {
             child: Center(
               child: Column(
                 children: [
-                  // SearchSimple(data: value.datas.map((e) => e.nama).toList()),
-                  // SizedBox(height: 10, width: 250, child: Divider(height: 2)),
-                  // ListMakanan(value: value),
+                  SearchSimple(controller: _searchController),
+                  SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  ListMakanan(value: filtered),
                 ],
               ),
             ),

@@ -16,10 +16,41 @@ class DaftarStock extends StatefulWidget {
 }
 
 class _DaftarStockState extends State<DaftarStock> {
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Makanans>(context, listen: false).getMakanan();
+    });
+
+    _searchController.addListener(() {
+      setState(() {}); // Trigger rebuild untuk filter list
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer2<Stocks, Makanans>(
-      builder: (context, stock, makanan, child) {
+    return Consumer<Makanans>(
+      builder: (context, value, child) {
+        if (value.isLoading) return Center(child: CircularProgressIndicator());
+
+        // Filter langsung tanpa provider
+        List<Makanan> filtered = value.datas
+            .where(
+              (u) => u.nama.toLowerCase().contains(
+                _searchController.text.toLowerCase(),
+              ),
+            )
+            .toList();
+
         return Scaffold(
           appBar: AppBar(
             title: Text("Stock Makanan"),
@@ -46,10 +77,9 @@ class _DaftarStockState extends State<DaftarStock> {
             child: Center(
               child: Column(
                 children: [
-                  // SearchSimple(data: makanan.datas.map((e) => e.nama).toList()),
-                  // SizedBox(height: 10, width: 250, child: Divider(height: 2)),
-
-                  // Expanded(child: ListStock(value: makanan)),
+                  SearchSimple(controller: _searchController),
+                  SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  Expanded(child: ListStock(value: filtered)),
                 ],
               ),
             ),

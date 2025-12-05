@@ -31,10 +31,10 @@ class DashboardAdminMenu extends StatelessWidget {
             onPressed: () {
               if (a == 0) {
                 // Monitoring
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Monitoring()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => Monitoring()),
+                // );
               } else if (a == 1) {
                 showDialog(
                   context: context,
@@ -125,12 +125,12 @@ class DashboardAdminMenu extends StatelessWidget {
                               ),
                               onPressed: () {
                                 // Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DaftarPengeluaran(),
-                                  ),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => DaftarPengeluaran(),
+                                //   ),
+                                // );
                               },
                               child: Text("Oprasional"),
                             ),
@@ -159,10 +159,10 @@ class DashboardAdminMenu extends StatelessWidget {
                   },
                 );
               } else if (a == 4) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PenjadwalanPage()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => PenjadwalanPage()),
+                // );
               } else {
                 Navigator.push(
                   context,

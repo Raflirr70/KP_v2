@@ -1,52 +1,59 @@
-import 'package:flutter/material.dart';
-import 'package:kerprak/model/cabang.dart';
-import 'package:kerprak/model/makanan.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class Stock {
-  Makanan makanan;
-  Cabang cabang;
-  int stock;
+  String id; // id dokumen stock
+  String refCabang; // path referensi cabang ("cabang/<id>")
+  int jumlahStock;
 
-  Stock(this.makanan, this.cabang, this.stock);
+  Stock({required this.id, required this.refCabang, required this.jumlahStock});
+
+  factory Stock.fromMap(String id, Map<String, dynamic> map) {
+    return Stock(
+      id: id,
+      refCabang: map['cabang'], // ← path referensi
+      jumlahStock: map['jumlah_stock'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"cabang": refCabang, "jumlah_stock": jumlahStock};
+  }
 }
 
 class Stocks extends ChangeNotifier {
-  Makanans m = Makanans();
-  Cabangs c = Cabangs();
-  late List<Stock> _datas;
+  List<Stock> _datas = [];
   List<Stock> get datas => _datas;
 
-  Stocks() {
-    final m = Makanans();
-    final c = Cabangs();
-
-    _datas = [
-      for (int a = 0; a < m.datas.length; a++)
-        for (int b = 0; b < c.datas.length; b++)
-          Stock(m.datas[a], c.datas[b], a * b),
-    ];
-  }
-
-  int getJumlah(int idCabang, int idMakanan) {
+  /// GET STOCK berdasarkan id makanan
+  Future<void> getStock(String idMakanan) async {
     try {
-      final item = _datas.firstWhere(
-        (e) => e.cabang.id == idCabang && e.makanan.id == idMakanan,
-      );
-      return item.stock;
+      final ref = FirebaseFirestore.instance
+          .collection("makanan")
+          .doc(idMakanan)
+          .collection("stock");
+
+      final snapshot = await ref.get();
+
+      _datas = snapshot.docs.map((d) => Stock.fromMap(d.id, d.data())).toList();
+
+      notifyListeners();
     } catch (e) {
-      return 0;
+      print("Error getStock: $e");
     }
   }
 
-  int getTotalCabang(int idMakanan) {
-    int total = 0;
+  /// Ambil jumlah stok berdasarkan id cabang
+  int getJumlah(String idCabang) {
+    final stock = _datas.firstWhere(
+      (d) => d.refCabang == "cabang/$idCabang",
+      orElse: () => Stock(id: "", refCabang: "", jumlahStock: 0),
+    );
+    return stock.jumlahStock;
+  }
 
-    for (var item in _datas) {
-      if (item.makanan.id == idMakanan) {
-        total += item.stock;
-      }
-    }
-
-    return total;
+  /// Total seluruh cabang
+  int getTotal() {
+    return _datas.fold(0, (sum, s) => sum + s.jumlahStock);
   }
 }

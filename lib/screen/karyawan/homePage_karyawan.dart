@@ -193,91 +193,92 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
             SizedBox(height: 12),
 
             // ==================== LIST VIEW ====================
-            Expanded(
-              child: Consumer<Stocks>(
-                builder: (context, value, child) {
-                  final filtered = value.datas
-                      .where((e) => e.cabang.id == 2)
-                      .toList();
+            //   Expanded(
+            //     child: Consumer<Stocks>(
+            //       builder: (context, value, child) {
+            //         final filtered;
+            //         = value.datas
+            //             .where((e) => e.cabang.id == 2)
+            //             .toList();
 
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "Tidak ada stock tersedia",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    );
-                  }
+            //         if (filtered.isEmpty) {
+            //           return Center(
+            //             child: Text(
+            //               "Tidak ada stock tersedia",
+            //               style: TextStyle(color: Colors.grey),
+            //             ),
+            //           );
+            //         }
 
-                  return ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final item = filtered[index];
-                      return Card(
-                        color: Colors.grey[200],
-                        elevation: 3,
-                        margin: EdgeInsets.only(bottom: 12),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                (index + 1).toString(),
-                                style: TextStyle(fontSize: 9),
-                              ),
-                              SizedBox(width: 5),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  item.makanan.nama,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "Rp ${item.makanan.harga}",
-                                  textAlign: TextAlign.end,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "${item.stock.toString()} / ${(item.stock + 7).toString()}",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+            //         return ListView.builder(
+            //           padding: EdgeInsets.symmetric(horizontal: 16),
+            //           itemCount: filtered.length,
+            //           itemBuilder: (context, index) {
+            //             final item = filtered[index];
+            //             return Card(
+            //               color: Colors.grey[200],
+            //               elevation: 3,
+            //               margin: EdgeInsets.only(bottom: 12),
+            //               child: Padding(
+            //                 padding: EdgeInsets.symmetric(
+            //                   horizontal: 16,
+            //                   vertical: 10,
+            //                 ),
+            //                 child: Row(
+            //                   children: [
+            //                     Text(
+            //                       (index + 1).toString(),
+            //                       style: TextStyle(fontSize: 9),
+            //                     ),
+            //                     SizedBox(width: 5),
+            //                     Expanded(
+            //                       flex: 2,
+            //                       child: Text(
+            //                         item.makanan.nama,
+            //                         style: TextStyle(
+            //                           fontSize: 12,
+            //                           fontWeight: FontWeight.w600,
+            //                         ),
+            //                       ),
+            //                     ),
+            //                     Expanded(
+            //                       child: Text(
+            //                         "Rp ${item.makanan.harga}",
+            //                         textAlign: TextAlign.end,
+            //                         style: TextStyle(
+            //                           fontSize: 10,
+            //                           color: Colors.grey[700],
+            //                         ),
+            //                       ),
+            //                     ),
+            //                     SizedBox(width: 8),
+            //                     Expanded(
+            //                       child: Container(
+            //                         padding: EdgeInsets.symmetric(vertical: 4),
+            //                         decoration: BoxDecoration(
+            //                           color: Colors.grey[300],
+            //                           borderRadius: BorderRadius.circular(8),
+            //                         ),
+            //                         child: Text(
+            //                           "${item.stock.toString()} / ${(item.stock + 7).toString()}",
+            //                           textAlign: TextAlign.center,
+            //                           style: TextStyle(
+            //                             fontWeight: FontWeight.bold,
 
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+            //                             fontSize: 10,
+            //                           ),
+            //                         ),
+            //                       ),
+            //                     ),
+            //                   ],
+            //                 ),
+            //               ),
+            //             );
+            //           },
+            //         );
+            //       },
+            //     ),
+            //   ),
           ],
         ),
 
