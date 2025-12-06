@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Future<void> alerPenghapusanKaryawan(
+Future<void> alertPenghapusan(
   BuildContext context, {
   required Function onDelete,
 }) async {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/list/list_karyawan.dart';
-import 'package:kerprak/widget/popup/alert_penghapusan_karyawan.dart';
+import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
 

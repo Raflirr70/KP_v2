@@ -1,110 +1,177 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 
-/// Fungsi untuk menampilkan BottomSheet menambahkan pengeluaran
-void showTambahPengeluaranDialog(BuildContext context) {
+void showTambahPengeluaranPopup(BuildContext context) {
   final namaC = TextEditingController();
   final jumlahC = TextEditingController();
-  final satuanC = TextEditingController();
   final hargaC = TextEditingController();
+  String? selectedSatuan;
+  final satuanList = ["unit", "liter", "kilo", "gram", "set", "box"];
 
-  showModalBottomSheet(
+  bool isEdited() {
+    return namaC.text.isNotEmpty ||
+        jumlahC.text.isNotEmpty ||
+        hargaC.text.isNotEmpty ||
+        selectedSatuan != null;
+  }
+
+  showDialog(
     context: context,
-    isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+    barrierDismissible: false, // supaya tidak langsung dismiss
     builder: (context) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
               "Tambah Pengeluaran",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-
-            buildField("Nama Pengeluaran", namaC),
-            buildField("Jumlah", jumlahC, keyboardType: TextInputType.number),
-            buildField("Jenis Satuan", satuanC),
-            buildField("Harga", hargaC, keyboardType: TextInputType.number),
-
-            SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              onPressed: () {
-                final nama = namaC.text.trim();
-                final jumlah = int.tryParse(jumlahC.text.trim()) ?? 0;
-                final satuan = satuanC.text.trim();
-                final harga = int.tryParse(hargaC.text.trim()) ?? 0;
-
-                if (nama.isEmpty ||
-                    jumlah <= 0 ||
-                    satuan.isEmpty ||
-                    harga <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Isi semua field dengan benar")),
-                  );
-                  return;
-                }
-
-                // Buat objek Pengeluaran baru
-                final newPengeluaran = Pengeluaran(
-                  DateTime.now().millisecondsSinceEpoch
-                      .toString(), // id sementara
-                  "", // idCabang bisa diisi sesuai kebutuhan
-                  nama,
-                  jumlah,
-                  satuan,
-                  harga,
-                );
-
-                // Simpan ke Provider
-                Provider.of<Pengeluarans>(
-                  context,
-                  listen: false,
-                ).tambah(newPengeluaran);
-
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.save),
-              label: Text("Simpan"),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 45),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildField("Nama Pengeluaran", namaC),
+                  SizedBox(height: 12),
+                  buildField(
+                    "Jumlah",
+                    jumlahC,
+                    keyboardType: TextInputType.number,
+                    isNumber: true,
+                  ),
+                  SizedBox(height: 12),
+                  buildField(
+                    "Harga",
+                    hargaC,
+                    keyboardType: TextInputType.number,
+                    isNumber: true,
+                  ),
+                  SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Jenis Satuan",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: satuanList.map((s) {
+                      final selected = selectedSatuan == s;
+                      return SizedBox(
+                        width: 80,
+                        height: 36,
+                        child: ChoiceChip(
+                          label: Center(
+                            child: Text(
+                              s,
+                              style: TextStyle(
+                                color: selected ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          selected: selected,
+                          selectedColor: Colors.blue,
+                          backgroundColor: Colors.grey[300],
+                          showCheckmark: false, // <-- ini hilangkan centang
+                          onSelected: (_) {
+                            setState(() => selectedSatuan = s);
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  if (isEdited()) {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Konfirmasi"),
+                        content: Text("Hapus perubahan?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text("Tidak"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text("Ya"),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm != true) return; // batal hapus
+                  }
+                  Navigator.pop(context); // tutup dialog
+                },
+                child: Text("Batal"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final nama = namaC.text.trim();
+                  final jumlah = int.tryParse(jumlahC.text.trim()) ?? 0;
+                  final harga = int.tryParse(hargaC.text.trim()) ?? 0;
 
-            SizedBox(height: 20),
-          ],
-        ),
+                  if (nama.isEmpty ||
+                      jumlah <= 0 ||
+                      harga <= 0 ||
+                      selectedSatuan == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Isi semua field dengan benar")),
+                    );
+                    return;
+                  }
+
+                  final newPengeluaran = Pengeluaran(
+                    DateTime.now().millisecondsSinceEpoch.toString(),
+                    "N7EjTNIMq5AgAEqN0ii5",
+                    nama,
+                    jumlah,
+                    selectedSatuan!,
+                    harga,
+                  );
+
+                  Provider.of<Pengeluarans>(
+                    context,
+                    listen: false,
+                  ).tambahData(newPengeluaran);
+                  Navigator.pop(context);
+                },
+                child: Text("Simpan"),
+              ),
+            ],
+          );
+        },
       );
     },
   );
 }
 
-/// Widget TextField umum
 Widget buildField(
   String label,
   TextEditingController c, {
   TextInputType keyboardType = TextInputType.text,
+  bool isNumber = false,
 }) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: TextField(
-      controller: c,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(),
-      ),
+  return TextField(
+    controller: c,
+    keyboardType: keyboardType,
+    inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
+    decoration: InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
     ),
   );
 }

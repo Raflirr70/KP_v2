@@ -49,11 +49,6 @@ class Pengeluarans extends ChangeNotifier {
 
   List<Pengeluaran> get datas => _datas;
 
-  void tambah(Pengeluaran x) {
-    _datas.add(x);
-    notifyListeners();
-  }
-
   /// Fetch data dari Firestore
   Future<void> fetchData() async {
     isLoading = true;
@@ -74,5 +69,39 @@ class Pengeluarans extends ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+  }
+
+  /// Tambah data ke Firestore dan list lokal
+  Future<void> tambahData(Pengeluaran pengeluaran) async {
+    try {
+      // Simpan ke Firestore
+      final docRef = await FirebaseFirestore.instance
+          .collection('pengeluaran')
+          .add(pengeluaran.toMap());
+
+      // Update id sesuai Firestore
+      pengeluaran.id = docRef.id;
+
+      // Tambahkan ke list lokal
+      _datas.add(pengeluaran);
+      notifyListeners();
+    } catch (e) {
+      print("Error tambahData Pengeluaran: $e");
+    }
+  }
+
+  /// Hapus data dari Firestore dan list lokal
+  Future<void> hapusData(Pengeluaran pengeluaran) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('pengeluaran')
+          .doc(pengeluaran.id)
+          .delete();
+
+      _datas.removeWhere((p) => p.id == pengeluaran.id);
+      notifyListeners();
+    } catch (e) {
+      print("Error hapusData Pengeluaran: $e");
+    }
   }
 }

@@ -1,7 +1,7 @@
 // 1️⃣ Buat halaman baru untuk bottom sheet
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/user.dart';
-import 'package:kerprak/widget/popup/alert_penghapusan_karyawan.dart';
+import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:provider/provider.dart';
 
 class KaryawanDetailPage extends StatelessWidget {
@@ -72,7 +72,7 @@ class KaryawanDetailPage extends StatelessWidget {
                   color: Colors.deepOrange,
                   onTap: () {
                     Navigator.pop(context);
-                    alerPenghapusanKaryawan(context, onDelete: () {});
+                    alertPenghapusan(context, onDelete: () {});
                   },
                 ),
               ),
@@ -83,7 +83,7 @@ class KaryawanDetailPage extends StatelessWidget {
                   label: "Hapus",
                   color: Colors.redAccent,
                   onTap: () {
-                    alerPenghapusanKaryawan(
+                    alertPenghapusan(
                       context,
                       onDelete: () async {
                         // 1️⃣ Hapus data

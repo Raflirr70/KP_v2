@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/user.dart';
-import 'package:kerprak/widget/popup/alert_penghapusan_karyawan.dart';
+import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:kerprak/widget/popup/show_tambah_karyawan.dart';
 import 'package:provider/provider.dart';
 
@@ -145,7 +145,6 @@ class ListKaryawan extends StatelessWidget {
                     color: Colors.deepOrange,
                     onTap: () {
                       Navigator.pop(context);
-                      alerPenghapusanKaryawan(context, onDelete: () {});
                     },
                   ),
                 ),
@@ -155,12 +154,17 @@ class ListKaryawan extends StatelessWidget {
                     icon: Icons.delete,
                     label: "Hapus",
                     color: Colors.redAccent,
-                    onTap: () async {
+                    onTap: () {
                       Navigator.pop(context);
-                      await Provider.of<Users>(
+                      alertPenghapusan(
                         context,
-                        listen: false,
-                      ).hapusKaryawan(user);
+                        onDelete: () async {
+                          await Provider.of<Users>(
+                            context,
+                            listen: false,
+                          ).hapusKaryawan(user);
+                        },
+                      );
                     },
                   ),
                 ),
