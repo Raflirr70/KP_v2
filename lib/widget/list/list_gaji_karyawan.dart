@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
+import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/user.dart';
@@ -43,20 +44,30 @@ class ListGajiKaryawan extends StatelessWidget {
                     color: Colors.grey[400],
                     child: Container(
                       padding: EdgeInsets.all(8),
-                      child: Consumer<Users>(
-                        builder: (context, filter, child) {
-                          // ListView di dalam Card harus shrinkWrap dan physics
+                      child: Consumer2<Users, Jadwals>(
+                        builder: (context, user, jadwal, child) {
+                          // Filter schedule data based on the branch
+                          final filter = jadwal.datas
+                              .where((j) => j.id_cabang == value[i].id)
+                              .toList();
+                          // return Text(jadwal.datas.length.toString());
                           return ListView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: filter.datas.length,
+                            itemCount: filter
+                                .length, // Make sure this is the filtered count
                             itemBuilder: (context, index) {
+                              final filkar = user.datas
+                                  .where((u) => u.id == filter[index].id_user)
+                                  .toList();
                               return Card(
                                 margin: EdgeInsets.symmetric(vertical: 4),
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: Text(
-                                    filter.datas[index].nama,
+                                    filkar.isNotEmpty
+                                        ? filkar[0].nama
+                                        : "User not found", // Display user's name
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/distribusi.dart';
+import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/pengeluaran.dart';
@@ -26,6 +27,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Cabangs()),
+        ChangeNotifierProvider(create: (_) => Jadwals()),
         ChangeNotifierProvider(create: (_) => Users()),
         ChangeNotifierProvider(create: (_) => Makanans()),
         ChangeNotifierProvider(create: (_) => Stocks()),

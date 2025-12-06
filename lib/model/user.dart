@@ -5,7 +5,7 @@ import 'package:kerprak/model/search.dart';
 import 'package:provider/provider.dart';
 
 class User {
-  int id;
+  String id;
   String role;
   String nama;
   String email;
@@ -55,7 +55,7 @@ class Users extends ChangeNotifier {
         snapshot.docs.map((doc) {
           var data = doc.data();
           return User(
-            data['id'] ?? 0,
+            doc.id,
             data['role'] ?? '',
             data['nama'] ?? '',
             data['email'] ?? '',
@@ -92,7 +92,7 @@ class Users extends ChangeNotifier {
       // 3. Tambahkan ke list lokal
       _datas.add(
         User(
-          docRef.id.hashCode, // ID lokal bisa dari hash ID dokumen
+          docRef.id, // ID lokal bisa dari hash ID dokumen
           role,
           nama,
           email,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
+import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/list/list_gaji_karyawan.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
@@ -21,6 +22,9 @@ class _DaftarGajiKaryawanState extends State<DaftarGajiKaryawan> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Users>(context, listen: false).fetchData();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Jadwals>(context, listen: false).getJadwal();
     });
   }
 
