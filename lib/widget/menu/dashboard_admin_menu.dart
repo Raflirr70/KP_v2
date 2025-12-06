@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/menu_dasboard_admin.dart';
+import 'package:kerprak/screen/owner/daftar_gaji_karyawan.dart';
 import 'package:kerprak/screen/owner/daftar_karyawan.dart';
 import 'package:kerprak/screen/owner/daftar_makanan.dart';
 import 'package:kerprak/screen/owner/daftar_pengeluaran.dart';
@@ -149,6 +150,12 @@ class DashboardAdminMenu extends StatelessWidget {
                               ),
                               onPressed: () {
                                 Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DaftarGajiKaryawan(),
+                                  ),
+                                );
                               },
                               child: Text("Gaji Karyawan"),
                             ),
