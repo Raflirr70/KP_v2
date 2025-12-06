@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:kerprak/widget/popup/alert_penghapusan.dart';
+import 'package:kerprak/widget/popup/show_edit_pengeluaran.dart';
 import 'package:kerprak/widget/popup/show_tambah_pengeluaran.dart';
 import 'package:provider/provider.dart';
 
@@ -153,7 +154,7 @@ class ListPengeluaran extends StatelessWidget {
                     color: Colors.blueAccent,
                     onTap: () {
                       Navigator.pop(context);
-                      print("Edit ${pluar.namaPengeluaran}");
+                      showEditPengeluaranPopup(context, pluar);
                     },
                   ),
                 ),
@@ -167,11 +168,11 @@ class ListPengeluaran extends StatelessWidget {
                       Navigator.pop(context);
                       alertPenghapusan(
                         context,
-                        onDelete: () {
-                          // await Provider.of<Pengeluarans>(
-                          //   context,
-                          //   listen: false,
-                          // ).hapusPengeluaran(pluar);
+                        onDelete: () async {
+                          await Provider.of<Pengeluarans>(
+                            context,
+                            listen: false,
+                          ).hapusData(pluar);
                         },
                       );
                     },

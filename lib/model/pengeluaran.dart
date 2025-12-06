@@ -90,6 +90,21 @@ class Pengeluarans extends ChangeNotifier {
     }
   }
 
+  Future<void> updateData(Pengeluaran pengeluaran) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('pengeluaran')
+          .doc(pengeluaran.id)
+          .update(pengeluaran.toMap());
+
+      int index = _datas.indexWhere((p) => p.id == pengeluaran.id);
+      if (index != -1) _datas[index] = pengeluaran;
+      notifyListeners();
+    } catch (e) {
+      print("Error updateData Pengeluaran: $e");
+    }
+  }
+
   /// Hapus data dari Firestore dan list lokal
   Future<void> hapusData(Pengeluaran pengeluaran) async {
     try {
