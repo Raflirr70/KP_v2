@@ -6,6 +6,7 @@ import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/pengeluaran.dart';
+import 'package:kerprak/model/penggajian.dart';
 import 'package:kerprak/model/penjadwalan.dart';
 import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/model/search.dart';
@@ -31,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => Users()),
         ChangeNotifierProvider(create: (_) => Makanans()),
         ChangeNotifierProvider(create: (_) => Stocks()),
+        ChangeNotifierProvider(create: (_) => Penggajians()),
         ChangeNotifierProvider(create: (_) => Distribusis()),
         ChangeNotifierProvider(create: (_) => Laporans()),
         ChangeNotifierProvider(create: (_) => Pengeluarans()),

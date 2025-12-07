@@ -11,15 +11,6 @@ class Penjadwalan {
 }
 
 class Penjadwalans extends ChangeNotifier {
-  final List<Penjadwalan> _datas = [
-    Penjadwalan(Users().datas[1], Cabangs().datas[1]),
-    Penjadwalan(Users().datas[1], Cabangs().datas[1]),
-
-    Penjadwalan(Users().datas[0], Cabangs().datas[2]),
-    Penjadwalan(Users().datas[0], Cabangs().datas[2]),
-
-    Penjadwalan(Users().datas[1], Cabangs().datas[3]),
-    Penjadwalan(Users().datas[0], Cabangs().datas[3]),
-  ];
+  final List<Penjadwalan> _datas = [];
   List<Penjadwalan> get datas => _datas;
 }

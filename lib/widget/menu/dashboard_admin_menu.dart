@@ -166,10 +166,10 @@ class DashboardAdminMenu extends StatelessWidget {
                   },
                 );
               } else if (a == 4) {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => PenjadwalanPage()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PenjadwalanPage()),
+                );
               } else {
                 Navigator.push(
                   context,
