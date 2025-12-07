@@ -1,21 +1,127 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/makanan.dart';
 
+import 'package:flutter/foundation.dart';
+
 class Distribusi {
-  Cabang dari;
-  Cabang tujuan;
-  Makanan makanan;
+  String id;
+  String id_cabang_dari;
+  String id_cabang_tujuan;
+  String id_makanan;
   int jumlah;
 
-  Distribusi(this.dari, this.tujuan, this.makanan, this.jumlah);
+  Distribusi({
+    required this.id,
+    required this.id_cabang_dari,
+    required this.id_cabang_tujuan,
+    required this.id_makanan,
+    required this.jumlah,
+  });
+
+  /// Konversi dari Firestore
+  factory Distribusi.fromMap(String id, Map<String, dynamic> map) {
+    return Distribusi(
+      id: id,
+      id_cabang_dari: map['id_cabang_dari'] ?? '',
+      id_cabang_tujuan: map['id_cabang_tujuan'] ?? '',
+      id_makanan: map['id_makanan'] ?? '',
+      jumlah: map['jumlah'] ?? 0,
+    );
+  }
+
+  /// Konversi ke Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      "id_cabang_dari": id_cabang_dari,
+      "id_cabang_tujuan": id_cabang_tujuan,
+      "id_makanan": id_makanan,
+      "jumlah": jumlah,
+    };
+  }
 }
 
 class Distribusis extends ChangeNotifier {
-  List<Distribusi> _datas = [
-    Distribusi(Cabangs().datas[1], Cabangs().datas[2], Makanans().datas[1], 20),
-    Distribusi(Cabangs().datas[2], Cabangs().datas[1], Makanans().datas[2], 40),
-    Distribusi(Cabangs().datas[3], Cabangs().datas[1], Makanans().datas[3], 60),
-  ];
+  final List<Distribusi> _datas = [];
   List<Distribusi> get datas => _datas;
+
+  bool isLoading = false;
+
+  /// 🔹 Generate ID otomatis
+  String _generateId() =>
+      FirebaseFirestore.instance.collection("distribusi").doc().id;
+
+  /// 🔹 Ambil semua data distribusi
+  Future<void> getDistribusi() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection("distribusi")
+          .get();
+
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          return Distribusi.fromMap(doc.id, doc.data());
+        }).toList(),
+      );
+    } catch (e) {
+      print("Error getDistribusi: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /// 🔹 Tambah distribusi
+  Future<void> addDistribusi({
+    required String idCabangDari,
+    required String idCabangTujuan,
+    required String idMakanan,
+    required int jumlah,
+  }) async {
+    final id = _generateId();
+
+    final newData = Distribusi(
+      id: id,
+      id_cabang_dari: idCabangDari,
+      id_cabang_tujuan: idCabangTujuan,
+      id_makanan: idMakanan,
+      jumlah: jumlah,
+    );
+
+    await FirebaseFirestore.instance
+        .collection("distribusi")
+        .doc(id)
+        .set(newData.toMap());
+
+    _datas.add(newData);
+    notifyListeners();
+  }
+
+  /// 🔹 Hapus distribusi
+  Future<void> deleteDistribusi(String id) async {
+    await FirebaseFirestore.instance.collection("distribusi").doc(id).delete();
+
+    _datas.removeWhere((d) => d.id == id);
+    notifyListeners();
+  }
+
+  /// 🔹 Filter distribusi berdasarkan cabang asal
+  List<Distribusi> getByCabangDari(String idCabang) {
+    return _datas.where((d) => d.id_cabang_dari == idCabang).toList();
+  }
+
+  /// 🔹 Filter distribusi berdasarkan cabang tujuan
+  List<Distribusi> getByCabangTujuan(String idCabang) {
+    return _datas.where((d) => d.id_cabang_tujuan == idCabang).toList();
+  }
+
+  /// 🔹 Filter distribusi berdasarkan makanan
+  List<Distribusi> getByMakanan(String idMakanan) {
+    return _datas.where((d) => d.id_makanan == idMakanan).toList();
+  }
 }

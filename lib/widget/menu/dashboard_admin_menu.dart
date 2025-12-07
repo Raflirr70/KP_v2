@@ -100,10 +100,10 @@ class DashboardAdminMenu extends StatelessWidget {
                   },
                 );
               } else if (a == 2) {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => DistribusiPage()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DistribusiPage()),
+                );
               } else if (a == 3) {
                 showDialog(
                   context: context,
