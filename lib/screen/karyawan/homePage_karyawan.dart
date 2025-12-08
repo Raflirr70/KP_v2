@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
+import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/penggajian.dart';
 import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
+import 'package:kerprak/widget/list/list_stock_karyawan.dart';
 import 'package:provider/provider.dart';
 
 class HomepageKaryawan extends StatefulWidget {
@@ -20,6 +22,7 @@ class HomepageKaryawan extends StatefulWidget {
 }
 
 class _HomepageKaryawanState extends State<HomepageKaryawan> {
+  String? id_cab;
   final _user = FirebaseAuth.instance.currentUser;
   final _currentIndex = 1;
   bool _show_info = true;
@@ -52,6 +55,9 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
     }
     if (jadwalUser != null) {
       final idCabang = jadwalUser.id_cabang;
+      setState(() {
+        id_cab = idCabang;
+      });
       final laporanProvider = Provider.of<Laporans>(context, listen: false);
       await laporanProvider.getData(idCabang);
       await Future.delayed(Duration(milliseconds: 200));
@@ -65,6 +71,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
   @override
   Widget build(BuildContext context) {
+    
     if (_akunBelumJadwal) {
       return Scaffold(
         backgroundColor: Colors.grey,
@@ -278,93 +285,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
             SizedBox(height: 12),
 
             // ==================== LIST VIEW ====================
-
-            //   Expanded(
-            //     child: Consumer<Stocks>(
-            //       builder: (context, value, child) {
-            //         final filtered;
-            //         = value.datas
-            //             .where((e) => e.cabang.id == 2)
-            //             .toList();
-
-            //         if (filtered.isEmpty) {
-            //           return Center(
-            //             child: Text(
-            //               "Tidak ada stock tersedia",
-            //               style: TextStyle(color: Colors.grey),
-            //             ),
-            //           );
-            //         }
-
-            //         return ListView.builder(
-            //           padding: EdgeInsets.symmetric(horizontal: 16),
-            //           itemCount: filtered.length,
-            //           itemBuilder: (context, index) {
-            //             final item = filtered[index];
-            //             return Card(
-            //               color: Colors.grey[200],
-            //               elevation: 3,
-            //               margin: EdgeInsets.only(bottom: 12),
-            //               child: Padding(
-            //                 padding: EdgeInsets.symmetric(
-            //                   horizontal: 16,
-            //                   vertical: 10,
-            //                 ),
-            //                 child: Row(
-            //                   children: [
-            //                     Text(
-            //                       (index + 1).toString(),
-            //                       style: TextStyle(fontSize: 9),
-            //                     ),
-            //                     SizedBox(width: 5),
-            //                     Expanded(
-            //                       flex: 2,
-            //                       child: Text(
-            //                         item.makanan.nama,
-            //                         style: TextStyle(
-            //                           fontSize: 12,
-            //                           fontWeight: FontWeight.w600,
-            //                         ),
-            //                       ),
-            //                     ),
-            //                     Expanded(
-            //                       child: Text(
-            //                         "Rp ${item.makanan.harga}",
-            //                         textAlign: TextAlign.end,
-            //                         style: TextStyle(
-            //                           fontSize: 10,
-            //                           color: Colors.grey[700],
-            //                         ),
-            //                       ),
-            //                     ),
-            //                     SizedBox(width: 8),
-            //                     Expanded(
-            //                       child: Container(
-            //                         padding: EdgeInsets.symmetric(vertical: 4),
-            //                         decoration: BoxDecoration(
-            //                           color: Colors.grey[300],
-            //                           borderRadius: BorderRadius.circular(8),
-            //                         ),
-            //                         child: Text(
-            //                           "${item.stock.toString()} / ${(item.stock + 7).toString()}",
-            //                           textAlign: TextAlign.center,
-            //                           style: TextStyle(
-            //                             fontWeight: FontWeight.bold,
-
-            //                             fontSize: 10,
-            //                           ),
-            //                         ),
-            //                       ),
-            //                     ),
-            //                   ],
-            //                 ),
-            //               ),
-            //             );
-            //           },
-            //         );
-            //       },
-            //     ),
-            //   ),
+            ListStockKaryawan(id_cabang: id_cab),
           ],
         ),
 
