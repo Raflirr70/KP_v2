@@ -69,7 +69,7 @@ class AuthCheck extends StatelessWidget {
         return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           future: FirebaseFirestore.instance
               .collection("akun")
-              .doc("P6u50eyj9EZK69caVDRokD94Bwp2")
+              .doc(snapshot.data!.uid)
               .get(),
           builder: (context, roleSnapshot) {
             // return Text("roleSnapshot.toString()");
@@ -86,13 +86,10 @@ class AuthCheck extends StatelessWidget {
               return Center(child: Text("User tidak ditemukan"));
 
             final role = data["role"];
-
             if (role == "admin") {
               return HomepageAdmin(nama: data["nama"]);
-            } else if (role == "karyawan") {
-              return HomepageKaryawan();
             } else {
-              return Center(child: Text("Role tidak dikenali"));
+              return HomepageKaryawan(id_user: snapshot.data!.uid);
             }
           },
         );

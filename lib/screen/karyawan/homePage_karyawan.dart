@@ -1,13 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/jadwal.dart';
+import 'package:kerprak/model/laporan.dart';
+import 'package:kerprak/model/penggajian.dart';
 import 'package:kerprak/model/stock.dart';
+import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 import 'package:provider/provider.dart';
 
 class HomepageKaryawan extends StatefulWidget {
-  const HomepageKaryawan({super.key});
+  final id_user;
+  const HomepageKaryawan({super.key, required this.id_user});
 
   @override
   State<HomepageKaryawan> createState() => _HomepageKaryawanState();
@@ -17,23 +23,100 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
   final _user = FirebaseAuth.instance.currentUser;
   final _currentIndex = 1;
   bool _show_info = true;
+  TextEditingController _searchCtrl = TextEditingController();
+  bool _akunBelumJadwal = false;
+  bool _loading = false;
+
+  bool _isChecking = true;
 
   @override
   void initState() {
     super.initState();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    // 1. Ambil jadwal untuk user ini
+    final jadwalsProvider = Provider.of<Jadwals>(context, listen: false);
+    await jadwalsProvider.getJadwal();
+
+    // 2. Ambil jadwal user berdasarkan id_user
+    Jadwal? jadwalUser;
+
+    try {
+      jadwalUser = jadwalsProvider.datas.firstWhere(
+        (j) => j.id_user == widget.id_user,
+      );
+    } catch (e) {
+      jadwalUser = null; // kalau tidak ada, jadwalUser tetap null
+    }
+    if (jadwalUser != null) {
+      final idCabang = jadwalUser.id_cabang;
+      final laporanProvider = Provider.of<Laporans>(context, listen: false);
+      await laporanProvider.getData(idCabang);
+      await Future.delayed(Duration(milliseconds: 200));
+      await laporanProvider.checkAndCreateLaporan(idCabang);
+    } else {
+      setState(() {
+        _akunBelumJadwal = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_akunBelumJadwal) {
+      return Scaffold(
+        backgroundColor: Colors.grey,
+        body: Center(
+          child: Card(
+            margin: EdgeInsets.all(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Perhatian",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text("Akun belum dapat jadwal."),
+                  Text("Harap Lapor Ke Owner"),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                    },
+                    child: Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 10),
+                      child: Text("OK"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    // return Scaffold(
+    //   body: Consumer<Laporans>(
+    //     builder: (context, value, child) {
+    //       return Text(
+    //         "Jumlah Laporan : ${value.datas.length}",
+    //         style: TextStyle(fontWeight: FontWeight.bold),
+    //       );
+    //     },
+    //   ),
+    // );
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
+        backgroundColor: Colors.grey[50],
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(16), // atur radius sesukamu
-            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
             child: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: Colors.blueAccent,
@@ -90,7 +173,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
         body: Column(
           children: [
-            // =================== SUMMARY CARD ===================
             AnimatedSize(
               duration: Duration(milliseconds: 300),
               curve: Curves.easeOut,
@@ -167,7 +249,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
               ),
             ),
 
-            // ==================== LABEL ====================
             InkWell(
               onTap: () {
                 setState(() => _show_info = !_show_info);
@@ -177,13 +258,17 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                 children: [
                   Icon(Icons.inventory, color: Colors.blueAccent),
                   SizedBox(width: 8),
-                  Text(
-                    "Stock Saat Ini",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                      color: Colors.grey[800],
-                    ),
+                  Consumer<Laporans>(
+                    builder: (context, value, child) {
+                      return Text(
+                        "Stock Saat Ini ${value.datas.length}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          color: Colors.grey[800],
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(width: 8),
                   Icon(Icons.inventory, color: Colors.blueAccent),
@@ -193,6 +278,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
             SizedBox(height: 12),
 
             // ==================== LIST VIEW ====================
+
             //   Expanded(
             //     child: Consumer<Stocks>(
             //       builder: (context, value, child) {
