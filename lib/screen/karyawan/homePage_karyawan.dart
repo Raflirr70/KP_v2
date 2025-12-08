@@ -71,7 +71,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
   @override
   Widget build(BuildContext context) {
-    
     if (_akunBelumJadwal) {
       return Scaffold(
         backgroundColor: Colors.grey,

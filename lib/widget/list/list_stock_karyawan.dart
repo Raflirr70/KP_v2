@@ -19,6 +19,12 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Makanans>(context, listen: false).getMakanan();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Stocks>(
+        context,
+        listen: false,
+      ).getStocksById("lodUeNMqKqguqSLVUDDELKrWXUq1");
+    });
   }
 
   @override
@@ -30,24 +36,19 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemCount: makanan.datas.length,
             itemBuilder: (context, index) {
-              print("ini cabang ${widget.id_cabang}");
-              print("ini makanan ${makanan.datas[index].id}");
-              final filtered = stock.datas
-                  .where(
-                    (e) =>
-                        e.idCabang == widget.id_cabang &&
-                        e.idMakanan == makanan.datas[index].id,
-                  )
-                  .toList();
+              final filtered = stock.datas.firstWhere(
+                (e) =>
+                    e.idCabang == widget.id_cabang ||
+                    e.idMakanan == makanan.datas[index].id,
+                orElse: () => Stock(
+                  id: "",
+                  idCabang: widget.id_cabang,
+                  idMakanan: makanan.datas[index].id,
+                  jumlahStock: 0,
+                ),
+              );
+              print("iiii : ${stock.datas.length}");
 
-              if (filtered.isEmpty) {
-                return Center(
-                  child: Text(
-                    "Tidak ada stock tersedia",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                );
-              }
               final item = makanan.datas[index];
               return Card(
                 color: Colors.grey[200],
@@ -75,6 +76,16 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                       Expanded(
                         child: Text(
                           "Rp ${makanan.datas[index].harga}",
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          "Rp ${filtered.jumlahStock}",
                           textAlign: TextAlign.end,
                           style: TextStyle(
                             fontSize: 10,

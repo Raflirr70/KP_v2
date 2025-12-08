@@ -84,11 +84,11 @@ class Stocks extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> getTotalStockByCabang(String idMakanan) async {
+  Future<int> getTotalStockByCabang(String id_cabang) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('stock')
-          .where("id_makanan", isEqualTo: idMakanan)
+          .where("id_cabang", isEqualTo: id_cabang)
           .get();
 
       int total = 0;
