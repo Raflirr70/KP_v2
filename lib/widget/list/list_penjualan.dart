@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/screen/karyawan/add_penjualan.dart';
 import 'package:provider/provider.dart';
 
 class ListPenjualan extends StatelessWidget {
-  final id_cabang;
+  final String id_cabang;
   const ListPenjualan({super.key, required this.id_cabang});
 
   String formatTimeOfDay(TimeOfDay tod) {
@@ -15,12 +16,19 @@ class ListPenjualan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (id_cabang == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Consumer<Penjualans>(
-      builder: (context, penjualan, child) {
-        if (penjualan.datas.isEmpty) {
+    // if (id_cabang == null) return CircularProgressIndicator();
+    return StreamBuilder<List<Penjualan>>(
+      stream: context.read<Penjualans>().streamPenjualanByIdCabang(id_cabang),
+      builder: (context, snapshot) {
+        // LOADING
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final datas = snapshot.data!;
+
+        // KOSONG → tampilkan tombol tambah
+        if (datas.isEmpty) {
           return InkWell(
             onTap: () {
               Navigator.push(
@@ -39,49 +47,52 @@ class ListPenjualan extends StatelessWidget {
               ),
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsetsGeometry.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: 16),
                 child: Icon(Icons.add_circle),
               ),
             ),
           );
         }
 
-        return Expanded(
-          child: Column(
-            children: [
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          AddPenjualanPage(idCabang: id_cabang),
-                    ),
-                  );
-                },
-                child: Card(
-                  elevation: 3,
-                  color: Colors.green[100],
-                  margin: EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        // LIST PENJUALAN
+        return Column(
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPenjualanPage(idCabang: id_cabang),
                   ),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsetsGeometry.symmetric(vertical: 16),
-                    child: Icon(Icons.add_circle),
-                  ),
+                );
+              },
+              child: Card(
+                elevation: 3,
+                color: Colors.green[100],
+                margin: EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Icon(Icons.add_circle),
                 ),
               ),
+            ),
 
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  itemCount: penjualan.datas.length,
-                  itemBuilder: (context, index) {
-                    final p = penjualan.datas[index];
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                itemCount: datas.length,
+                itemBuilder: (context, index) {
+                  final p = datas[index];
 
-                    return Card(
+                  return InkWell(
+                    onLongPress: () {
+                      // delete di sini
+                    },
+                    child: Card(
                       elevation: 3,
                       color: Colors.green[50],
                       margin: EdgeInsets.only(bottom: 12),
@@ -96,7 +107,6 @@ class ListPenjualan extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // =================== JAM + TOTAL HARGA ===================
                             Row(
                               children: [
                                 Expanded(
@@ -121,7 +131,6 @@ class ListPenjualan extends StatelessWidget {
 
                             SizedBox(height: 8),
 
-                            // =================== DETAIL PENJUALAN ===================
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: p.detail.map((d) {
@@ -134,12 +143,21 @@ class ListPenjualan extends StatelessWidget {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          d.namaMakanan,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                        child: Consumer<Makanans>(
+                                          builder: (context, value, child) {
+                                            final filter = value.datas
+                                                .firstWhere(
+                                                  (m) => m.id == d.id_makanan,
+                                                )
+                                                .nama;
+                                            return Text(
+                                              filter,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
                                       Text(
@@ -168,7 +186,6 @@ class ListPenjualan extends StatelessWidget {
 
                             Divider(),
 
-                            // =================== RINGKASAN ===================
                             Row(
                               children: [
                                 Icon(
@@ -203,12 +220,12 @@ class ListPenjualan extends StatelessWidget {
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

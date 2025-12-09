@@ -132,7 +132,6 @@ class ListKaryawan extends StatelessWidget {
               color: Colors.blueAccent,
               onTap: () {
                 Navigator.pop(context);
-                print("Edit ${user.nama}");
               },
             ),
             SizedBox(height: 12),

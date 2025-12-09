@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/distribusi.dart';
 import 'package:kerprak/model/jadwal.dart';
+import 'package:kerprak/model/konsumsi.dart';
 import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/pengeluaran.dart';
@@ -37,6 +38,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => Pengeluarans()),
         ChangeNotifierProvider(create: (_) => Penjualans()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => Konsumsis()),
+        ChangeNotifierProvider(create: (_) => DetailKonsumsis()),
       ],
       child: MyApp(),
     ),

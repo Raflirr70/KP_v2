@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
-import 'package:kerprak/model/search.dart';
 import 'package:kerprak/widget/popup/show_tambah_makanan.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class ListMakanan extends StatelessWidget {
   List<Makanan> value;
   ListMakanan({super.key, required this.value});
@@ -141,7 +141,6 @@ class ListMakanan extends StatelessWidget {
               color: Colors.blueAccent,
               onTap: () {
                 Navigator.pop(context);
-                print("Edit ${makanan.nama}");
               },
             ),
             SizedBox(height: 12),

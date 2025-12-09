@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/distribusi.dart';
 import 'package:kerprak/model/makanan.dart';
-import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/widget/popup/show_tambah_distribusi.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class ListDistribusi extends StatefulWidget {
   String id_cabang_dari, id_cabang_tujuan;
   ListDistribusi({

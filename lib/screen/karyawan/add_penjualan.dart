@@ -23,32 +23,14 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Makanans>(context, listen: false).getMakanan();
-      Provider.of<Stocks>(
-        context,
-        listen: false,
-      ).getStocksByIdCabang(widget.idCabang);
-    });
-
-    // Listener search
-    _searchController.addListener(() {
-      setState(() {}); // untuk filter list
-    });
+    _searchController.addListener(() => setState(() {}));
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _hitungTotal(Makanans makanan) {
+  void _hitungTotal(List<Makanan> makananList) {
     int total = 0;
 
     jumlahBeli.forEach((idMakanan, qty) {
-      final m = makanan.datas.firstWhere((e) => e.id == idMakanan);
+      final m = makananList.firstWhere((e) => e.id == idMakanan);
       total += m.harga * qty;
     });
 
@@ -70,233 +52,211 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 14),
             backgroundColor: Colors.green,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           ),
           child: Text(
             "JUAL  •  Rp $totalHarga",
             style: TextStyle(
-              fontWeight: FontWeight.bold,
               fontSize: 16,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
         ),
       ),
 
-      body: Consumer3<Makanans, Stocks, Penjualans>(
-        builder: (context, makanan, stock, penjualanProvider, child) {
-          if (makanan.isLoading || stock.isLoading) {
+      body: StreamBuilder<List<Makanan>>(
+        stream: context.read<Makanans>().streamMakanan(),
+        builder: (context, makananSnap) {
+          if (!makananSnap.hasData)
             return Center(child: CircularProgressIndicator());
-          }
+          final listMakanan = makananSnap.data!;
 
-          // FILTER LIST SESUAI SEARCH
-          List<Makanan> filtered = makanan.datas
-              .where(
-                (m) => m.nama.toLowerCase().contains(
-                  _searchController.text.toLowerCase(),
-                ),
-              )
-              .toList();
+          return StreamBuilder<List<Stock>>(
+            stream: context.read<Stocks>().streamStockByIdCabang(
+              widget.idCabang,
+            ),
+            builder: (context, stockSnap) {
+              if (!stockSnap.hasData)
+                return Center(child: CircularProgressIndicator());
+              final listStock = stockSnap.data!;
 
-          return Column(
-            children: [
-              SizedBox(height: 10),
+              // Pencarian
+              List<Makanan> filtered = listMakanan
+                  .where(
+                    (m) => m.nama.toLowerCase().contains(
+                      _searchController.text.toLowerCase(),
+                    ),
+                  )
+                  .toList();
 
-              // 🔍 SEARCH INPUT
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: SearchSimple(controller: _searchController),
-              ),
+              return Column(
+                children: [
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: SearchSimple(controller: _searchController),
+                  ),
+                  Divider(),
 
-              SizedBox(height: 10, width: 250, child: Divider(height: 2)),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: EdgeInsets.all(12),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final item = filtered[index];
 
-              // LIST VIEW
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.all(12),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final item = filtered[index];
+                        final stockItem = listStock.firstWhere(
+                          (s) => s.idMakanan == item.id,
+                          orElse: () => Stock(
+                            id: "",
+                            idCabang: widget.idCabang,
+                            idMakanan: item.id,
+                            jumlahStock: 0,
+                          ),
+                        );
 
-                    final stockItem = stock.datas.firstWhere(
-                      (x) =>
-                          x.idCabang == widget.idCabang &&
-                          x.idMakanan == item.id,
-                      orElse: () => Stock(
-                        id: "",
-                        idCabang: widget.idCabang,
-                        idMakanan: item.id,
-                        jumlahStock: 0,
-                      ),
-                    );
+                        // stok realtime
+                        stokSisa.putIfAbsent(
+                          item.id,
+                          () => stockItem.jumlahStock,
+                        );
 
-                    if (!stokSisa.containsKey(item.id)) {
-                      stokSisa[item.id] = stockItem.jumlahStock;
-                    }
+                        final qty = jumlahBeli[item.id] ?? 0;
 
-                    final int qty = jumlahBeli[item.id] ?? 0;
-
-                    return Card(
-                      elevation: 2,
-                      margin: EdgeInsets.only(bottom: 12),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.nama,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "Rp ${item.harga}",
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Stock: ${stokSisa[item.id]}",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.redAccent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // TOMBOL +/-
-                            Row(
+                        return Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Row(
                               children: [
-                                InkWell(
-                                  onTap: qty > 0
-                                      ? () {
-                                          jumlahBeli[item.id] = qty - 1;
-                                          stokSisa[item.id] =
-                                              stokSisa[item.id]! + 1;
-
-                                          _hitungTotal(makanan);
-                                          setState(() {});
-                                        }
-                                      : null,
-                                  child: Container(
-                                    padding: EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red[100],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.remove, size: 18),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.nama,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text("Rp ${item.harga}"),
+                                      Text(
+                                        "Stock: ${stokSisa[item.id]}",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ],
                                   ),
                                 ),
 
-                                SizedBox(width: 10),
-
-                                Text(
-                                  "$qty",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                SizedBox(width: 10),
-
-                                InkWell(
-                                  onTap: stokSisa[item.id]! > 0
-                                      ? () {
-                                          jumlahBeli[item.id] = qty + 1;
-                                          stokSisa[item.id] =
-                                              stokSisa[item.id]! - 1;
-
-                                          _hitungTotal(makanan);
-                                          setState(() {});
-                                        }
-                                      : null,
-                                  child: Container(
-                                    padding: EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green[100],
-                                      borderRadius: BorderRadius.circular(8),
+                                Row(
+                                  children: [
+                                    // MINUS
+                                    InkWell(
+                                      onTap: qty > 0
+                                          ? () {
+                                              jumlahBeli[item.id] = qty - 1;
+                                              stokSisa[item.id] =
+                                                  stokSisa[item.id]! + 1;
+                                              _hitungTotal(listMakanan);
+                                            }
+                                          : null,
+                                      child: _btn(
+                                        Icons.remove,
+                                        Colors.red[100],
+                                      ),
                                     ),
-                                    child: Icon(Icons.add, size: 18),
-                                  ),
+
+                                    SizedBox(width: 10),
+                                    Text(
+                                      "$qty",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+
+                                    // PLUS
+                                    InkWell(
+                                      onTap: stokSisa[item.id]! > 0
+                                          ? () {
+                                              jumlahBeli[item.id] = qty + 1;
+                                              stokSisa[item.id] =
+                                                  stokSisa[item.id]! - 1;
+                                              _hitungTotal(listMakanan);
+                                            }
+                                          : null,
+                                      child: _btn(Icons.add, Colors.green[100]),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
     );
   }
 
+  Widget _btn(IconData icon, Color? color) {
+    return Container(
+      padding: EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(icon, size: 18),
+    );
+  }
+
   Future<void> _submitPenjualan(BuildContext context) async {
-    final makanan = Provider.of<Makanans>(context, listen: false);
-    final penjualan = Provider.of<Penjualans>(context, listen: false);
-    final stockProvider = Provider.of<Stocks>(context, listen: false);
+    final makananList = await context.read<Makanans>().getMakanan();
+    final penjualan = context.read<Penjualans>();
+    final stockProvider = context.read<Stocks>();
 
     if (jumlahBeli.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Tidak ada makanan yang dipilih")));
+      ).showSnackBar(SnackBar(content: Text("Tidak ada makanan dipilih")));
       return;
     }
 
-    // Buat penjualan
     Penjualan p = Penjualan(
       id: "",
-      detail: [],
+      id_cabang: widget.idCabang,
       totalHarga: totalHarga,
       jam: TimeOfDay.now(),
+      detail: [],
     );
 
-    // Tambahkan detail transaksi
     jumlahBeli.forEach((idMakanan, qty) {
-      final m = makanan.datas.firstWhere((e) => e.id == idMakanan);
-
+      final m = makananList.firstWhere((e) => e.id == idMakanan);
       p.detail.add(
         DetailPenjualan(
           id: "",
-          namaMakanan: m.nama,
+          id_makanan: m.id,
           jumlah: qty,
           totalHarga: m.harga * qty,
         ),
       );
     });
 
-    // 🚀 SIMPAN PENJUALAN
     await penjualan.tambahPenjualan(p);
 
-    // 🚀 UPDATE STOCK FIREBASE
-    for (var entry in jumlahBeli.entries) {
-      final idMakanan = entry.key;
-      final sisaBaru = stokSisa[idMakanan]!;
-
+    // update stock
+    for (var entry in stokSisa.entries) {
       await stockProvider.saveStock(
-        idMakanan: idMakanan,
+        idMakanan: entry.key,
         idCabang: widget.idCabang,
-        jumlahStock: sisaBaru,
+        jumlahStock: entry.value,
       );
     }
 

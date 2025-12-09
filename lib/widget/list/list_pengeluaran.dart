@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/pengeluaran.dart';
-import 'package:kerprak/model/search.dart';
 import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:kerprak/widget/popup/show_edit_pengeluaran.dart';
 import 'package:kerprak/widget/popup/show_tambah_pengeluaran.dart';

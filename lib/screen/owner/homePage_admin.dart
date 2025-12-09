@@ -15,7 +15,6 @@ class HomepageAdmin extends StatefulWidget {
 }
 
 class _HomepageAdminState extends State<HomepageAdmin> {
-  final _user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

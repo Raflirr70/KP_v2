@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kerprak/main.dart';
 import 'package:kerprak/model/user.dart';
-import 'package:kerprak/screen/owner/homePage_admin.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,15 +14,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscure = false;
-
-  void _showMessage(String msg, {bool error = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: error ? Colors.red : Colors.green,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

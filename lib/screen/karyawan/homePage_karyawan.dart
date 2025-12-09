@@ -1,12 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
-import 'package:kerprak/model/makanan.dart';
-import 'package:kerprak/model/penggajian.dart';
-import 'package:kerprak/model/stock.dart';
-import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
@@ -267,7 +262,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                   Consumer<Laporans>(
                     builder: (context, value, child) {
                       return Text(
-                        "Stock Saat Ini ${value.datas.length}",
+                        "Stock Saat Ini",
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
@@ -332,10 +327,10 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                 );
                 break;
               case 2:
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => KonsumsiPage()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => KonsumsiPage()),
+                );
                 break;
               case 3:
                 // Navigasi ke Laporan jika ada

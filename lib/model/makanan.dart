@@ -35,6 +35,16 @@ class Makanans extends ChangeNotifier {
 
   List<Makanan> get datas => _datas;
 
+  Stream<List<Makanan>> streamMakanan() {
+    return FirebaseFirestore.instance.collection('makanan').snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs
+          .map((doc) => Makanan.fromMap(doc.id, doc.data()))
+          .toList();
+    });
+  }
+
   Future<void> tambahMakanan(Makanan makanan) async {
     final doc = FirebaseFirestore.instance.collection("makanan").doc();
     await doc.set(makanan.toMap());
@@ -45,7 +55,7 @@ class Makanans extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getMakanan() async {
+  Future<List<Makanan>> getMakanan() async {
     isLoading = true;
     notifyListeners();
 
@@ -66,6 +76,26 @@ class Makanans extends ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+
+    return _datas; // ← WAJIB RETURN
+  }
+
+  Future<Makanan?> getMakananById(String id_makanan) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('makanan')
+          .where("id", isEqualTo: id_makanan)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) return null;
+
+      final doc = snapshot.docs.first;
+      return Makanan.fromMap(doc.id, doc.data());
+    } catch (e) {
+      print("Error getMakananById: $e");
+      return null;
+    }
   }
 
   Future<void> hapusMakanan(Makanan makanan) async {

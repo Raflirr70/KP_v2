@@ -32,6 +32,18 @@ class Stocks extends ChangeNotifier {
 
   List<Stock> get datas => _datas;
 
+  Stream<List<Stock>> streamStockByIdCabang(String idCabang) {
+    return FirebaseFirestore.instance
+        .collection('stock')
+        .where("id_cabang", isEqualTo: idCabang)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Stock.fromMap(doc.id, doc.data()))
+              .toList();
+        });
+  }
+
   /// Ambil semua stock
   Future<void> getAllStocks() async {
     isLoading = true;
@@ -224,6 +236,45 @@ class Stocks extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print("Error updateStock: $e");
+    }
+  }
+
+  Future<void> updateStockJumlah({
+    required String idCabang,
+    required String idMakanan,
+    required int jumlahBaru,
+  }) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where('id_cabang', isEqualTo: idCabang)
+          .where('id_makanan', isEqualTo: idMakanan)
+          .get();
+
+      // Jika data tidak ditemukan
+      if (snapshot.docs.isEmpty) {
+        print("⚠️ Stock tidak ditemukan untuk makanan: $idMakanan");
+        return;
+      }
+
+      // Update setiap dokumen yang ditemukan
+      for (var doc in snapshot.docs) {
+        await FirebaseFirestore.instance.collection('stock').doc(doc.id).update(
+          {'jumlah': jumlahBaru},
+        );
+      }
+
+      // Update list lokal (opsional)
+      for (var s in _datas) {
+        if (s.idCabang == idCabang && s.idMakanan == idMakanan) {
+          s.jumlahStock = jumlahBaru;
+        }
+      }
+
+      notifyListeners();
+      print("✅ Stock $idMakanan berhasil diupdate: $jumlahBaru");
+    } catch (e) {
+      print("❌ Error update stock: $e");
     }
   }
 }

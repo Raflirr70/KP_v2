@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/widget/list/list_penjualan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/penjualan.dart';
@@ -15,33 +13,20 @@ class PenjualanPage extends StatefulWidget {
 
 class _PenjualanPageState extends State<PenjualanPage> {
   bool _showSummary = true;
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Penjualans>(
-        context,
-        listen: false,
-      ).getPenjualanByIdCabang(widget.id_cabang);
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
+    final penjualanStream = context
+        .read<Penjualans>()
+        .streamPenjualanByIdCabang(widget.id_cabang);
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
+        backgroundColor: Colors.grey[50],
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(16), // atur radius sesukamu
-            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
             child: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: Colors.blueAccent,
@@ -80,20 +65,8 @@ class _PenjualanPageState extends State<PenjualanPage> {
                     ],
                   ),
                   SizedBox(width: 5),
-                  InkWell(
-                    onTap: () {},
-                    child: Icon(Icons.account_circle_rounded, size: 30),
-                  ),
+                  Icon(Icons.account_circle_rounded, size: 30),
                 ],
-              ),
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blueAccent, Colors.lightBlueAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
               ),
             ),
           ),
@@ -101,37 +74,40 @@ class _PenjualanPageState extends State<PenjualanPage> {
 
         body: Column(
           children: [
-            // =================== SUMMARY CARD ===================
+            // ===================== SUMMARY ======================
             AnimatedSize(
               duration: Duration(milliseconds: 300),
               curve: Curves.easeOut,
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: Offset(0, -0.1),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
                 child: _showSummary
-                    ? Card(
+                    ? StreamBuilder<List<Penjualan>>(
                         key: ValueKey("summary"),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Consumer<Penjualans>(
-                            builder: (context, value, child) {
-                              return Row(
+                        stream: penjualanStream,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return SizedBox(
+                              height: 90,
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+
+                          final data = snapshot.data!;
+                          final totalPendapatan = data.fold(
+                            0,
+                            (sum, p) => sum + p.totalHarga,
+                          );
+                          final jumlahTerjual = data.length;
+
+                          return Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Row(
                                 children: [
                                   Expanded(
                                     child: _summaryBox(
-                                      "Total Pendapatan",
-                                      value.Pendapatan().toString(),
+                                      "Total Penjualan",
+                                      totalPendapatan.toString(),
                                       Colors.green,
                                       Icons.trending_up,
                                     ),
@@ -140,22 +116,22 @@ class _PenjualanPageState extends State<PenjualanPage> {
                                   Expanded(
                                     child: _summaryBox(
                                       "Jumlah Terjual",
-                                      value.datas.length.toString(),
+                                      jumlahTerjual.toString(),
                                       Colors.teal,
                                       Icons.shopping_cart,
                                     ),
                                   ),
                                 ],
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            ),
+                          );
+                        },
                       )
                     : SizedBox.shrink(key: ValueKey("empty")),
               ),
             ),
 
-            // ==================== LABEL ====================
+            // ====================== LABEL =======================
             InkWell(
               onTap: () => setState(() => _showSummary = !_showSummary),
               child: Padding(
@@ -182,14 +158,15 @@ class _PenjualanPageState extends State<PenjualanPage> {
 
             SizedBox(height: 10),
 
-            ListPenjualan(id_cabang: widget.id_cabang),
+            // ===================== LIST VIEW =====================
+            Expanded(child: ListPenjualan(id_cabang: widget.id_cabang)),
           ],
         ),
       ),
     );
   }
 
-  // =================== SUMMARY BOX ===================
+  // ========================== WIDGET SUMMARY BOX ==========================
   Widget _summaryBox(String label, String value, Color color, IconData icon) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 14),

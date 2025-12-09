@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 
 class DetailPenjualan {
   String id;
-  String namaMakanan;
+  String id_makanan;
   int jumlah;
   int totalHarga;
 
   DetailPenjualan({
     required this.id,
-    required this.namaMakanan,
+    required this.id_makanan,
     required this.jumlah,
     required this.totalHarga,
   });
@@ -18,7 +18,7 @@ class DetailPenjualan {
   factory DetailPenjualan.fromMap(String id, Map<String, dynamic> map) {
     return DetailPenjualan(
       id: id,
-      namaMakanan: map['nama_makanan'] ?? '',
+      id_makanan: map['id_makanan'] ?? '',
       jumlah: map['jumlah'] ?? 0,
       totalHarga: map['total_harga'] ?? 0,
     );
@@ -26,7 +26,7 @@ class DetailPenjualan {
 
   Map<String, dynamic> toMap() {
     return {
-      'nama_makanan': namaMakanan,
+      'id_makanan': id_makanan,
       'jumlah': jumlah,
       'total_harga': totalHarga,
     };
@@ -35,18 +35,21 @@ class DetailPenjualan {
 
 class Penjualan {
   String id;
+  String id_cabang;
   List<DetailPenjualan> detail;
   int totalHarga;
   TimeOfDay jam;
 
   Penjualan({
     required this.id,
+    required this.id_cabang,
     required this.detail,
     required this.totalHarga,
     required this.jam,
   });
 
-  String jamToString(TimeOfDay t) => "${t.hour}:${t.minute}";
+  String jamToString(TimeOfDay t) =>
+      "${t.hour}:${t.minute.toString().padLeft(2, '0')}";
 
   static TimeOfDay parseJam(String s) {
     final parts = s.split(':');
@@ -56,6 +59,7 @@ class Penjualan {
   factory Penjualan.fromMap(String id, Map<String, dynamic> map) {
     return Penjualan(
       id: id,
+      id_cabang: map['id_cabang'],
       detail: [],
       totalHarga: map['total_harga'] ?? 0,
       jam: parseJam(map['jam'] ?? "00:00"),
@@ -63,7 +67,11 @@ class Penjualan {
   }
 
   Map<String, dynamic> toMap() {
-    return {"total_harga": totalHarga, "jam": jamToString(jam)};
+    return {
+      "id_cabang": id_cabang,
+      "total_harga": totalHarga,
+      "jam": jamToString(jam),
+    };
   }
 }
 
@@ -74,13 +82,11 @@ class Penjualans extends ChangeNotifier {
   List<Penjualan> get datas => _datas;
 
   // ===============================
-  // 🔥 FUNGSI SUMMARY
+  // 🔥 SUMMARY
   // ===============================
 
-  /// Total Pendapatan Semua Penjualan
   int Pendapatan() => _datas.fold(0, (sum, p) => sum + p.totalHarga);
 
-  /// Total Porsi semua detail penjualan
   int TotalPorsi() {
     int jumlah = 0;
     for (var p in _datas) {
@@ -90,8 +96,31 @@ class Penjualans extends ChangeNotifier {
   }
 
   // ===============================
-  // 🔥 AMBIL DATA FIRESTORE
+  // 🔥 GET DATA
   // ===============================
+  Stream<List<Penjualan>> streamPenjualanByIdCabang(String idCabang) {
+    final penjualanRef = FirebaseFirestore.instance
+        .collection('penjualan')
+        .where('id_cabang', isEqualTo: idCabang);
+
+    return penjualanRef.snapshots().asyncMap((snapshot) async {
+      List<Penjualan> result = [];
+
+      for (var doc in snapshot.docs) {
+        Penjualan p = Penjualan.fromMap(doc.id, doc.data());
+
+        // Ambil detail secara async
+        final detailSnap = await doc.reference.collection('detail').get();
+        p.detail = detailSnap.docs
+            .map((d) => DetailPenjualan.fromMap(d.id, d.data()))
+            .toList();
+
+        result.add(p);
+      }
+
+      return result;
+    });
+  }
 
   Future<void> getPenjualan() async {
     isLoading = true;
@@ -100,7 +129,7 @@ class Penjualans extends ChangeNotifier {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('penjualan')
-          .orderBy('jam')
+          .orderBy('jam', descending: true)
           .get();
 
       _datas.clear();
@@ -144,7 +173,6 @@ class Penjualans extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Detail dari subcollection
   Future<List<DetailPenjualan>> _getDetailPenjualan(String idPenjualan) async {
     List<DetailPenjualan> details = [];
 
@@ -181,7 +209,7 @@ class Penjualans extends ChangeNotifier {
   }
 
   // ===============================
-  // 🔥 HAPUS PENJUALAN
+  // 🔥 HAPUS
   // ===============================
   Future<void> hapusPenjualan(Penjualan p) async {
     try {

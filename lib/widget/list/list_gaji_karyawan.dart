@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/jadwal.dart';
-import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/penggajian.dart';
-import 'package:kerprak/model/search.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/popup/show_edit_penggajian.dart';
-import 'package:kerprak/widget/popup/show_tambah_makanan.dart';
 import 'package:provider/provider.dart';
 
 class ListGajiKaryawan extends StatelessWidget {
