@@ -1,78 +1,174 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/penjualan.dart';
+import 'package:kerprak/screen/karyawan/add_penjualan.dart';
 import 'package:provider/provider.dart';
 
 class ListPenjualan extends StatelessWidget {
-  const ListPenjualan({super.key});
-  String formatTimeOfDay(TimeOfDay tod) {
-    final hour = tod.hourOfPeriod.toString().padLeft(2, '0');
-    final minute = tod.minute.toString().padLeft(2, '0');
-    final period = tod.period == DayPeriod.am ? "AM" : "PM";
+  final id_cabang;
+  const ListPenjualan({super.key, required this.id_cabang});
 
-    return "$hour:$minute $period";
+  String formatTimeOfDay(TimeOfDay tod) {
+    final hour = tod.hour.toString().padLeft(2, '0');
+    final minute = tod.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
   }
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Consumer<Penjualans>(
-        builder: (context, value, child) {
-          if (value.datas.isEmpty) {
-            return Center(
-              child: Text(
-                "Belum ada data penjualan",
-                style: TextStyle(color: Colors.grey),
+    if (id_cabang == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return Consumer<Penjualans>(
+      builder: (context, penjualan, child) {
+        if (penjualan.datas.isEmpty) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddPenjualanPage(idCabang: id_cabang),
+                ),
+              );
+            },
+            child: Card(
+              elevation: 3,
+              color: Colors.green[100],
+              margin: EdgeInsets.only(bottom: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            );
-          }
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsetsGeometry.symmetric(vertical: 16),
+                child: Icon(Icons.add_circle),
+              ),
+            ),
+          );
+        }
 
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              if (index != 3) {
-                final p = value.datas[index];
-                return Card(
+        return Expanded(
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          AddPenjualanPage(idCabang: id_cabang),
+                    ),
+                  );
+                },
+                child: Card(
                   elevation: 3,
-                  color: Colors.green[50],
+                  color: Colors.green[100],
                   margin: EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Nama menu + total jual
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                formatTimeOfDay(p.jam!),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "Rp ${p.total_harga}",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsetsGeometry.symmetric(vertical: 16),
+                    child: Icon(Icons.add_circle),
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  itemCount: penjualan.datas.length,
+                  itemBuilder: (context, index) {
+                    final p = penjualan.datas[index];
+
+                    return Card(
+                      elevation: 3,
+                      color: Colors.green[50],
+                      margin: EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
                         ),
-
-                        SizedBox(height: 6),
-
-                        // Jumlah terjual + tanggal
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // =================== JAM + TOTAL HARGA ===================
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    formatTimeOfDay(p.jam),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  "Rp ${p.totalHarga}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 8),
+
+                            // =================== DETAIL PENJUALAN ===================
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: p.detail.map((d) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          d.namaMakanan,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "${d.jumlah}x",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        "Rp ${d.totalHarga}",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            SizedBox(height: 6),
+
+                            Divider(),
+
+                            // =================== RINGKASAN ===================
                             Row(
                               children: [
                                 Icon(
@@ -82,16 +178,13 @@ class ListPenjualan extends StatelessWidget {
                                 ),
                                 SizedBox(width: 6),
                                 Text(
-                                  " Porsi",
+                                  "${p.detail.fold(0, (s, x) => s + x.jumlah)} Porsi",
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey[700],
                                   ),
                                 ),
-                              ],
-                            ),
-                            Row(
-                              children: [
+                                Spacer(),
                                 Icon(
                                   Icons.calendar_today,
                                   size: 13,
@@ -99,7 +192,7 @@ class ListPenjualan extends StatelessWidget {
                                 ),
                                 SizedBox(width: 6),
                                 Text(
-                                  p.total_harga.toString(),
+                                  formatTimeOfDay(p.jam),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey[700],
@@ -109,30 +202,15 @@ class ListPenjualan extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return InkWell(
-                onTap: () {},
-                child: Card(
-                  elevation: 3,
-                  color: Colors.green[100],
-                  margin: EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsetsGeometry.symmetric(vertical: 16),
-                    child: Icon(Icons.add_circle),
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

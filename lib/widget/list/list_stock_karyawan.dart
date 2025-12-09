@@ -23,23 +23,25 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
       Provider.of<Stocks>(
         context,
         listen: false,
-      ).getStocksById("lodUeNMqKqguqSLVUDDELKrWXUq1");
+      ).getStocksByIdCabang("HG4biWXd6vqIOJGunXXq");
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.id_cabang == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Expanded(
       child: Consumer2<Stocks, Makanans>(
         builder: (context, stock, makanan, child) {
+          print(stock.datas.length);
           return ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemCount: makanan.datas.length,
             itemBuilder: (context, index) {
               final filtered = stock.datas.firstWhere(
-                (e) =>
-                    e.idCabang == widget.id_cabang ||
-                    e.idMakanan == makanan.datas[index].id,
+                (e) => e.idMakanan == makanan.datas[index].id,
                 orElse: () => Stock(
                   id: "",
                   idCabang: widget.id_cabang,
@@ -47,9 +49,9 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                   jumlahStock: 0,
                 ),
               );
-              print("iiii : ${stock.datas.length}");
 
               final item = makanan.datas[index];
+
               return Card(
                 color: Colors.grey[200],
                 elevation: 3,
@@ -66,7 +68,7 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          makanan.datas[index].nama,
+                          item.nama,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -75,7 +77,7 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                       ),
                       Expanded(
                         child: Text(
-                          "Rp ${makanan.datas[index].harga}",
+                          "Rp ${item.harga}",
                           textAlign: TextAlign.end,
                           style: TextStyle(
                             fontSize: 10,
@@ -85,7 +87,7 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                       ),
                       Expanded(
                         child: Text(
-                          "Rp ${filtered.jumlahStock}",
+                          "${filtered.jumlahStock}",
                           textAlign: TextAlign.end,
                           style: TextStyle(
                             fontSize: 10,
@@ -93,25 +95,6 @@ class _ListStockKaryawanState extends State<ListStockKaryawan> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
-                      // Expanded(
-                      //   child: Container(
-                      //     padding: EdgeInsets.symmetric(vertical: 4),
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.grey[300],
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //     child: Text(
-                      //       "${item.stock.toString()} / ${(item.stock + 7).toString()}",
-                      //       textAlign: TextAlign.center,
-                      //       style: TextStyle(
-                      //         fontWeight: FontWeight.bold,
-
-                      //         fontSize: 10,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),

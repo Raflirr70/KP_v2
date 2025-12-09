@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/widget/list/list_penjualan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/penjualan.dart';
 
 class PenjualanPage extends StatefulWidget {
-  const PenjualanPage({super.key});
+  final id_cabang;
+  const PenjualanPage({super.key, required this.id_cabang});
 
   @override
   State<PenjualanPage> createState() => _PenjualanPageState();
@@ -13,6 +15,21 @@ class PenjualanPage extends StatefulWidget {
 
 class _PenjualanPageState extends State<PenjualanPage> {
   bool _showSummary = true;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Penjualans>(
+        context,
+        listen: false,
+      ).getPenjualanByIdCabang(widget.id_cabang);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,26 +124,30 @@ class _PenjualanPageState extends State<PenjualanPage> {
                         key: ValueKey("summary"),
                         child: Padding(
                           padding: EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _summaryBox(
-                                  "Total Pendapatan",
-                                  "Rp 1.340.000",
-                                  Colors.green,
-                                  Icons.trending_up,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: _summaryBox(
-                                  "Jumlah Terjual",
-                                  "74 Porsi",
-                                  Colors.teal,
-                                  Icons.shopping_cart,
-                                ),
-                              ),
-                            ],
+                          child: Consumer<Penjualans>(
+                            builder: (context, value, child) {
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: _summaryBox(
+                                      "Total Pendapatan",
+                                      value.Pendapatan().toString(),
+                                      Colors.green,
+                                      Icons.trending_up,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _summaryBox(
+                                      "Jumlah Terjual",
+                                      value.datas.length.toString(),
+                                      Colors.teal,
+                                      Icons.shopping_cart,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       )
@@ -161,7 +182,7 @@ class _PenjualanPageState extends State<PenjualanPage> {
 
             SizedBox(height: 10),
 
-            ListPenjualan(),
+            ListPenjualan(id_cabang: widget.id_cabang),
           ],
         ),
       ),

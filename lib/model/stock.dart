@@ -84,6 +84,52 @@ class Stocks extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getStocksByIdCabang(String idCabang) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where("id_cabang", isEqualTo: idCabang)
+          .get();
+
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          var data = doc.data();
+          return Stock.fromMap(doc.id, data);
+        }).toList(),
+      );
+    } catch (e) {
+      print("Error getMakanan: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<int> getTotalStockByMakanan(String id_makanan) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stock')
+          .where("id_makanan", isEqualTo: id_makanan)
+          .get();
+
+      int total = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>; // ⬅ WAJIB CAST
+        total += (data['jumlah_makanan'] ?? 0) as int; // ⬅ ACCESS AMAN
+      }
+
+      return total;
+    } catch (e) {
+      print("Error getTotalStockByCabang: $e");
+      return 0;
+    }
+  }
+
   Future<int> getTotalStockByCabang(String id_cabang) async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -147,6 +193,37 @@ class Stocks extends ChangeNotifier {
       await getStocksById(idMakanan); // refresh data
     } catch (e) {
       print("Error saveStock: $e");
+    }
+  }
+
+  Future<void> updateStock(
+    String idCabang,
+    String idMakanan,
+    int sisaBaru,
+  ) async {
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('stock')
+          .where('id_cabang', isEqualTo: idCabang)
+          .where('id_makanan', isEqualTo: idMakanan)
+          .get();
+
+      for (var doc in query.docs) {
+        await doc.reference.update({"jumlah_stock": sisaBaru});
+      }
+
+      // update di local list
+      int index = _datas.indexWhere(
+        (x) => x.idCabang == idCabang && x.idMakanan == idMakanan,
+      );
+
+      if (index != -1) {
+        _datas[index].jumlahStock = sisaBaru;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print("Error updateStock: $e");
     }
   }
 }

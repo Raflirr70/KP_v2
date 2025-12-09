@@ -320,7 +320,9 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
               case 0:
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PenjualanPage()),
+                  MaterialPageRoute(
+                    builder: (context) => PenjualanPage(id_cabang: id_cab),
+                  ),
                 );
                 break;
               case 1:
@@ -330,10 +332,10 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                 );
                 break;
               case 2:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => KonsumsiPage()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => KonsumsiPage()),
+                // );
                 break;
               case 3:
                 // Navigasi ke Laporan jika ada

@@ -86,7 +86,9 @@ class _ListStockState extends State<ListStock> with TickerProviderStateMixin {
                           Consumer<Stocks>(
                             builder: (context, stock, child) {
                               return FutureBuilder<int>(
-                                future: stock.getTotalStockByCabang(makanan.id),
+                                future: stock.getTotalStockByMakanan(
+                                  makanan.id,
+                                ),
                                 builder: (context, snapshot) {
                                   return Text(snapshot.data?.toString() ?? "0");
                                 },
