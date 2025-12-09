@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:kerprak/model/konsumsi.dart';
+import 'package:kerprak/model/makanan.dart';
+import 'package:kerprak/model/user.dart';
+import 'package:kerprak/screen/karyawan/add_konsumsi.dart';
+import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
-import 'package:kerprak/model/penjualan.dart';
 
 class KonsumsiPage extends StatefulWidget {
-  const KonsumsiPage({super.key});
+  final id_cabang;
+  const KonsumsiPage({super.key, required this.id_cabang});
 
   @override
   State<KonsumsiPage> createState() => _KonsumsiPageState();
@@ -22,10 +25,17 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
+        bottomNavigationBar: NavbarKaryawan(id_cab: widget.id_cabang, x: 2),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: ClipRRect(
@@ -91,45 +101,6 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
 
         body: Column(
           children: [
-            // =================== SUMMARY CARD ===================
-            AnimatedSize(
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: Offset(0, -0.1),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Card(
-                  key: ValueKey("summary"),
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _summaryBox(
-                            "Konsumsi",
-                            "0",
-                            Colors.deepOrange,
-                            Icons.local_dining,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
             SizedBox(height: 10),
 
             // ==================== LIST PENJUALAN ====================
@@ -146,10 +117,18 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AddKonsumsi(idCabang: widget.id_cabang),
+                          ),
+                        );
+                      },
                       child: Card(
                         elevation: 3,
-                        color: Colors.green[100],
+                        color: Colors.deepOrange[100],
                         margin: EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -162,91 +141,125 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
                       ),
                     );
                   }
-
                   final datas = snapshot.data!;
 
                   return ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 10),
-                    itemCount: datas.length,
+                    itemCount: datas.length + 1,
                     itemBuilder: (context, index) {
-                      final p = datas[index];
-
-                      return Card(
-                        elevation: 3,
-                        color: Colors.deepOrange[50],
-                        margin: EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
+                      if (datas.length == index) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddKonsumsi(idCabang: widget.id_cabang),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            elevation: 3,
+                            color: Colors.deepOrange[100],
+                            margin: EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Icon(Icons.add_circle),
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Nama menu + total harga
-                              Row(
+                        );
+                      }
+                      final p = datas[index];
+                      return Consumer<Users>(
+                        builder: (context, value, child) {
+                          return Card(
+                            elevation: 3,
+                            color: Colors.deepOrange[50],
+                            margin: EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      p.namaKaryawan,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                  // Nama menu + total harga
+                                  Consumer<Users>(
+                                    builder: (context, vva, child) {
+                                      String u = vva.datas
+                                          .firstWhere(
+                                            (u) => u.id == p.idKaryawan,
+                                          )
+                                          .nama;
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              u,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: p.detailKonsumsi.map((d) {
+                                              return Consumer<Makanans>(
+                                                builder: (context, value, child) {
+                                                  final ms = value.datas
+                                                      .firstWhere(
+                                                        (m) =>
+                                                            m.id == d.idMakanan,
+                                                      );
+                                                  return Row(
+                                                    children: [
+                                                      Text(
+                                                        ms.nama,
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Colors.deepOrange,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        "  x ${d.jumlah.toString()}",
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Colors.deepOrange,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
-                                  Text(
-                                    "Rp ${p.detailKonsumsi}",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.deepOrange,
-                                    ),
-                                  ),
+
+                                  SizedBox(height: 6),
                                 ],
                               ),
-                              SizedBox(height: 6),
-
-                              // Detail: bisa di stream detail konsumsi
-                              StreamBuilder<List<DetailKonsumsi>>(
-                                stream: Provider.of<DetailKonsumsis>(
-                                  context,
-                                  listen: false,
-                                ).streamDetailKonsumsi(p.id),
-                                builder: (context, detailSnapshot) {
-                                  if (!detailSnapshot.hasData ||
-                                      detailSnapshot.data!.isEmpty) {
-                                    return Text(
-                                      "Tidak ada detail konsumsi",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
-                                      ),
-                                    );
-                                  }
-
-                                  final details = detailSnapshot.data!;
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: details.map((d) {
-                                      return Text(
-                                        "- ${d.idMakanan} x${d.jumlah}",
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey[700],
-                                        ),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       );
                     },
                   );

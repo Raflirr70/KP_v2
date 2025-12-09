@@ -2,10 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
+import 'package:kerprak/model/makanan.dart';
+import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 import 'package:kerprak/widget/list/list_stock_karyawan.dart';
+import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 
 class HomepageKaryawan extends StatefulWidget {
@@ -31,14 +34,20 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
   void initState() {
     super.initState();
     _initData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Users>(context, listen: false).fetchData();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Jadwals>(context, listen: false).getByCabang(id_cab!);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Makanans>(context, listen: false).getMakanan();
+    });
   }
 
   Future<void> _initData() async {
-    // 1. Ambil jadwal untuk user ini
     final jadwalsProvider = Provider.of<Jadwals>(context, listen: false);
     await jadwalsProvider.getJadwal();
-
-    // 2. Ambil jadwal user berdasarkan id_user
     Jadwal? jadwalUser;
 
     try {
@@ -101,16 +110,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
         ),
       );
     }
-    // return Scaffold(
-    //   body: Consumer<Laporans>(
-    //     builder: (context, value, child) {
-    //       return Text(
-    //         "Jumlah Laporan : ${value.datas.length}",
-    //         style: TextStyle(fontWeight: FontWeight.bold),
-    //       );
-    //     },
-    //   ),
-    // );
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
@@ -284,60 +283,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
         ),
 
         // ================== NAV BAR ==================
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          backgroundColor: Color(0xFF111118),
-          selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.grey[400],
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed, // Pastikan semua item terlihat
-          elevation: 8,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: "Penjualan",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: "Pengeluaran",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.fastfood),
-              label: "Konsumsi",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_long),
-              label: "Laporan",
-            ),
-          ],
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PenjualanPage(id_cabang: id_cab),
-                  ),
-                );
-                break;
-              case 1:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PengeluaranPage()),
-                );
-                break;
-              case 2:
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => KonsumsiPage()),
-                );
-                break;
-              case 3:
-                // Navigasi ke Laporan jika ada
-                break;
-            }
-          },
-        ),
+        bottomNavigationBar: NavbarKaryawan(id_cab: id_cab, x: -1),
       ),
     );
   }
@@ -373,49 +319,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // =================== MENU ITEM ===================
-  Widget _menuItem({
-    required String title,
-    required IconData icon,
-    required Color color,
-    required Function onTap,
-  }) {
-    return InkWell(
-      onTap: () => onTap(),
-      borderRadius: BorderRadius.circular(12),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 40, color: color),
-              SizedBox(height: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

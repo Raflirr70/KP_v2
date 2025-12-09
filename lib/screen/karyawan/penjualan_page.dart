@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/widget/list/list_penjualan.dart';
+import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/penjualan.dart';
 
@@ -23,6 +24,7 @@ class _PenjualanPageState extends State<PenjualanPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
+        bottomNavigationBar: NavbarKaryawan(id_cab: widget.id_cabang, x: 0),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: ClipRRect(

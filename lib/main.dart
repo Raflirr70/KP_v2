@@ -39,7 +39,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => Penjualans()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => Konsumsis()),
-        ChangeNotifierProvider(create: (_) => DetailKonsumsis()),
+        // ChangeNotifierProvider(create: (_) => DetailKonsumsis()),
       ],
       child: MyApp(),
     ),

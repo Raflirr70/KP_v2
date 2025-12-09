@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 
@@ -17,6 +18,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
+        bottomNavigationBar: NavbarKaryawan(id_cab: "widget.id_cabang", x: 1),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: ClipRRect(

@@ -41,6 +41,26 @@ class Users extends ChangeNotifier {
   }
 
   // Load semua data dari Firestore dan update _datas
+  Stream<List<User>> streamKaryawanByCabang(String idCabang) {
+    return FirebaseFirestore.instance
+        .collection('akun')
+        .where('role', isEqualTo: 'karyawan')
+        .where('idCabang', isEqualTo: idCabang) // asumsi field idCabang ada
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            var data = doc.data();
+            return User(
+              doc.id,
+              data['role'] ?? '',
+              data['nama'] ?? '',
+              data['email'] ?? '',
+              data['password'] ?? '',
+            );
+          }).toList(),
+        );
+  }
+
   Future<void> fetchData() async {
     isLoading = true;
     notifyListeners();
