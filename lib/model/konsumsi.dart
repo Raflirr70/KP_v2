@@ -81,6 +81,18 @@ class Konsumsis extends ChangeNotifier {
         );
   }
 
+  Stream<List<Konsumsi>> streamKonsumsiByLaporan(String idLaporan) {
+    return FirebaseFirestore.instance
+        .collection('konsumsi')
+        .where('id_laporan', isEqualTo: idLaporan)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Konsumsi.fromMap(doc.id, doc.data()))
+              .toList(),
+        );
+  }
+
   Future<void> tambahKonsumsi(Konsumsi konsumsi) async {
     try {
       final doc = FirebaseFirestore.instance.collection('konsumsi').doc();

@@ -11,6 +11,7 @@ class Distribusi {
   String id_cabang_tujuan;
   String id_makanan;
   int jumlah;
+  DateTime tanggal;
 
   Distribusi({
     required this.id,
@@ -18,6 +19,7 @@ class Distribusi {
     required this.id_cabang_tujuan,
     required this.id_makanan,
     required this.jumlah,
+    required this.tanggal,
   });
 
   /// Konversi dari Firestore
@@ -28,6 +30,13 @@ class Distribusi {
       id_cabang_tujuan: map['id_cabang_tujuan'] ?? '',
       id_makanan: map['id_makanan'] ?? '',
       jumlah: map['jumlah'] ?? 0,
+      tanggal: map['tanggal'] != null
+          ? (map['tanggal'] as Timestamp).toDate()
+          : DateTime(
+              DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day,
+            ),
     );
   }
 
@@ -38,6 +47,7 @@ class Distribusi {
       "id_cabang_tujuan": id_cabang_tujuan,
       "id_makanan": id_makanan,
       "jumlah": jumlah,
+      "tanggal": tanggal,
     };
   }
 }
@@ -76,6 +86,35 @@ class Distribusis extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getDistribusiHariIni() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final today = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      );
+      final snapshot = await FirebaseFirestore.instance
+          .collection("distribusi")
+          .where("tanggal", isGreaterThanOrEqualTo: Timestamp.fromDate(today))
+          .get();
+
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs.map((doc) {
+          return Distribusi.fromMap(doc.id, doc.data());
+        }).toList(),
+      );
+    } catch (e) {
+      print("Error getDistribusi: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
   /// 🔹 Tambah distribusi
   Future<void> addDistribusi({
     required String idCabangDari,
@@ -91,6 +130,11 @@ class Distribusis extends ChangeNotifier {
       id_cabang_tujuan: idCabangTujuan,
       id_makanan: idMakanan,
       jumlah: jumlah,
+      tanggal: DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      ),
     );
 
     await FirebaseFirestore.instance

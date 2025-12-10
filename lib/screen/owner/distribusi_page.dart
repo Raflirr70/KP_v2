@@ -27,7 +27,7 @@ class _DistribusiPageState extends State<DistribusiPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Makanans>(context, listen: false).getMakanan();
       Provider.of<Cabangs>(context, listen: false).getCabang();
-      Provider.of<Distribusis>(context, listen: false).getDistribusi();
+      Provider.of<Distribusis>(context, listen: false).getDistribusiHariIni();
       Provider.of<Stocks>(context, listen: false).getAllStocks();
     });
 

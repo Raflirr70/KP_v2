@@ -77,6 +77,32 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<Laporan?> getLaporanHariIni(String id_cabang) async {
+    try {
+      final now = DateTime.now();
+
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where("id_cabang", isEqualTo: id_cabang)
+          .where("tanggal", isGreaterThanOrEqualTo: startOfDay)
+          .where("tanggal", isLessThan: endOfDay)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return null; // tidak ada laporan hari ini
+      }
+
+      final doc = snapshot.docs.first;
+      return Laporan.fromMap(doc.id, doc.data());
+    } catch (e) {
+      print("Error getLaporanHariIni: $e");
+      return null;
+    }
+  }
+
   /// Tambah laporan ke list lokal
   void tambah(Laporan x) {
     _datas.add(x);
@@ -99,12 +125,13 @@ class Laporans extends ChangeNotifier {
     return _datas.fold(0, (sum, l) => sum + l.total_pengeluaran);
   }
 
-  /// Cek dan buat laporan hari ini jika belum ada
-  Future<void> checkAndCreateLaporan(String id_cabang) async {
+  Future<String> checkAndCreateLaporan(String id_cabang) async {
+    // **LOAD DATA DULU**
+    await getData(id_cabang);
+
     final today = DateTime.now();
 
-    // cek apakah sudah ada laporan hari ini untuk cabang ini
-    final existingLaporan = _datas.any(
+    final existingLaporan = _datas.where(
       (l) =>
           l.id_cabang == id_cabang &&
           l.tanggal != null &&
@@ -113,25 +140,25 @@ class Laporans extends ChangeNotifier {
           l.tanggal!.day == today.day,
     );
 
-    print(existingLaporan);
-    if (!existingLaporan) {
-      final newLaporanRef = FirebaseFirestore.instance
-          .collection("laporan")
-          .doc();
-      final newLaporan = Laporan(
-        id: newLaporanRef.id,
-        total_pendapatan: 0,
-        total_pengeluaran: 0,
-        status: false,
-        tanggal: today,
-        id_cabang: id_cabang,
-      );
-
-      // simpan ke Firestore
-      await newLaporanRef.set(newLaporan.toMap());
-
-      // simpan ke list lokal
-      tambah(newLaporan);
+    if (existingLaporan.isNotEmpty) {
+      return existingLaporan.first.id;
     }
+
+    // buat baru
+    final newRef = FirebaseFirestore.instance.collection("laporan").doc();
+
+    final newData = Laporan(
+      id: newRef.id,
+      total_pendapatan: 0,
+      total_pengeluaran: 0,
+      status: false,
+      tanggal: today,
+      id_cabang: id_cabang,
+    );
+
+    await newRef.set(newData.toMap());
+    tambah(newData);
+
+    return newData.id;
   }
 }

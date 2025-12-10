@@ -36,6 +36,7 @@ class DetailPenjualan {
 class Penjualan {
   String id;
   String id_cabang;
+  String id_laporan;
   List<DetailPenjualan> detail;
   int totalHarga;
   TimeOfDay jam;
@@ -43,6 +44,7 @@ class Penjualan {
   Penjualan({
     required this.id,
     required this.id_cabang,
+    required this.id_laporan,
     required this.detail,
     required this.totalHarga,
     required this.jam,
@@ -60,6 +62,7 @@ class Penjualan {
     return Penjualan(
       id: id,
       id_cabang: map['id_cabang'],
+      id_laporan: map['id_laporan'],
       detail: [],
       totalHarga: map['total_harga'] ?? 0,
       jam: parseJam(map['jam'] ?? "00:00"),
@@ -69,6 +72,7 @@ class Penjualan {
   Map<String, dynamic> toMap() {
     return {
       "id_cabang": id_cabang,
+      "id_laporan": id_laporan,
       "total_harga": totalHarga,
       "jam": jamToString(jam),
     };
@@ -102,6 +106,30 @@ class Penjualans extends ChangeNotifier {
     final penjualanRef = FirebaseFirestore.instance
         .collection('penjualan')
         .where('id_cabang', isEqualTo: idCabang);
+
+    return penjualanRef.snapshots().asyncMap((snapshot) async {
+      List<Penjualan> result = [];
+
+      for (var doc in snapshot.docs) {
+        Penjualan p = Penjualan.fromMap(doc.id, doc.data());
+
+        // Ambil detail secara async
+        final detailSnap = await doc.reference.collection('detail').get();
+        p.detail = detailSnap.docs
+            .map((d) => DetailPenjualan.fromMap(d.id, d.data()))
+            .toList();
+
+        result.add(p);
+      }
+
+      return result;
+    });
+  }
+
+  Stream<List<Penjualan>> streamPenjualanByIdLaporan(String id_laporan) {
+    final penjualanRef = FirebaseFirestore.instance
+        .collection('penjualan')
+        .where('id_laporan', isEqualTo: id_laporan);
 
     return penjualanRef.snapshots().asyncMap((snapshot) async {
       List<Penjualan> result = [];

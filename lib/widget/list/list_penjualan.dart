@@ -5,8 +5,12 @@ import 'package:kerprak/screen/karyawan/add_penjualan.dart';
 import 'package:provider/provider.dart';
 
 class ListPenjualan extends StatelessWidget {
-  final String id_cabang;
-  const ListPenjualan({super.key, required this.id_cabang});
+  final String id_cabang, id_laporan;
+  const ListPenjualan({
+    super.key,
+    required this.id_cabang,
+    required this.id_laporan,
+  });
 
   String formatTimeOfDay(TimeOfDay tod) {
     final hour = tod.hour.toString().padLeft(2, '0');
@@ -18,7 +22,7 @@ class ListPenjualan extends StatelessWidget {
   Widget build(BuildContext context) {
     // if (id_cabang == null) return CircularProgressIndicator();
     return StreamBuilder<List<Penjualan>>(
-      stream: context.read<Penjualans>().streamPenjualanByIdCabang(id_cabang),
+      stream: context.read<Penjualans>().streamPenjualanByIdLaporan(id_laporan),
       builder: (context, snapshot) {
         // LOADING
         if (!snapshot.hasData) {

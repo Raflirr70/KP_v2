@@ -4,6 +4,7 @@ import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/penjualan.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PenjualanPage extends StatefulWidget {
   final id_cabang;
@@ -15,13 +16,27 @@ class PenjualanPage extends StatefulWidget {
 
 class _PenjualanPageState extends State<PenjualanPage> {
   bool _showSummary = true;
+  String? x;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initLaporan();
+  }
+
+  void _initLaporan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getString("id_laporan");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final penjualanStream = context
         .read<Penjualans>()
-        .streamPenjualanByIdCabang(widget.id_cabang);
-
+        .streamPenjualanByIdLaporan(x!);
+    print(x!);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
@@ -118,7 +133,9 @@ class _PenjualanPageState extends State<PenjualanPage> {
             SizedBox(height: 10),
 
             // ===================== LIST VIEW =====================
-            Expanded(child: ListPenjualan(id_cabang: widget.id_cabang)),
+            Expanded(
+              child: ListPenjualan(id_cabang: widget.id_cabang, id_laporan: x!),
+            ),
           ],
         ),
       ),

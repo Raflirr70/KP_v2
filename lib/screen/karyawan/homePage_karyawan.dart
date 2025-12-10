@@ -82,9 +82,15 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
         id_cab = idCabang;
       });
       final laporanProvider = Provider.of<Laporans>(context, listen: false);
-      await laporanProvider.getData(idCabang);
+      await laporanProvider.getLaporanHariIni(idCabang);
       await Future.delayed(Duration(milliseconds: 200));
-      await laporanProvider.checkAndCreateLaporan(idCabang);
+      String idLaporan = await laporanProvider.checkAndCreateLaporan(idCabang);
+
+      print("ID laporan hari ini: $idLaporan");
+
+      // simpan kalau perlu:
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("id_laporan", idLaporan);
     } else {
       setState(() {
         _akunBelumJadwal = true;

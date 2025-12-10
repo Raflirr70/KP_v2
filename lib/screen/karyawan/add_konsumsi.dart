@@ -7,6 +7,7 @@ import 'package:kerprak/model/user.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddKonsumsi extends StatefulWidget {
   final String idCabang;
@@ -23,11 +24,20 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
   Map<String, int> stokSisa = {};
   int totalHarga = 0;
   String? selectedKaryawan;
+  String? x;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(() => setState(() {}));
+    _initLaporan();
+  }
+
+  void _initLaporan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getString("id_laporan");
+    });
   }
 
   void _hitungTotal(List<Makanan> makananList) {
@@ -338,7 +348,7 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
 
     Konsumsi k = Konsumsi(
       id: "",
-      idLaporan: widget.idCabang,
+      idLaporan: x!,
       idKaryawan: selectedKaryawan!,
       detailKonsumsi: [],
     );

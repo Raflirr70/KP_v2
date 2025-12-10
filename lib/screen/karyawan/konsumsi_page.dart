@@ -8,6 +8,7 @@ import 'package:kerprak/screen/karyawan/add_konsumsi.dart';
 import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KonsumsiPage extends StatefulWidget {
   final id_cabang;
@@ -18,6 +19,7 @@ class KonsumsiPage extends StatefulWidget {
 }
 
 class _KonsumsiPageState extends State<KonsumsiPage> {
+  String? x;
   bool _showSummary = true;
   String formatTimeOfDay(TimeOfDay tod) {
     final hour = tod.hourOfPeriod.toString().padLeft(2, '0');
@@ -31,6 +33,14 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _initLaporan();
+  }
+
+  void _initLaporan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getString("id_laporan");
+    });
   }
 
   @override
@@ -54,7 +64,7 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
                 stream: Provider.of<Konsumsis>(
                   context,
                   listen: false,
-                ).streamKonsumsi(),
+                ).streamKonsumsiByLaporan(x!),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());

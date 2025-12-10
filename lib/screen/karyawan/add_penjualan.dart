@@ -4,6 +4,7 @@ import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPenjualanPage extends StatefulWidget {
   final String idCabang;
@@ -19,11 +20,19 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
   Map<String, int> jumlahBeli = {};
   Map<String, int> stokSisa = {};
   int totalHarga = 0;
-
+  String? x;
   @override
   void initState() {
     super.initState();
     _searchController.addListener(() => setState(() {}));
+    _initLaporan();
+  }
+
+  void _initLaporan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getString("id_laporan");
+    });
   }
 
   void _hitungTotal(List<Makanan> makananList) {
@@ -39,6 +48,7 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (x == null) return CircularProgressIndicator();
     return Scaffold(
       appBar: AppBar(
         title: Text("Tambah Penjualan"),
@@ -232,6 +242,7 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
     Penjualan p = Penjualan(
       id: "",
       id_cabang: widget.idCabang,
+      id_laporan: x!,
       totalHarga: totalHarga,
       jam: TimeOfDay.now(),
       detail: [],
