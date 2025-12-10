@@ -142,6 +142,12 @@ class ListPenjadwalan extends StatelessWidget {
                                       jadwal.addJadwal(
                                         idUser: selectedUser!,
                                         idCabang: cab.id,
+                                        nominal: 0,
+                                        tanggal: DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day,
+                                        ),
                                       );
                                     }
                                     Navigator.pop(context);
