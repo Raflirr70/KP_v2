@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 
 class PengeluaranPage extends StatefulWidget {
-  const PengeluaranPage({super.key});
+  final id_cabang;
+  const PengeluaranPage({super.key, required this.id_cabang});
 
   @override
   State<PengeluaranPage> createState() => _PengeluaranPageState();
@@ -21,65 +23,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
         bottomNavigationBar: NavbarKaryawan(id_cab: "widget.id_cabang", x: 1),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
-          child: ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(16), // atur radius sesukamu
-            ),
-            child: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.blueAccent,
-              title: Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.temple_buddhist_outlined),
-                        SizedBox(width: 5),
-                        Text(
-                          "Cipanas",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text("Ujang Sopandi", style: TextStyle(fontSize: 10)),
-                      Text(
-                        "Karyawan",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 5),
-                  InkWell(
-                    onTap: () {},
-                    child: Icon(Icons.account_circle_rounded, size: 30),
-                  ),
-                ],
-              ),
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blueAccent, Colors.lightBlueAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: AppbarKaryawan(id_cabang: widget.id_cabang),
         ),
 
         body: Column(

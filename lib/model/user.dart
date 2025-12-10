@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kerprak/model/search.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
   String id;
@@ -59,6 +60,20 @@ class Users extends ChangeNotifier {
             );
           }).toList(),
         );
+  }
+
+  Future<void> simpanSP({
+    required String nama,
+    required String idCabang,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('nama', nama);
+      await prefs.setString('idCabang', idCabang);
+      print("SharedPreferences berhasil disimpan: $nama, $idCabang");
+    } catch (e) {
+      print("Error simpanSP: $e");
+    }
   }
 
   Future<void> fetchData() async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/widget/list/list_penjualan.dart';
+import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/penjualan.dart';
@@ -27,51 +28,7 @@ class _PenjualanPageState extends State<PenjualanPage> {
         bottomNavigationBar: NavbarKaryawan(id_cab: widget.id_cabang, x: 0),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
-          child: ClipRRect(
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-            child: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.blueAccent,
-              title: Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.temple_buddhist_outlined),
-                        SizedBox(width: 5),
-                        Text(
-                          "Cipanas",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text("Ujang Sopandi", style: TextStyle(fontSize: 10)),
-                      Text(
-                        "Karyawan",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: 5),
-                  Icon(Icons.account_circle_rounded, size: 30),
-                ],
-              ),
-            ),
-          ),
+          child: AppbarKaryawan(id_cabang: widget.id_cabang),
         ),
 
         body: Column(

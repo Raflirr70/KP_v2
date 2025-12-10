@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kerprak/screen/karyawan/homePage_karyawan.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
@@ -42,7 +44,17 @@ class NavbarKaryawan extends StatelessWidget {
           case 1:
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => PengeluaranPage()),
+              MaterialPageRoute(
+                builder: (context) => HomepageKaryawan(
+                  id_user: FirebaseAuth.instance.currentUser!.uid,
+                ),
+              ),
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PengeluaranPage(id_cabang: id_cab),
+              ),
             );
             break;
           case 2:

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/makanan.dart';
@@ -10,6 +11,7 @@ import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 import 'package:kerprak/widget/list/list_stock_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomepageKaryawan extends StatefulWidget {
   final id_user;
@@ -21,14 +23,8 @@ class HomepageKaryawan extends StatefulWidget {
 
 class _HomepageKaryawanState extends State<HomepageKaryawan> {
   String? id_cab;
-  final _user = FirebaseAuth.instance.currentUser;
-  final _currentIndex = 1;
   bool _show_info = true;
-  TextEditingController _searchCtrl = TextEditingController();
   bool _akunBelumJadwal = false;
-  bool _loading = false;
-
-  bool _isChecking = true;
 
   @override
   void initState() {
@@ -43,6 +39,29 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Makanans>(context, listen: false).getMakanan();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Cabangs>(context, listen: false).getCabang();
+    });
+  }
+
+  String? _namaUser;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final users = Provider.of<Users>(context);
+    if (_namaUser == null && users.datas.isNotEmpty) {
+      final nama = users.datas
+          .firstWhere((u) => u.id == FirebaseAuth.instance.currentUser!.uid)
+          .nama;
+      SharedPreferences.getInstance().then(
+        (prefs) => prefs.setString('nama', nama),
+      );
+
+      setState(() {
+        _namaUser = nama;
+      });
+    }
   }
 
   Future<void> _initData() async {
@@ -139,7 +158,24 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(_user!.email!, style: TextStyle(fontSize: 10)),
+                      Consumer<Users>(
+                        builder: (context, value, child) {
+                          String nama = value.datas
+                              .firstWhere(
+                                (u) =>
+                                    u.id ==
+                                    FirebaseAuth.instance.currentUser!.uid,
+                              )
+                              .nama;
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.setString("nama", nama);
+                          });
+                          return Text(
+                            _namaUser!,
+                            style: TextStyle(fontSize: 10),
+                          );
+                        },
+                      ),
                       Text(
                         "Karyawan",
                         style: TextStyle(
