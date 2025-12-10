@@ -36,10 +36,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
           appBar: AppBar(
             leading: IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DashboardAdminMenu()),
-                );
+                Navigator.popUntil(context, (route) => route.isFirst);
               },
               icon: Icon(Icons.arrow_back_ios_new_sharp),
             ),

@@ -38,6 +38,12 @@ class _DaftarKaryawanState extends State<DaftarKaryawan> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+          icon: Icon(Icons.arrow_back_ios_new_sharp),
+        ),
         title: Text("Kelola Karyawan"),
         backgroundColor: Colors.blueAccent,
       ),

@@ -15,6 +15,13 @@ class HomepageAdmin extends StatefulWidget {
 }
 
 class _HomepageAdminState extends State<HomepageAdmin> {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Cabangs>(context, listen: false).getCabang();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +42,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                     Icon(Icons.temple_buddhist_outlined),
                     SizedBox(width: 5),
                     Text(
-                      "Cipanas",
+                      "Ampera Saiyo",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -44,25 +51,38 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                   ],
                 ),
                 Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text("asd", style: TextStyle(fontSize: 10)),
-                    Text(
-                      "Admin",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+                Text(
+                  "Admin",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
                 ),
-                SizedBox(width: 5),
+
+                SizedBox(width: 10),
                 InkWell(
-                  onTap: () {
-                    FirebaseAuth.instance.signOut();
+                  onTap: () async {
+                    final keluar = await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Konfirmasi"),
+                        content: Text("Apakah Anda yakin ingin keluar?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text("Batal"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text("Keluar"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (keluar == true) {
+                      FirebaseAuth.instance.signOut();
+                    }
                   },
-                  child: Icon(Icons.account_circle_rounded, size: 30),
+
+                  child: Icon(Icons.logout, size: 20),
                 ),
               ],
             ),

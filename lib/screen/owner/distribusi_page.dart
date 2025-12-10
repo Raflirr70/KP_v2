@@ -63,7 +63,16 @@ class _DistribusiPageState extends State<DistribusiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Halaman Distribusi"), centerTitle: true),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+          icon: Icon(Icons.arrow_back_ios_new_sharp),
+        ),
+        title: Text("Halaman Distribusi"),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Center(
           child: Container(
