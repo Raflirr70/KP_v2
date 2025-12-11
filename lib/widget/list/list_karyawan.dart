@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/popup/alert_penghapusan.dart';
@@ -5,7 +6,7 @@ import 'package:kerprak/widget/popup/show_tambah_karyawan.dart';
 import 'package:provider/provider.dart';
 
 class ListKaryawan extends StatelessWidget {
-  final List<User> users;
+  final users;
 
   const ListKaryawan({super.key, required this.users});
 
@@ -82,7 +83,7 @@ class ListKaryawan extends StatelessWidget {
     );
   }
 
-  void _showUserBottomSheet(BuildContext context, User user) {
+  void _showUserBottomSheet(BuildContext context, final user) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -142,8 +143,43 @@ class ListKaryawan extends StatelessWidget {
                     icon: Icons.lock_reset_outlined,
                     label: "Reset",
                     color: Colors.deepOrange,
-                    onTap: () {
-                      Navigator.pop(context);
+                    onTap: () async {
+                      try {
+                        await FirebaseAuth.instance.sendPasswordResetEmail(
+                          email: user.email,
+                        );
+
+                        // Jika berhasil
+                        if (context.mounted) {
+                          Navigator.pop(context); // tutup popup
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Link reset password telah dikirim ke email ${user.email}",
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        // Jika gagal dari FirebaseAuth
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Gagal mengirim reset password: ${e.message}",
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      } catch (e) {
+                        // Jika error lain
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Terjadi kesalahan: $e"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),

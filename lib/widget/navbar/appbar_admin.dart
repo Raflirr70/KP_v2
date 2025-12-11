@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AppbarAdmin extends StatelessWidget {
-  const AppbarAdmin({super.key});
+  final data;
+  AppbarAdmin({super.key, this.data = ""});
 
   @override
   Widget build(BuildContext context) {

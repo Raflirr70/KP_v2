@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/user.dart';
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:kerprak/model/user.dart';
+
 void showTambahKaryawanDialog(BuildContext context) {
   final _formKey = GlobalKey<FormState>();
   String nama = '';
@@ -11,133 +15,138 @@ void showTambahKaryawanDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) {
-      return Dialog(
+      return AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+        backgroundColor: Colors.orange[50],
+        insetPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+
+        title: Text(
+          "Tambah Karyawan",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+
+        contentPadding: EdgeInsets.zero,
+        content: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Tambah Karyawan",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                // NAMA
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: "Nama Karyawan",
+                    prefixIcon: Icon(Icons.person),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Nama harus diisi"
+                      : null,
+                  onChanged: (value) => nama = value,
                 ),
+
+                SizedBox(height: 12),
+
+                // EMAIL
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                    prefixIcon: Icon(Icons.email),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) => value == null || !value.contains("@")
+                      ? "Email tidak valid"
+                      : null,
+                  onChanged: (value) => email = value,
+                ),
+
+                SizedBox(height: 12),
+
+                // PASSWORD
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                    prefixIcon: Icon(Icons.key),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  obscureText: true,
+                  validator: (value) => value == null || value.length < 6
+                      ? "Password minimal 6 karakter"
+                      : null,
+                  onChanged: (value) => password = value,
+                ),
+
                 SizedBox(height: 20),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      // Nama
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Nama",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          prefixIcon: Icon(Icons.person),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Nama harus diisi"
-                            : null,
-                        onChanged: (value) => nama = value,
-                      ),
-                      SizedBox(height: 12),
 
-                      // Email
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Email",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) =>
-                            value == null || !value.contains("@")
-                            ? "Email tidak valid"
-                            : null,
-                        onChanged: (value) => email = value,
+                // TOMBOL SIMPAN
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      SizedBox(height: 12),
-
-                      // Password
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          prefixIcon: Icon(Icons.key),
-                        ),
-                        obscureText: true,
-                        validator: (value) => value == null || value.length < 6
-                            ? "Password minimal 6 karakter"
-                            : null,
-                        onChanged: (value) => password = value,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      "Simpan",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      SizedBox(height: 20),
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        try {
+                          final messenger = ScaffoldMessenger.of(context);
 
-                      // Tombol Simpan
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          await Provider.of<Users>(
+                            context,
+                            listen: false,
+                          ).tambahKaryawan(
+                            nama: nama,
+                            email: email,
+                            password: password,
+                          );
+
+                          Navigator.of(context).pop();
+
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text("Berhasil menambahkan karyawan!"),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                              margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                              duration: Duration(seconds: 2),
                             ),
-                          ),
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              try {
-                                // Simpan reference ke ScaffoldMessenger SEBELUM menutup dialog
-                                final messenger = ScaffoldMessenger.of(context);
-
-                                // Tambah karyawan
-                                await Provider.of<Users>(
-                                  context,
-                                  listen: false,
-                                ).tambahKaryawan(
-                                  nama: nama,
-                                  email: email,
-                                  password: password,
-                                );
-
-                                // Tutup dialog
-                                Navigator.of(context).pop();
-
-                                // Tampilkan snackbar
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      "Berhasil menambahkan karyawan!",
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                                    backgroundColor: Colors.green,
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              } catch (e) {
-                                // Jika error, tampilkan snackbar dari context dialog
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      "Gagal menambahkan karyawan: $e",
-                                    ),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-
-                          child: Text("Simpan"),
-                        ),
-                      ),
-                    ],
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Gagal menambahkan karyawan: $e"),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ),
               ],

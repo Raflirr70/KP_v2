@@ -11,11 +11,12 @@ class ListMakanan extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-        itemCount: value.length + 1,
-        itemBuilder: (context, i) {
-          if (i == value.length) {
-            return InkWell(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 70,
+            width: double.infinity,
+            child: InkWell(
               child: Card(
                 color: Colors.lightBlue[100],
                 elevation: 3,
@@ -26,52 +27,59 @@ class ListMakanan extends StatelessWidget {
                 ),
               ),
               onTap: () => showTambahMakananDialog(context),
-            );
-          }
-          var nama = value[i].nama;
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: value.length,
+              itemBuilder: (context, i) {
+                var nama = value[i].nama;
 
-          // Ambil objek makanan sesuai nama hasil filter
-          var makanan = value.firstWhere((u) => u.nama == nama);
+                // Ambil objek makanan sesuai nama hasil filter
+                var makanan = value.firstWhere((u) => u.nama == nama);
 
-          return Card(
-            elevation: 5,
-            child: InkWell(
-              onTap: () => _showMakananBottomSheet(context, makanan),
+                return Card(
+                  elevation: 5,
+                  child: InkWell(
+                    onTap: () => _showMakananBottomSheet(context, makanan),
 
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 20,
-                ),
-                child: Row(
-                  children: [
-                    Text((i + 1).toString()),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      width: 2,
-                      height: 25,
-                      color: Colors.grey,
-                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 20,
+                      ),
+                      child: Row(
+                        children: [
+                          Text((i + 1).toString()),
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 10),
+                            width: 2,
+                            height: 25,
+                            color: Colors.grey,
+                          ),
 
-                    // Nama Makanan
-                    Text(
-                      nama,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                          // Nama Makanan
+                          Text(
+                            nama,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          Spacer(),
+
+                          // Harga berdasarkan makanan yang cocok
+                          Text('Rp.${makanan.harga}'),
+                        ],
                       ),
                     ),
-
-                    Spacer(),
-
-                    // Harga berdasarkan makanan yang cocok
-                    Text('Rp.${makanan.harga}'),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
