@@ -15,6 +15,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
   bool _obscure = true;
+  bool? success;
+
+  String? _loginError; // variabel untuk menyimpan pesan error
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +112,18 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 15),
+
+                    /// PESAN ERROR LOGIN
+                    if (_loginError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          _loginError!,
+                          style: TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
 
                     /// SIGN IN BUTTON
                     Consumer<Users>(
@@ -118,13 +132,33 @@ class _LoginPageState extends State<LoginPage> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                // Hanya login jika form valid
-                                value.Login(
+                                bool success = await value.Login(
                                   _emailCtrl.text,
                                   _passwordCtrl.text,
                                 );
+
+                                if (!success) {
+                                  // Jika login gagal, tampilkan SnackBar popup
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Email atau password salah!",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                } else {
+                                  // Login sukses, navigasi atau hapus snackbar
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).hideCurrentSnackBar();
+                                  // Misal navigasi ke halaman utama:
+                                  // Navigator.pushReplacementNamed(context, '/home');
+                                }
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -148,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 70),
             ],
           ),
         ),

@@ -21,6 +21,7 @@ class KonsumsiPage extends StatefulWidget {
 class _KonsumsiPageState extends State<KonsumsiPage> {
   String? x;
   bool _showSummary = true;
+  bool load = true;
   String formatTimeOfDay(TimeOfDay tod) {
     final hour = tod.hourOfPeriod.toString().padLeft(2, '0');
     final minute = tod.minute.toString().padLeft(2, '0');
@@ -40,11 +41,13 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       x = prefs.getString("id_laporan");
+      load = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (load) return Center(child: CircularProgressIndicator());
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
@@ -71,29 +74,49 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
                   }
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddKonsumsi(idCabang: widget.id_cabang),
+                    return Column(
+                      children: [
+                        SizedBox(
+                          height: 70,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddKonsumsi(idCabang: widget.id_cabang),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              elevation: 3,
+                              color: Colors.deepOrange[100],
+                              margin: EdgeInsets.only(bottom: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Icon(Icons.add_circle),
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 3,
-                        color: Colors.deepOrange[100],
-                        margin: EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Icon(Icons.add_circle),
+                        Expanded(
+                          child: Opacity(
+                            opacity: 0.5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset("../../lib/asset/notFound.png"),
+                                Text("Belum Ada Data"),
+                                SizedBox(height: 100),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     );
                   }
                   final datas = snapshot.data!;

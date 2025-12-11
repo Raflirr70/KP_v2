@@ -30,14 +30,16 @@ class Users extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> Login(String _emailCtrl, String _passwordCtrl) async {
+  Future<bool> Login(String _emailCtrl, String _passwordCtrl) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailCtrl,
         password: _passwordCtrl,
       );
+      return true;
     } on FirebaseAuthException catch (e) {
       print(e);
+      return false;
     }
   }
 

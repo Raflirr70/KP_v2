@@ -25,13 +25,14 @@ class AppbarKaryawan extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      Icon(Icons.temple_buddhist_outlined),
+                      Icon(Icons.temple_buddhist_outlined, color: Colors.white),
                       SizedBox(width: 5),
                       Text(
                         cabang.datas.firstWhere((c) => c.id == id_cabang).nama,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -48,19 +49,24 @@ class AppbarKaryawan extends StatelessWidget {
                                 u.id == FirebaseAuth.instance.currentUser!.uid,
                           )
                           .nama,
-                      style: TextStyle(fontSize: 10),
+                      style: TextStyle(fontSize: 10, color: Colors.white),
                     ),
                     Text(
                       "Karyawan",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 10,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(width: 5),
-                Icon(Icons.account_circle_rounded, size: 30),
+                Icon(
+                  Icons.account_circle_rounded,
+                  size: 30,
+                  color: Colors.white,
+                ),
               ],
             ),
           ),

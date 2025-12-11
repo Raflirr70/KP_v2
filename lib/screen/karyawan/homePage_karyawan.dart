@@ -24,7 +24,7 @@ class HomepageKaryawan extends StatefulWidget {
 class _HomepageKaryawanState extends State<HomepageKaryawan> {
   String? id_cab;
   bool _show_info = true;
-  bool _akunBelumJadwal = false;
+  bool? _akunBelumJadwal;
 
   @override
   void initState() {
@@ -91,6 +91,9 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
       // simpan kalau perlu:
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("id_laporan", idLaporan);
+      setState(() {
+        _akunBelumJadwal = false;
+      });
     } else {
       setState(() {
         _akunBelumJadwal = true;
@@ -100,7 +103,9 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
   @override
   Widget build(BuildContext context) {
-    if (_akunBelumJadwal) {
+    if (_akunBelumJadwal == null)
+      return Center(child: CircularProgressIndicator());
+    if (_akunBelumJadwal!) {
       return Scaffold(
         backgroundColor: Colors.grey,
         body: Center(
