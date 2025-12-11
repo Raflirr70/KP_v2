@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/widget/dll/legen_item.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
+import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
 
 class HomepageAdmin extends StatefulWidget {
@@ -28,75 +29,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
       backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50),
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(16), // atur radius sesukamu
-          ),
-          child: AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: Colors.blueAccent,
-            title: Row(
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.temple_buddhist_outlined),
-                    SizedBox(width: 5),
-                    Text(
-                      "Ampera Saiyo",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Text(
-                  "Admin",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-                ),
-
-                SizedBox(width: 10),
-                InkWell(
-                  onTap: () async {
-                    final keluar = await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text("Konfirmasi"),
-                        content: Text("Apakah Anda yakin ingin keluar?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: Text("Batal"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: Text("Keluar"),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (keluar == true) {
-                      FirebaseAuth.instance.signOut();
-                    }
-                  },
-
-                  child: Icon(Icons.logout, size: 20),
-                ),
-              ],
-            ),
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blueAccent, Colors.lightBlueAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: AppbarAdmin(),
       ),
       body: SafeArea(
         child: Column(

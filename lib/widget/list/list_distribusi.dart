@@ -25,116 +25,136 @@ class _ListDistribusiState extends State<ListDistribusi> {
       builder: (context, distribusiValue, makananValue, cabangValue, child) {
         final datas = distribusiValue.datas;
 
-        return ListView.builder(
-          itemCount: datas.length + 1,
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          itemBuilder: (context, index) {
-            // ====== TOMBOL ADD DI AKHIR ======
-            if (index == datas.length) {
-              return Container(
-                height: 55,
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: Card(
-                  elevation: 2,
-                  child: InkWell(
-                    onTap: () {
-                      if (widget.id_cabang_dari == "-" ||
-                          widget.id_cabang_tujuan == "-") {
-                        // Tampilkan peringatan
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Pilih cabang terlebih dahulu!"),
-                            backgroundColor: Colors.red,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                        return; // hentikan proses
-                      }
-
-                      // Jika cabang sudah dipilih, tampilkan popup makanan
-                      showPilihMakananPopup(
-                        context,
-                        makananValue,
-                        widget.id_cabang_dari,
-                        widget.id_cabang_tujuan,
+        return Column(
+          children: [
+            Container(
+              height: 55,
+              child: Card(
+                color: Colors.blue[100],
+                elevation: 2,
+                child: InkWell(
+                  onTap: () {
+                    if (widget.id_cabang_dari == "-" ||
+                        widget.id_cabang_tujuan == "-") {
+                      // Tampilkan peringatan
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Pilih cabang terlebih dahulu!"),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
                       );
-                    },
-                    child: Center(child: Icon(Icons.add, size: 32)),
-                  ),
-                ),
-              );
-            }
+                      return; // hentikan proses
+                    }
 
-            final item = datas[index];
-
-            final makanan = makananValue.datas.firstWhere(
-              (e) => e.id == item.id_makanan,
-              orElse: () => Makanan(id: "-", nama: "Tidak ada", harga: 0),
-            );
-
-            final cabangDari = cabangValue.datas.firstWhere(
-              (e) => e.id == item.id_cabang_dari,
-              orElse: () => Cabang(id: "-", nama: "Tidak ada"),
-            );
-
-            final cabangTujuan = cabangValue.datas.firstWhere(
-              (e) => e.id == item.id_cabang_tujuan,
-              orElse: () => Cabang(id: "-", nama: "Tidak ada"),
-            );
-
-            return Card(
-              elevation: 2,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // BARIS 1: Nama makanan + jumlah
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          makanan.nama,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "${cabangDari.nama} -> ${cabangTujuan.nama}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Spacer(),
-
-                    // BARIS 2: Cabang asal -> Cabang tujuan
-                    Container(
-                      width: 70,
-                      padding: EdgeInsetsGeometry.symmetric(vertical: 5),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Center(
-                        child: Text(
-                          item.jumlah.toString(),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    // Jika cabang sudah dipilih, tampilkan popup makanan
+                    showPilihMakananPopup(
+                      context,
+                      makananValue,
+                      widget.id_cabang_dari,
+                      widget.id_cabang_tujuan,
+                    );
+                  },
+                  child: Center(child: Icon(Icons.add, size: 32)),
                 ),
               ),
-            );
-          },
+            ),
+            Expanded(
+              child: datas.isEmpty
+                  ? Expanded(
+                      child: Opacity(
+                        opacity: 0.5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset("../../lib/asset/notFound.png"),
+                            Text("Belum Ada Data"),
+                            SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: datas.length,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemBuilder: (context, index) {
+                        final item = datas[index];
+
+                        final makanan = makananValue.datas.firstWhere(
+                          (e) => e.id == item.id_makanan,
+                          orElse: () =>
+                              Makanan(id: "-", nama: "Tidak ada", harga: 0),
+                        );
+
+                        final cabangDari = cabangValue.datas.firstWhere(
+                          (e) => e.id == item.id_cabang_dari,
+                          orElse: () => Cabang(id: "-", nama: "Tidak ada"),
+                        );
+
+                        final cabangTujuan = cabangValue.datas.firstWhere(
+                          (e) => e.id == item.id_cabang_tujuan,
+                          orElse: () => Cabang(id: "-", nama: "Tidak ada"),
+                        );
+
+                        return Card(
+                          color: Colors.orange[50],
+                          elevation: 2,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      makanan.nama,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "${cabangDari.nama} -> ${cabangTujuan.nama}",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                Spacer(),
+
+                                Container(
+                                  width: 70,
+                                  padding: EdgeInsetsGeometry.symmetric(
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      item.jumlah.toString(),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         );
       },
     );

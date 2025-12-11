@@ -19,93 +19,89 @@ void showPilihMakananPopup(
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text("Pilih Makanan"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.orange[50],
+            insetPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            title: Text(
+              "Pilih Makanan",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            contentPadding: EdgeInsets.zero,
             content: SizedBox(
               width: double.maxFinite,
               height: 400,
               child: Column(
                 children: [
-                  // =======================
                   // SEARCH BAR
-                  // =======================
-                  TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: "Cari makanan...",
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      height: 40,
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: "Cari makanan...",
+                          hintStyle: TextStyle(fontSize: 14),
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            filteredList = makananValue.datas
+                                .where(
+                                  (m) => m.nama.toLowerCase().contains(
+                                    value.toLowerCase(),
+                                  ),
+                                )
+                                .toList();
+                          });
+                        },
                       ),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        filteredList = makananValue.datas
-                            .where(
-                              (m) => m.nama.toLowerCase().contains(
-                                value.toLowerCase(),
-                              ),
-                            )
-                            .toList();
-                      });
-                    },
                   ),
 
-                  SizedBox(height: 12),
+                  SizedBox(height: 8),
 
-                  // =======================
                   // LIST MAKANAN
-                  // =======================
                   Expanded(
-                    child: Card(
-                      child: Padding(
-                        padding: EdgeInsetsGeometry.all(10),
-                        child: ListView.builder(
-                          itemCount: filteredList.length,
-                          itemBuilder: (context, i) {
-                            final m = filteredList[i];
+                    child: ListView.separated(
+                      itemCount: filteredList.length,
+                      separatorBuilder: (context, i) =>
+                          Divider(height: 1, color: Colors.black26),
+                      itemBuilder: (context, i) {
+                        final m = filteredList[i];
 
-                            // Ambil stock untuk cabang dari dan makanan ini
-                            final stock =
-                                Provider.of<Stocks>(
-                                  context,
-                                  listen: false,
-                                ).datas.firstWhere(
-                                  (s) =>
-                                      s.idCabang == id_cabang_dari &&
-                                      s.idMakanan == m.id,
-                                  orElse: () => Stock(
-                                    id: "-",
-                                    idCabang: "-",
-                                    idMakanan: "-",
-                                    jumlahStock: 0,
-                                  ),
-                                );
-
-                            return InkWell(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: Colors.grey, // warna border
-                                      width: 1, // tebal border
-                                    ),
-                                  ),
-                                ),
-                                child: ListTile(
-                                  title: Text(m.nama),
-                                  trailing: Text(
-                                    "${stock.jumlahStock}",
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context, m); // KIRIM OBJECT
-                                  },
-                                ),
+                        final stock =
+                            Provider.of<Stocks>(
+                              context,
+                              listen: false,
+                            ).datas.firstWhere(
+                              (s) =>
+                                  s.idCabang == id_cabang_dari &&
+                                  s.idMakanan == m.id,
+                              orElse: () => Stock(
+                                id: "-",
+                                idCabang: "-",
+                                idMakanan: "-",
+                                jumlahStock: 0,
                               ),
                             );
+
+                        return ListTile(
+                          dense: true,
+                          title: Text(m.nama),
+                          trailing: Text("${stock.jumlahStock}"),
+                          hoverColor: Colors.orange[100],
+                          onTap: () {
+                            Navigator.pop(context, m); // Kirim object
                           },
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -135,24 +131,36 @@ void showPilihMakananPopup(
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
+              insetPadding: EdgeInsets.all(20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              backgroundColor: Colors.orange[50],
               title: Row(
                 children: [
-                  Text("${makanan.nama}"),
+                  Text("${makanan.nama}", style: TextStyle(fontSize: 17)),
                   Spacer(),
-                  Text("Stock: ${stock.jumlahStock}"),
+                  Text(
+                    "Stock: ${stock.jumlahStock}",
+                    style: TextStyle(fontSize: 17),
+                  ),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: "Masukkan jumlah",
-                      errorText: errorText,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  SizedBox(
+                    height: 40,
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Masukkan jumlah",
+                        hintStyle: TextStyle(fontSize: 14),
+                        errorText: errorText,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
@@ -170,7 +178,7 @@ void showPilihMakananPopup(
                         input <= 0 ||
                         input > stock.jumlahStock) {
                       setState(() {
-                        errorText = "Masukkan Nilai";
+                        errorText = "Masukkan nilai yang valid";
                       });
                     } else {
                       jumlah = input;
@@ -193,8 +201,8 @@ void showPilihMakananPopup(
     final stockProvider = Provider.of<Stocks>(context, listen: false);
 
     await distribusiProvider.addDistribusi(
-      idCabangDari: id_cabang_dari!,
-      idCabangTujuan: id_cabang_tujuan!,
+      idCabangDari: id_cabang_dari,
+      idCabangTujuan: id_cabang_tujuan,
       idMakanan: makanan.id,
       jumlah: jumlah!,
     );
@@ -204,7 +212,7 @@ void showPilihMakananPopup(
       (s) => s.idCabang == id_cabang_dari && s.idMakanan == makanan.id,
       orElse: () => Stock(
         id: "-",
-        idCabang: id_cabang_dari!,
+        idCabang: id_cabang_dari,
         idMakanan: makanan.id,
         jumlahStock: 0,
       ),
@@ -213,13 +221,13 @@ void showPilihMakananPopup(
     if (stockAsal.id != "-") {
       await stockProvider.saveStock(
         idMakanan: makanan.id,
-        idCabang: id_cabang_dari!,
+        idCabang: id_cabang_dari,
         jumlahStock: stockAsal.jumlahStock - jumlah!,
       );
     } else {
       await stockProvider.saveStock(
         idMakanan: makanan.id,
-        idCabang: id_cabang_dari!,
+        idCabang: id_cabang_dari,
         jumlahStock: 0,
       );
     }
@@ -229,7 +237,7 @@ void showPilihMakananPopup(
       (s) => s.idCabang == id_cabang_tujuan && s.idMakanan == makanan.id,
       orElse: () => Stock(
         id: "-",
-        idCabang: id_cabang_tujuan!,
+        idCabang: id_cabang_tujuan,
         idMakanan: makanan.id,
         jumlahStock: 0,
       ),
@@ -237,8 +245,9 @@ void showPilihMakananPopup(
 
     await stockProvider.saveStock(
       idMakanan: makanan.id,
-      idCabang: id_cabang_tujuan!,
+      idCabang: id_cabang_tujuan,
       jumlahStock: stockTujuan.jumlahStock + jumlah!,
     );
+    Provider.of<Stocks>(context, listen: false).getAllStocks();
   });
 }

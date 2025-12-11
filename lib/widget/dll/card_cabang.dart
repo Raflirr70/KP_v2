@@ -12,20 +12,32 @@ class PilihanCabangDialog extends StatelessWidget {
     final cabangs = Provider.of<Cabangs>(context).datas;
 
     return AlertDialog(
-      title: Text("Pilih Cabang ${pilihDari ? 'Asal' : 'Tujuan'}"),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: Colors.orange[50],
+      insetPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      title: Text(
+        "Pilih Cabang ${pilihDari ? 'Asal' : 'Tujuan'}",
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+
+      contentPadding: EdgeInsets.zero,
       content: SizedBox(
         width: double.maxFinite,
         height: 300,
-        child: ListView.builder(
+        child: ListView.separated(
           itemCount: cabangs.length,
+          separatorBuilder: (context, i) =>
+              Divider(height: 1, color: Colors.black26),
           itemBuilder: (context, i) {
             final cab = cabangs[i];
-
             return ListTile(
+              dense: true, // lebih compact
               title: Text(cab.nama),
               leading: cab.nama != "Gudang"
-                  ? Icon(Icons.storefront_rounded)
-                  : Icon(Icons.collections_bookmark),
+                  ? Icon(Icons.storefront_rounded, color: Colors.orange)
+                  : Icon(Icons.collections_bookmark, color: Colors.orange),
+              hoverColor: Colors.orange[100], // efek hover di desktop/web
               onTap: () {
                 Navigator.pop(context, cab.id);
               },

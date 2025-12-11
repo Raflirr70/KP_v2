@@ -5,6 +5,7 @@ import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/widget/dll/card_cabang.dart';
 import 'package:kerprak/widget/list/list_distribusi.dart';
+import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
 
 class DistribusiPage extends StatefulWidget {
@@ -26,8 +27,14 @@ class _DistribusiPageState extends State<DistribusiPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Makanans>(context, listen: false).getMakanan();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Distribusis>(context, listen: false).getDistribusiHariIni();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Stocks>(context, listen: false).getAllStocks();
     });
 
@@ -63,26 +70,16 @@ class _DistribusiPageState extends State<DistribusiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          },
-          icon: Icon(Icons.arrow_back_ios_new_sharp),
-        ),
-        title: Text("Halaman Distribusi"),
-        centerTitle: true,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: AppbarAdmin(),
       ),
       body: SafeArea(
         child: Center(
           child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             padding: EdgeInsets.symmetric(vertical: 20),
             width: double.infinity,
-            // decoration: BoxDecoration(
-            //   border: Border.all(),
-            //   borderRadius: BorderRadius.circular(15),
-            // ),
             child: Column(
               children: [
                 Consumer<Cabangs>(
@@ -110,8 +107,8 @@ class _DistribusiPageState extends State<DistribusiPage> {
                               side: BorderSide(
                                 width: 5,
                                 color: cabangDari == null
-                                    ? Colors.red.shade400
-                                    : Colors.green.shade400,
+                                    ? Colors.red.shade100
+                                    : Colors.blue.shade100,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
@@ -162,8 +159,8 @@ class _DistribusiPageState extends State<DistribusiPage> {
                               side: BorderSide(
                                 width: 5,
                                 color: cabangTujuan == null
-                                    ? Colors.red.shade400
-                                    : Colors.green.shade400,
+                                    ? Colors.red.shade100
+                                    : Colors.blue.shade100,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
@@ -189,12 +186,7 @@ class _DistribusiPageState extends State<DistribusiPage> {
                     );
                   },
                 ),
-
-                Container(
-                  width: 250,
-                  margin: EdgeInsets.symmetric(vertical: 20),
-                  child: Divider(height: 3),
-                ),
+                SizedBox(height: 10),
 
                 // LIST DISTRIBUSI
                 Expanded(
