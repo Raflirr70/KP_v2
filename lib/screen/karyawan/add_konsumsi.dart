@@ -78,7 +78,7 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
           onPressed: () => _submitPenjualan(context),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 14),
-            backgroundColor: Colors.deepOrange[300],
+            backgroundColor: Colors.deepOrange,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadiusGeometry.circular(20),
             ),

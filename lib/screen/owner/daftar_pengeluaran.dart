@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/widget/list/list_pengeluaran.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
+import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
 
@@ -36,15 +37,9 @@ class _DaftarPengeluaranState extends State<DaftarPengeluaran> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Daftar Pengeluaran"),
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          },
-          icon: Icon(Icons.arrow_back_ios_new_sharp),
-        ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: AppbarAdmin(),
       ),
       body: Consumer<Pengeluarans>(
         builder: (context, pluars, child) {

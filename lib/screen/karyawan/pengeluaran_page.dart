@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
+import 'package:kerprak/widget/popup/show_tambah_pengeluaran_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PengeluaranPage extends StatefulWidget {
   final id_cabang;
@@ -14,9 +16,26 @@ class PengeluaranPage extends StatefulWidget {
 
 class _PengeluaranPageState extends State<PengeluaranPage> {
   bool _showSummary = true;
+  String? x;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initLaporan();
+  }
+
+  void _initLaporan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getString("id_laporan");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final penjualanStream = context
+        .read<Pengeluarans>()
+        .streamPenjualanByIdLaporan(x!);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
@@ -47,32 +66,36 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                   );
                 },
                 child: _showSummary
-                    ? Card(
-                        key: ValueKey("summary"),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _summaryBox(
-                                  "Total Hari Ini",
-                                  "Rp 320.000",
-                                  Colors.redAccent,
-                                  Icons.money_off,
-                                ),
+                    ? Consumer<Pengeluarans>(
+                        builder: (context, value, child) {
+                          return Card(
+                            key: ValueKey("summary"),
+                            child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _summaryBox(
+                                      "Total Hari Ini",
+                                      value.totalPengeluaranLocal.toString(),
+                                      Colors.redAccent,
+                                      Icons.money_off,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _summaryBox(
+                                      "Transaksi",
+                                      value.datas.length.toString(),
+                                      Colors.deepOrange,
+                                      Icons.list,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: _summaryBox(
-                                  "Transaksi",
-                                  "6 Item",
-                                  Colors.deepOrange,
-                                  Icons.list,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       )
                     : SizedBox.shrink(key: ValueKey("empty")),
               ),
@@ -107,106 +130,122 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
 
             // ==================== LIST PENGELUARAN ====================
             Expanded(
-              child: Consumer<Pengeluarans>(
-                builder: (context, value, child) {
-                  final filtered = value.datas
-                      .where((e) => e.idCabang == 2)
-                      .toList();
-
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "Tidak ada stock tersedia",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    itemCount: filtered.length + 1,
-                    itemBuilder: (context, index) {
-                      if (filtered.length != index) {
-                        final p = filtered[index];
-                        return Card(
-                          elevation: 3,
-                          color: Colors.red[50],
-                          margin: EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
+              child: StreamBuilder(
+                stream: penjualanStream,
+                builder: (context, asyncSnapshot) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 70,
+                        width: double.infinity,
+                        child: InkWell(
+                          onTap: () {
+                            showTambahPengeluaranKaryawanPopup(
+                              context,
+                              widget.id_cabang,
+                              x!,
+                            );
+                          },
+                          child: Card(
+                            elevation: 3,
+                            color: Colors.red[100],
+                            margin: EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Judul + Harga
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        p.namaPengeluaran,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      "Rp ${p.jumlahUnit}",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                SizedBox(height: 6),
-
-                                // Keterangan lebih kecil
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      p.totalHarga.toString(),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[700],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            child: Padding(
+                              padding: EdgeInsetsGeometry.symmetric(
+                                vertical: 16,
+                              ),
+                              child: Icon(Icons.add_circle),
                             ),
-                          ),
-                        );
-                      }
-                      return InkWell(
-                        onTap: () {},
-                        child: Card(
-                          elevation: 3,
-                          color: Colors.red[100],
-                          margin: EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsetsGeometry.symmetric(vertical: 16),
-                            child: Icon(Icons.add_circle),
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      if (!asyncSnapshot.hasData)
+                        Expanded(
+                          child: Opacity(
+                            opacity: 0.5,
+                            child: Image.asset("../../lib/asset/notFound.png"),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ListView.builder(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            itemCount: asyncSnapshot.data!.length,
+                            itemBuilder: (context, index) {
+                              final p = asyncSnapshot.data![index];
+                              return InkWell(
+                                onTap: () {},
+                                child: Card(
+                                  elevation: 3,
+                                  color: Colors.red[50],
+                                  margin: EdgeInsets.only(bottom: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 10,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Judul + Harga
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                p.namaPengeluaran,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              "Rp ${p.jumlahUnit}",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.redAccent,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        SizedBox(height: 6),
+
+                                        // Keterangan lebih kecil
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today,
+                                              size: 14,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              p.totalHarga.toString(),
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),

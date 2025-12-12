@@ -41,6 +41,7 @@ void showPenggajianKaryawanDialog(
     context: context,
     builder: (context) {
       return Dialog(
+        backgroundColor: Colors.orange[50],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -60,6 +61,7 @@ void showPenggajianKaryawanDialog(
                     children: [
                       TextFormField(
                         controller: gajiController,
+                        textAlign: TextAlign.end,
                         decoration: InputDecoration(
                           labelText: "Masukan Gaji",
                           border: OutlineInputBorder(
@@ -88,6 +90,7 @@ void showPenggajianKaryawanDialog(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

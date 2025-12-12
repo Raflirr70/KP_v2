@@ -4,6 +4,7 @@ import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/list/list_penjadwalan.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
+import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
 
 class PenjadwalanPage extends StatefulWidget {
@@ -33,15 +34,9 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
     return Consumer<Jadwals>(
       builder: (context, value, child) {
         return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              icon: Icon(Icons.arrow_back_ios_new_sharp),
-            ),
-            title: Text("Penjadwalan Karyawan"),
-            centerTitle: true,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(50),
+            child: AppbarAdmin(),
           ),
           body: Consumer<Cabangs>(
             builder: (context, cabang, child) {

@@ -33,28 +33,42 @@ class ListPenjualan extends StatelessWidget {
 
         // KOSONG → tampilkan tombol tambah
         if (datas.isEmpty) {
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddPenjualanPage(idCabang: id_cabang),
+          return Column(
+            children: [
+              SizedBox(
+                height: 70,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddPenjualanPage(idCabang: id_cabang),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 3,
+                    color: Colors.green[100],
+                    margin: EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Icon(Icons.add_circle),
+                    ),
+                  ),
                 ),
-              );
-            },
-            child: Card(
-              elevation: 3,
-              color: Colors.green[100],
-              margin: EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Icon(Icons.add_circle),
+              Expanded(
+                child: Opacity(
+                  opacity: 0.5,
+                  child: Image.asset("../../lib/asset/notFound.png"),
+                ),
               ),
-            ),
+            ],
           );
         }
 

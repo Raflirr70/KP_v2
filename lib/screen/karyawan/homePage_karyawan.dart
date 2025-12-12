@@ -4,6 +4,8 @@ import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/makanan.dart';
+import 'package:kerprak/model/pengeluaran.dart';
+import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
@@ -41,6 +43,12 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Penjualans>(
+        context,
+        listen: false,
+      ).getPenjualanByIdCabang(id_cab!);
     });
   }
 
@@ -237,60 +245,64 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                   );
                 },
                 child: _show_info
-                    ? Card(
-                        key: ValueKey("summaryCard"),
-                        shape: RoundedRectangleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              Row(
+                    ? Consumer2<Penjualans, Pengeluarans>(
+                        builder: (context, penjualan, pengeluaran, child) {
+                          return Card(
+                            key: ValueKey("summaryCard"),
+                            shape: RoundedRectangleBorder(),
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    child: _summaryBox(
-                                      "Pendapatan",
-                                      "Rp 1.250.500",
-                                      Colors.green,
-                                      Icons.trending_up,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _summaryBox(
+                                          "Pendapatan",
+                                          "Rp ${penjualan.Pendapatan().toString()}",
+                                          Colors.green,
+                                          Icons.trending_up,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Expanded(
+                                        child: _summaryBox(
+                                          "Pengeluaran",
+                                          "Rp 54.500",
+                                          Colors.red,
+                                          Icons.trending_down,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    child: _summaryBox(
-                                      "Pengeluaran",
-                                      "Rp 54.500",
-                                      Colors.red,
-                                      Icons.trending_down,
-                                    ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: _summaryBox(
+                                          "Total",
+                                          "Rp 973.000",
+                                          Colors.blueAccent,
+                                          Icons.account_balance_wallet,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Expanded(
+                                        child: _summaryBox(
+                                          "Penjualan",
+                                          "${penjualan.datas.length} Porsi",
+                                          Colors.deepPurple,
+                                          Icons.shopping_cart,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: _summaryBox(
-                                      "Total",
-                                      "Rp 973.000",
-                                      Colors.blueAccent,
-                                      Icons.account_balance_wallet,
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    child: _summaryBox(
-                                      "Penjualan",
-                                      "67 Porsi",
-                                      Colors.deepPurple,
-                                      Icons.shopping_cart,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       )
                     : SizedBox.shrink(key: ValueKey("empty")),
               ),

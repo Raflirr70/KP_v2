@@ -80,13 +80,14 @@ class ListGajiKaryawan extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       Text(
-                                        filkar.nama, // Display user's name
+                                        filkar.nama, // Display user's name,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Spacer(),
+                                      Text("Rp"),
                                       InkWell(
                                         onTap: () {
                                           showPenggajianKaryawanDialog(
@@ -97,14 +98,18 @@ class ListGajiKaryawan extends StatelessWidget {
                                         },
                                         child: Card(
                                           color: figaji.gaji == 0
-                                              ? Colors.red[300]
-                                              : Colors.green[300],
+                                              ? Colors.red[100]
+                                              : Colors.green[100],
                                           child: Container(
                                             padding: EdgeInsets.symmetric(
                                               vertical: 10,
+                                              horizontal: 16,
                                             ),
                                             width: 100,
-                                            child: Text(figaji.gaji.toString()),
+                                            child: Text(
+                                              figaji.gaji.toString(),
+                                              textAlign: TextAlign.end,
+                                            ),
                                           ),
                                         ),
                                       ),

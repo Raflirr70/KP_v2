@@ -115,6 +115,7 @@ class ListPenjadwalan extends StatelessWidget {
 
                             return AlertDialog(
                               title: Text("Pilih Karyawan"),
+                              backgroundColor: Colors.orange[50],
 
                               content: DropdownButtonFormField<String>(
                                 decoration: InputDecoration(
@@ -137,6 +138,10 @@ class ListPenjadwalan extends StatelessWidget {
                                   child: Text("Batal"),
                                 ),
                                 ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    foregroundColor: Colors.white,
+                                  ),
                                   onPressed: () {
                                     if (selectedUser != null) {
                                       jadwal.addJadwal(
@@ -150,6 +155,7 @@ class ListPenjadwalan extends StatelessWidget {
                                         ),
                                       );
                                     }
+
                                     Navigator.pop(context);
                                   },
                                   child: Text("Simpan"),

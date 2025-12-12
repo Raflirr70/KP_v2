@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/list/list_karyawan.dart';
+import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
 
@@ -37,15 +38,9 @@ class _DaftarKaryawanState extends State<DaftarKaryawan> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          },
-          icon: Icon(Icons.arrow_back_ios_new_sharp),
-        ),
-        title: Text("Kelola Karyawan"),
-        backgroundColor: Colors.blueAccent,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(50),
+        child: AppbarAdmin(),
       ),
       body: Consumer<Users>(
         builder: (context, users, child) {

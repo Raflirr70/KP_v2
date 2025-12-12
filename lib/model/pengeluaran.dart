@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Pengeluaran {
   String id;
   String idCabang;
+  String id_laporan;
   String namaPengeluaran;
   int jumlahUnit;
   String jenisSatuan;
@@ -12,6 +13,7 @@ class Pengeluaran {
   Pengeluaran(
     this.id,
     this.idCabang,
+    this.id_laporan,
     this.namaPengeluaran,
     this.jumlahUnit,
     this.jenisSatuan,
@@ -25,6 +27,7 @@ class Pengeluaran {
     return Pengeluaran(
       id,
       map["id_cabang"]?.toString() ?? "",
+      map["id_laporan"]?.toString() ?? "",
       map["nama_pengeluaran"] ?? "",
       jn is int ? jn : int.tryParse(jn.toString()) ?? 0,
       map["jenis_satuan"] ?? "",
@@ -35,6 +38,7 @@ class Pengeluaran {
   Map<String, dynamic> toMap() {
     return {
       "id_cabang": idCabang,
+      "id_laporan": id_laporan,
       "nama_pengeluaran": namaPengeluaran,
       "jumlah_unit": jumlahUnit,
       "jenis_satuan": jenisSatuan,
@@ -48,6 +52,30 @@ class Pengeluarans extends ChangeNotifier {
   bool isLoading = false;
 
   List<Pengeluaran> get datas => _datas;
+
+  Stream<List<Pengeluaran>> streamPenjualanByIdLaporan(String id_laporan) {
+    final pengeluaranRef = FirebaseFirestore.instance
+        .collection('pengeluaran')
+        .where('id_laporan', isEqualTo: id_laporan);
+
+    return pengeluaranRef.snapshots().asyncMap((snapshot) async {
+      List<Pengeluaran> result = [];
+
+      for (var doc in snapshot.docs) {
+        result.add(Pengeluaran.fromMap(doc.id, doc.data()));
+      }
+
+      return result;
+    });
+  }
+
+  int get totalPengeluaranLocal {
+    int total = 0;
+    for (var item in _datas) {
+      total += item.totalHarga;
+    }
+    return total;
+  }
 
   /// Fetch data dari Firestore
   Future<void> fetchData() async {

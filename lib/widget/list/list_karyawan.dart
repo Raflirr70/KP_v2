@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/popup/alert_penghapusan.dart';
+import 'package:kerprak/widget/popup/show_edit_karyawan.dart';
 import 'package:kerprak/widget/popup/show_tambah_karyawan.dart';
 import 'package:provider/provider.dart';
 
@@ -133,6 +134,8 @@ class ListKaryawan extends StatelessWidget {
               color: Colors.blueAccent,
               onTap: () {
                 Navigator.pop(context);
+                showEditKaryawanDialog(context, user);
+                print("object");
               },
             ),
             SizedBox(height: 12),

@@ -36,7 +36,6 @@ class _PenjualanPageState extends State<PenjualanPage> {
     final penjualanStream = context
         .read<Penjualans>()
         .streamPenjualanByIdLaporan(x!);
-    print(x!);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],

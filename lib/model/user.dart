@@ -25,6 +25,32 @@ class Users extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> editKaryawan(
+    String idUser, {
+    required String nama,
+    required String email,
+  }) async {
+    try {
+      // Update Firestore berdasarkan document ID
+      await FirebaseFirestore.instance.collection("akun").doc(idUser).update({
+        "nama": nama,
+        "email": email,
+      });
+
+      // UPDATE LIST LOKAL
+      int index = _datas.indexWhere((u) => u.id == idUser);
+      if (index != -1) {
+        _datas[index].nama = nama;
+        _datas[index].email = email;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print("Error editKaryawan: $e");
+      throw e;
+    }
+  }
+
   void hapus(int id) {
     _datas.removeWhere((user) => user.id == id);
     notifyListeners();
