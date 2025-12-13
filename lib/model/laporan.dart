@@ -77,6 +77,52 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<List<List<dynamic>>> getPendapatan(String idCabang) async {
+    try {
+      // 1️⃣ Ambil data cabang
+      final snapshotCabang = await FirebaseFirestore.instance
+          .collection("cabang")
+          .doc(idCabang)
+          .get();
+
+      if (!snapshotCabang.exists) {
+        return [];
+      }
+
+      final namaCabang = snapshotCabang['nama'];
+
+      // 2️⃣ Ambil laporan berdasarkan cabang
+      final snapshotLaporan = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where('id_cabang', isEqualTo: idCabang)
+          .get();
+
+      int totalPendapatan = 0;
+
+      // 3️⃣ Loop setiap laporan → ambil penjualan
+      for (var laporanDoc in snapshotLaporan.docs) {
+        final idLaporan = laporanDoc.id;
+
+        final snapshotPenjualan = await FirebaseFirestore.instance
+            .collection("penjualan")
+            .where('id_laporan', isEqualTo: idLaporan)
+            .get();
+
+        for (var penjualan in snapshotPenjualan.docs) {
+          totalPendapatan += (penjualan['total_harga'] ?? 0) as int;
+        }
+      }
+
+      // 4️⃣ Output final
+      return [
+        [namaCabang, totalPendapatan],
+      ];
+    } catch (e) {
+      print("Error getPendapatan: $e");
+      return [];
+    }
+  }
+
   Future<Laporan?> getLaporanHariIni(String id_cabang) async {
     try {
       final now = DateTime.now();

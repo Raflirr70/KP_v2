@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
+import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/widget/dll/legen_item.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
@@ -16,10 +17,17 @@ class HomepageAdmin extends StatefulWidget {
 }
 
 class _HomepageAdminState extends State<HomepageAdmin> {
+  bool mode = true;
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
+    });
+  }
+
+  void gantiModeChart() {
+    setState(() {
+      mode = !mode;
     });
   }
 
@@ -35,74 +43,117 @@ class _HomepageAdminState extends State<HomepageAdmin> {
         child: Column(
           children: [
             Container(
-              margin: EdgeInsets.only(top: 0, left: 10, right: 10),
-              padding: EdgeInsets.all(10),
-              constraints: BoxConstraints(minHeight: 10, maxHeight: 270),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 175,
-                    child: PieChart(
-                      PieChartData(
-                        sections: [
-                          PieChartSectionData(
-                            value: 40,
-                            color: Colors.amber,
-                            showTitle: false,
-                          ),
-                          PieChartSectionData(
-                            value: 3,
-                            color: Colors.blue,
-                            showTitle: false,
-                          ),
-                          PieChartSectionData(
-                            value: 2,
-                            color: Colors.red,
-                            showTitle: false,
-                          ),
-                          PieChartSectionData(
-                            value: 80,
-                            color: Colors.green,
-                            showTitle: false,
-                          ),
-                        ],
-                      ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
                     ),
-                  ),
-                  SizedBox(height: 15, width: 150, child: Divider()),
-                  Consumer<Cabangs>(
-                    builder: (context, value, child) {
-                      return Table(
-                        // border: TableBorder.all(),
-                        defaultColumnWidth: FixedColumnWidth(75),
-                        children: [
-                          TableRow(
-                            children: [
-                              legendItem(Colors.amber, value.datas[1].nama),
-                              legendItem(Colors.red, value.datas[2].nama),
-                            ],
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // HEADER
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "title",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
                           ),
-                          TableRow(
-                            children: [
-                              legendItem(Colors.blue, value.datas[3].nama),
-                              legendItem(Colors.green, value.datas[4].nama),
-                            ],
+                          decoration: BoxDecoration(
+                            color: const Color(0xff6c63ff),
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
+                          child: InkWell(
+                            onTap: () {
+                              // onTapMode();
+                            },
+                            child: Text(
+                              "rightButtonText",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // ---- CHART CONTAINER ----
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color.fromARGB(
+                              255,
+                              17,
+                              49,
+                              255,
+                            ).withOpacity(0.2),
+                            const Color.fromARGB(
+                              255,
+                              24,
+                              77,
+                              251,
+                            ).withOpacity(0.05),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      child: FutureBuilder(
+                        future: Provider.of<Cabangs>(context).getCabang(),
+                        builder: (context, snapshot) {
+                          return FutureBuilder(
+                            future: Provider.of<Laporans>(
+                              context,
+                            ).getData("HG4biWXd6vqIOJGunXXq"),
+                            builder: (context, s) {
+                              return Text("a");
+                            },
+                          );
+                        },
+                      ),
+                      // child: Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //   crossAxisAlignment: CrossAxisAlignment.end,
+                      //   children: [
+                      //     if (true) _bar(80, "Gudang"),
+                      //     _bar(50, "Cipanas"),
+                      //     _bar(80, "Cimacan"),
+                      //     _bar(120, "GSP"),
+                      //     _bar(100, "Balakang"),
+                      //   ],
+                      // ),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(
@@ -122,4 +173,22 @@ class _HomepageAdminState extends State<HomepageAdmin> {
       ),
     );
   }
+}
+
+// ---------- BAR ITEM ----------
+Widget _bar(double height, String nama_cabang) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      Container(
+        width: 20,
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xff6c63ff),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      Text(nama_cabang, style: TextStyle(fontSize: 10)),
+    ],
+  );
 }
