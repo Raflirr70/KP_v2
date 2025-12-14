@@ -23,7 +23,17 @@ class _HomepageAdminState extends State<HomepageAdmin> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Laporans>(context, listen: false).getAllData();
+    });
   }
+
+  double? pendapatan;
+  // Future<void> getPendapatan(String id_cabang){
+  //   setState(() async{
+  //     pendapatan = await Provider.of<Laporans>(context).getPendapatan(id_cabang);
+  //   });
+  // }
 
   void gantiModeChart() {
     setState(() {
@@ -127,30 +137,30 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                         horizontal: 12,
                         vertical: 16,
                       ),
-                      child: FutureBuilder(
-                        future: Provider.of<Cabangs>(context).getCabang(),
-                        builder: (context, snapshot) {
-                          return FutureBuilder(
-                            future: Provider.of<Laporans>(
-                              context,
-                            ).getData("HG4biWXd6vqIOJGunXXq"),
-                            builder: (context, s) {
-                              return Text("a");
-                            },
+                      child: Consumer2<Cabangs, Laporans>(
+                        builder: (context, cabang, laporan, child) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              for (int a = 0; a < cabang.datas.length; a++)
+                                if (laporan.datas
+                                    .where(
+                                      (l) => l.id_cabang == cabang.datas[a].id,
+                                    )
+                                    .isNotEmpty)
+                                  _bar(
+                                    getPendapatan(cabang.datas[a].id),
+                                    cabang.datas[a].nama,
+                                  ),
+                              // _bar(80, cabang.datas[1].nama),
+                              // _bar(80, cabang.datas[2].nama),
+                              // _bar(80, cabang.datas[3].nama),
+                              // _bar(80, cabang.datas[4].nama),
+                            ],
                           );
                         },
                       ),
-                      // child: Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //   crossAxisAlignment: CrossAxisAlignment.end,
-                      //   children: [
-                      //     if (true) _bar(80, "Gudang"),
-                      //     _bar(50, "Cipanas"),
-                      //     _bar(80, "Cimacan"),
-                      //     _bar(120, "GSP"),
-                      //     _bar(100, "Balakang"),
-                      //   ],
-                      // ),
                     ),
                   ],
                 ),

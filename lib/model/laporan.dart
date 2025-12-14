@@ -77,7 +77,32 @@ class Laporans extends ChangeNotifier {
     }
   }
 
-  Future<List<List<dynamic>>> getPendapatan(String idCabang) async {
+  Future<void> getAllData() async {
+    try {
+      final now = DateTime.now();
+
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final snapshot = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where("tanggal", isGreaterThanOrEqualTo: startOfDay)
+          .where("tanggal", isLessThan: endOfDay)
+          .get();
+
+      _datas.clear();
+      _datas.addAll(
+        snapshot.docs
+            .map((doc) => Laporan.fromMap(doc.id, doc.data()))
+            .toList(),
+      );
+
+      notifyListeners();
+    } catch (e) {
+      print("Error getData Laporan: $e");
+    }
+  }
+
+  Future<double> getPendapatan(String idCabang) async {
     try {
       // 1️⃣ Ambil data cabang
       final snapshotCabang = await FirebaseFirestore.instance
@@ -86,10 +111,8 @@ class Laporans extends ChangeNotifier {
           .get();
 
       if (!snapshotCabang.exists) {
-        return [];
+        return 0;
       }
-
-      final namaCabang = snapshotCabang['nama'];
 
       // 2️⃣ Ambil laporan berdasarkan cabang
       final snapshotLaporan = await FirebaseFirestore.instance
@@ -97,7 +120,7 @@ class Laporans extends ChangeNotifier {
           .where('id_cabang', isEqualTo: idCabang)
           .get();
 
-      int totalPendapatan = 0;
+      double totalPendapatan = 0;
 
       // 3️⃣ Loop setiap laporan → ambil penjualan
       for (var laporanDoc in snapshotLaporan.docs) {
@@ -114,12 +137,10 @@ class Laporans extends ChangeNotifier {
       }
 
       // 4️⃣ Output final
-      return [
-        [namaCabang, totalPendapatan],
-      ];
+      return totalPendapatan;
     } catch (e) {
       print("Error getPendapatan: $e");
-      return [];
+      return 0;
     }
   }
 

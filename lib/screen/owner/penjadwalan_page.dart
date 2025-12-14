@@ -19,9 +19,6 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Cabangs>(context, listen: false).getCabang();
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Users>(context, listen: false).fetchData();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
