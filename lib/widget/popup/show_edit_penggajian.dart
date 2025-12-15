@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kerprak/model/penggajian.dart';
+import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/widget/dll/inforow.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/user.dart';
@@ -7,35 +7,19 @@ import 'package:kerprak/model/user.dart';
 void showPenggajianKaryawanDialog(
   BuildContext context,
   String idPegawai,
-  String idLaporan,
+  String idJadwal,
 ) {
-  final _formKey = GlobalKey<FormState>();
-  int gajiBaru = 0;
+  final formKey = GlobalKey<FormState>();
 
-  final user = Provider.of<Users>(context, listen: false);
-  final pegawai = user.datas.firstWhere((u) => u.id == idPegawai);
+  final usersProvider = Provider.of<Users>(context, listen: false);
+  final jadwalsProvider = Provider.of<Jadwals>(context, listen: false);
 
-  // ----------------------------
-  // 🔥 Ambil data gaji lama
-  // ----------------------------
-  final penggajians = Provider.of<Penggajians>(context, listen: false);
+  final pegawai = usersProvider.datas.firstWhere((u) => u.id == idPegawai);
+  final jadwal = jadwalsProvider.datas.firstWhere((j) => j.id == idJadwal);
 
-  final dataGaji = penggajians.datas.firstWhere(
-    (g) => g.id_pegawai == idPegawai && g.id_laporan == idLaporan,
-    orElse: () => Penggajian(
-      id: '',
-      id_pegawai: idPegawai,
-      id_laporan: idLaporan,
-      gaji: 0,
-    ),
+  final TextEditingController gajiController = TextEditingController(
+    text: jadwal.nominal.toString(),
   );
-
-  int gajiLama = dataGaji.gaji;
-
-  // Controller agar otomatis muncul gaji lama
-  final gajiController = TextEditingController(text: gajiLama.toString());
-
-  // ----------------------------
 
   showDialog(
     context: context,
@@ -50,42 +34,39 @@ void showPenggajianKaryawanDialog(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nama Pegawai
+                /// 🔹 Info Pegawai
                 infoRow(Icons.people, "Nama", pegawai.nama),
+                const SizedBox(height: 20),
 
-                SizedBox(height: 20),
-
+                /// 🔹 Form Gaji
                 Form(
-                  key: _formKey,
+                  key: formKey,
                   child: Column(
                     children: [
                       TextFormField(
                         controller: gajiController,
+                        keyboardType: TextInputType.number,
                         textAlign: TextAlign.end,
                         decoration: InputDecoration(
-                          labelText: "Masukan Gaji",
+                          labelText: "Masukkan Gaji",
+                          prefixIcon: const Icon(Icons.money),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          prefixIcon: Icon(Icons.money),
                         ),
-                        keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Gaji tidak boleh kosong";
                           }
                           if (int.tryParse(value) == null) {
-                            return "Masukkan angka yang benar";
+                            return "Masukkan angka yang valid";
                           }
                           return null;
                         },
-                        onChanged: (value) {
-                          gajiBaru = int.tryParse(value) ?? gajiLama;
-                        },
                       ),
+                      const SizedBox(height: 16),
 
-                      SizedBox(height: 16),
-
+                      /// 🔹 Tombol Simpan
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -96,36 +77,36 @@ void showPenggajianKaryawanDialog(
                             ),
                           ),
                           onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              try {
-                                final messenger = ScaffoldMessenger.of(context);
+                            if (!formKey.currentState!.validate()) return;
 
-                                await Provider.of<Penggajians>(
-                                  context,
-                                  listen: false,
-                                ).simpanGaji(idPegawai, idLaporan, gajiBaru);
+                            try {
+                              final gajiBaru = int.parse(gajiController.text);
 
+                              await jadwalsProvider.updateNominal(
+                                idJadwal,
+                                gajiBaru,
+                              );
+
+                              if (context.mounted) {
                                 Navigator.pop(context);
-
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text("Berhasil disimpan"),
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: Colors.green,
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Gagal : $e"),
-                                    backgroundColor: Colors.red,
+                                  const SnackBar(
+                                    content: Text("Berhasil disimpan"),
+                                    backgroundColor: Colors.green,
+                                    behavior: SnackBarBehavior.floating,
                                   ),
                                 );
                               }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Gagal: $e"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
                             }
                           },
-                          child: Text("Simpan"),
+                          child: const Text("Simpan"),
                         ),
                       ),
                     ],

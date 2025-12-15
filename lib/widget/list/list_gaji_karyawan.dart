@@ -60,16 +60,6 @@ class ListGajiKaryawan extends StatelessWidget {
                                 (u) => u.id == filter[index].id_user,
                               );
 
-                              final figaji = penggajian.datas.firstWhere(
-                                (g) => g.id_pegawai == filkar.id,
-                                orElse: () => Penggajian(
-                                  id: '',
-                                  id_pegawai: filkar.id,
-                                  id_laporan: '',
-                                  gaji: 0,
-                                ),
-                              );
-
                               return Card(
                                 margin: EdgeInsets.symmetric(vertical: 4),
                                 child: Padding(
@@ -93,11 +83,11 @@ class ListGajiKaryawan extends StatelessWidget {
                                           showPenggajianKaryawanDialog(
                                             context,
                                             filkar.id,
-                                            "id_laporan",
+                                            filter[index].id,
                                           );
                                         },
                                         child: Card(
-                                          color: figaji.gaji == 0
+                                          color: filter[index].nominal == 0
                                               ? Colors.red[100]
                                               : Colors.green[100],
                                           child: Container(
@@ -107,7 +97,7 @@ class ListGajiKaryawan extends StatelessWidget {
                                             ),
                                             width: 100,
                                             child: Text(
-                                              figaji.gaji.toString(),
+                                              filter[index].nominal.toString(),
                                               textAlign: TextAlign.end,
                                             ),
                                           ),

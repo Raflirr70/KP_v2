@@ -23,17 +23,23 @@ class _HomepageAdminState extends State<HomepageAdmin> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Laporans>(context, listen: false).getAllData();
+    pen();
+  }
+
+  void pen() async {
+    final total = await Provider.of<Laporans>(
+      context,
+      listen: false,
+    ).getTotalPendapatan();
+
+    if (!mounted) return;
+
+    setState(() {
+      pendapatan = total;
     });
   }
 
   double? pendapatan;
-  // Future<void> getPendapatan(String id_cabang){
-  //   setState(() async{
-  //     pendapatan = await Provider.of<Laporans>(context).getPendapatan(id_cabang);
-  //   });
-  // }
 
   void gantiModeChart() {
     setState(() {
@@ -77,7 +83,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "title",
+                              mode ? "Pendapatan" : "Pengeluaran",
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -96,7 +102,9 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              // onTapMode();
+                              setState(() {
+                                mode != mode;
+                              });
                             },
                             child: Text(
                               "rightButtonText",
@@ -111,7 +119,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
 
                     // ---- CHART CONTAINER ----
                     Container(
-                      height: 300,
+                      height: 250,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -137,30 +145,49 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                         horizontal: 12,
                         vertical: 16,
                       ),
-                      child: Consumer2<Cabangs, Laporans>(
-                        builder: (context, cabang, laporan, child) {
+                      child: Consumer<Cabangs>(
+                        builder: (context, value, child) {
+                          print(pendapatan);
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              for (int a = 0; a < cabang.datas.length; a++)
-                                if (laporan.datas
-                                    .where(
-                                      (l) => l.id_cabang == cabang.datas[a].id,
-                                    )
-                                    .isNotEmpty)
-                                  _bar(
-                                    getPendapatan(cabang.datas[a].id),
-                                    cabang.datas[a].nama,
+                              for (int a = 0; a < value.datas.length; a++)
+                                if (value.datas[a].nama != "Gudang")
+                                  FutureBuilder(
+                                    future: Provider.of<Laporans>(
+                                      context,
+                                    ).getPendapatan(value.datas[a].id),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting)
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      // return Text("data");
+                                      else
+                                        return _bar(
+                                          snapshot.data ?? 0,
+                                          value.datas[a].nama,
+                                          pendapatan ?? 0,
+                                        );
+                                    },
                                   ),
-                              // _bar(80, cabang.datas[1].nama),
-                              // _bar(80, cabang.datas[2].nama),
-                              // _bar(80, cabang.datas[3].nama),
-                              // _bar(80, cabang.datas[4].nama),
                             ],
                           );
                         },
                       ),
+                      // child: Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //   crossAxisAlignment: CrossAxisAlignment.end,
+                      //   children: [
+                      //     if (true) _bar(80, "Gudang"),
+                      //     _bar(50, "Cipanas"),
+                      //     _bar(80, "Cimacan"),
+                      //     _bar(120, "GSP"),
+                      //     _bar(100, "Balakang"),
+                      //   ],
+                      // ),
                     ),
                   ],
                 ),
@@ -186,13 +213,13 @@ class _HomepageAdminState extends State<HomepageAdmin> {
 }
 
 // ---------- BAR ITEM ----------
-Widget _bar(double height, String nama_cabang) {
+Widget _bar(double height, String nama_cabang, double pendapatan) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
       Container(
         width: 20,
-        height: height,
+        height: (height / pendapatan) * 100 * 2,
         decoration: BoxDecoration(
           color: const Color(0xff6c63ff),
           borderRadius: BorderRadius.circular(8),

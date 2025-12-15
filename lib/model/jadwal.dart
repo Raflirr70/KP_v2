@@ -52,6 +52,19 @@ class Jadwals extends ChangeNotifier {
 
   final _ref = FirebaseFirestore.instance.collection('jadwal');
 
+  Future<void> updateNominal(String idJadwal, int nominalBaru) async {
+    // 🔥 Update Firestore
+    print(idJadwal);
+    await _ref.doc(idJadwal).update({'nominal': nominalBaru});
+
+    // 🔥 Update local state
+    final index = datas.indexWhere((j) => j.id == idJadwal);
+    if (index != -1) {
+      datas[index].nominal = nominalBaru;
+      notifyListeners();
+    }
+  }
+
   /// 🔹 Ambil semua jadwal
   Future<void> getJadwal() async {
     isLoading = true;
