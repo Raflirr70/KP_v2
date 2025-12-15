@@ -78,6 +78,33 @@ class Pengeluarans extends ChangeNotifier {
   }
 
   /// Fetch data dari Firestore
+  Future<void> fetchDataHariIni(String id_laporan) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('pengeluaran')
+          .where('id_laporan', isEqualTo: id_laporan)
+          .get();
+
+      _datas = snapshot.docs
+          .map((doc) => Pengeluaran.fromMap(doc.id, doc.data()))
+          .toList();
+    } catch (e) {
+      print("Error fetchDataHariIni Pengeluaran: $e");
+      _datas = [];
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /// Fetch data dari Firestore
   Future<void> fetchData() async {
     isLoading = true;
     notifyListeners();

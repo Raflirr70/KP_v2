@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 
-void showTambahPengeluaranPopup(BuildContext context) {
+void showTambahPengeluaranPopup(BuildContext context, String id_laporan) {
   final namaC = TextEditingController();
   final jumlahC = TextEditingController();
   final hargaC = TextEditingController();
+
   String? selectedSatuan;
   final satuanList = ["unit", "liter", "kilo", "gram", "set", "box"];
 
@@ -140,7 +141,7 @@ void showTambahPengeluaranPopup(BuildContext context) {
                   final newPengeluaran = Pengeluaran(
                     DateTime.now().millisecondsSinceEpoch.toString(),
                     "N7EjTNIMq5AgAEqN0ii5",
-                    "",
+                    id_laporan,
                     nama,
                     jumlah,
                     selectedSatuan!,

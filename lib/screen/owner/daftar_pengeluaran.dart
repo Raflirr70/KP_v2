@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/widget/list/list_pengeluaran.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
@@ -14,18 +15,34 @@ class DaftarPengeluaran extends StatefulWidget {
 }
 
 class _DaftarPengeluaranState extends State<DaftarPengeluaran> {
-  TextEditingController _searchCtrl = TextEditingController();
+  final TextEditingController _searchCtrl = TextEditingController();
+  String? idLaporan;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Pengeluarans>(context, listen: false).fetchData();
-    });
 
     _searchCtrl.addListener(() {
-      setState(() {}); // Trigger rebuild untuk filter list
+      setState(() {});
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await initLaporan();
+
+      if (idLaporan != null && mounted) {
+        Provider.of<Pengeluarans>(
+          context,
+          listen: false,
+        ).fetchDataHariIni(idLaporan!);
+      }
+    });
+  }
+
+  Future<void> initLaporan() async {
+    idLaporan = await Provider.of<Laporans>(
+      context,
+      listen: false,
+    ).checkAndCreateLaporan("N7EjTNIMq5AgAEqN0ii5");
   }
 
   @override

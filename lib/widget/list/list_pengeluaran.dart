@@ -26,7 +26,7 @@ class ListPengeluaran extends StatelessWidget {
                 child: Icon(Icons.add_circle),
               ),
             ),
-            onTap: () => showTambahPengeluaranPopup(context),
+            onTap: () => showTambahPengeluaranPopup(context, "asd"),
           );
         }
 
@@ -54,7 +54,7 @@ class ListPengeluaran extends StatelessWidget {
 
                   Text(
                     pluar.namaPengeluaran,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   Spacer(),
                   SizedBox(
