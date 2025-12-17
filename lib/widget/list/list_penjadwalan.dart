@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 class ListPenjadwalan extends StatelessWidget {
   final List<Cabang> value;
-  ListPenjadwalan({super.key, required this.value});
+  const ListPenjadwalan({super.key, required this.value});
 
   @override
   Widget build(BuildContext context) {

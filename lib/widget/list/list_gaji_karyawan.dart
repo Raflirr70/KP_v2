@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 class ListGajiKaryawan extends StatelessWidget {
   final List<Cabang> value;
-  ListGajiKaryawan({super.key, required this.value});
+  const ListGajiKaryawan({super.key, required this.value});
 
   @override
   Widget build(BuildContext context) {

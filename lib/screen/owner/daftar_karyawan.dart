@@ -14,7 +14,7 @@ class DaftarKaryawan extends StatefulWidget {
 }
 
 class _DaftarKaryawanState extends State<DaftarKaryawan> {
-  TextEditingController _searchCtrl = TextEditingController();
+  final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -44,8 +44,9 @@ class _DaftarKaryawanState extends State<DaftarKaryawan> {
       ),
       body: Consumer<Users>(
         builder: (context, users, child) {
-          if (users.isLoading)
+          if (users.isLoading) {
             return Center(child: CircularProgressIndicator());
+          }
 
           // Filter langsung tanpa provider
           List<User> filtered = users.datas

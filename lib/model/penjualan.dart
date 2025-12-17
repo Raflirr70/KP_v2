@@ -94,7 +94,9 @@ class Penjualans extends ChangeNotifier {
   int TotalPorsi() {
     int jumlah = 0;
     for (var p in _datas) {
-      for (var d in p.detail) jumlah += d.jumlah;
+      for (var d in p.detail) {
+        jumlah += d.jumlah;
+      }
     }
     return jumlah;
   }
@@ -126,10 +128,10 @@ class Penjualans extends ChangeNotifier {
     });
   }
 
-  Stream<List<Penjualan>> streamPenjualanByIdLaporan(String id_laporan) {
+  Stream<List<Penjualan>> streamPenjualanByIdLaporan(String idLaporan) {
     final penjualanRef = FirebaseFirestore.instance
         .collection('penjualan')
-        .where('id_laporan', isEqualTo: id_laporan);
+        .where('id_laporan', isEqualTo: idLaporan);
 
     return penjualanRef.snapshots().asyncMap((snapshot) async {
       List<Penjualan> result = [];
@@ -175,14 +177,40 @@ class Penjualans extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getPenjualanByIdCabang(String id_cabang) async {
+  Future<void> getPenjualanByIdLaporan(String idLaporan) async {
     isLoading = true;
     notifyListeners();
 
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('penjualan')
-          .where('id_cabang', isEqualTo: id_cabang)
+          .where('id_laporan', isEqualTo: idLaporan)
+          // .orderBy('jam')
+          .get();
+
+      _datas.clear();
+
+      for (var doc in snapshot.docs) {
+        Penjualan p = Penjualan.fromMap(doc.id, doc.data());
+        p.detail = await _getDetailPenjualan(doc.id);
+        _datas.add(p);
+      }
+    } catch (e) {
+      print("Error getPenjualanByIdCabang: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getPenjualanByIdCabang(String idCabang) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('penjualan')
+          .where('id_cabang', isEqualTo: idCabang)
           .orderBy('jam')
           .get();
 

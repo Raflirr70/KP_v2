@@ -45,6 +45,24 @@ class Makanans extends ChangeNotifier {
     });
   }
 
+  Future<void> updateMakanan(Makanan makanan) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('makanan')
+          .doc(makanan.id)
+          .update(makanan.toMap());
+
+      // update lokal juga
+      int index = _datas.indexWhere((m) => m.id == makanan.id);
+      if (index != -1) {
+        _datas[index] = makanan;
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Error updateMakanan: $e");
+    }
+  }
+
   Future<void> tambahMakanan(Makanan makanan) async {
     final doc = FirebaseFirestore.instance.collection("makanan").doc();
     await doc.set(makanan.toMap());
@@ -80,11 +98,11 @@ class Makanans extends ChangeNotifier {
     return _datas; // ← WAJIB RETURN
   }
 
-  Future<Makanan?> getMakananById(String id_makanan) async {
+  Future<Makanan?> getMakananById(String idMakanan) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('makanan')
-          .where("id", isEqualTo: id_makanan)
+          .where("id", isEqualTo: idMakanan)
           .limit(1)
           .get();
 

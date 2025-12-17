@@ -121,17 +121,17 @@ class Stocks extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> getTotalStockByMakanan(String id_makanan) async {
+  Future<int> getTotalStockByMakanan(String idMakanan) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('stock')
-          .where("id_makanan", isEqualTo: id_makanan)
+          .where("id_makanan", isEqualTo: idMakanan)
           .get();
 
       int total = 0;
 
       for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>; // ⬅ WAJIB CAST
+        final data = doc.data(); // ⬅ WAJIB CAST
         total += (data['jumlah_makanan'] ?? 0) as int; // ⬅ ACCESS AMAN
       }
 
@@ -142,17 +142,17 @@ class Stocks extends ChangeNotifier {
     }
   }
 
-  Future<int> getTotalStockByCabang(String id_cabang) async {
+  Future<int> getTotalStockByCabang(String idCabang) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('stock')
-          .where("id_cabang", isEqualTo: id_cabang)
+          .where("id_cabang", isEqualTo: idCabang)
           .get();
 
       int total = 0;
 
       for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>; // ⬅ WAJIB CAST
+        final data = doc.data(); // ⬅ WAJIB CAST
         total += (data['jumlah_makanan'] ?? 0) as int; // ⬅ ACCESS AMAN
       }
 

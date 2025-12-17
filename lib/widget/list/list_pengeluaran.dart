@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 class ListPengeluaran extends StatelessWidget {
   final List<Pengeluaran> pluars;
-  ListPengeluaran({super.key, required this.pluars});
+  const ListPengeluaran({super.key, required this.pluars});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class ListPengeluaran extends StatelessWidget {
         if (i == pluars.length) {
           return InkWell(
             child: Card(
-              color: Colors.lightBlue[100],
+              color: Colors.red[100],
               elevation: 3,
               margin: EdgeInsets.only(bottom: 12),
               child: Container(
@@ -89,7 +89,7 @@ class ListPengeluaran extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: Colors.grey[700]),
         SizedBox(width: 10),
-        SizedBox(width: 60, child: Text("$label")),
+        SizedBox(width: 60, child: Text(label)),
         Expanded(
           child: Text(
             ": $value",

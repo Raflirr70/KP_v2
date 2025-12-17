@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 class ListStock extends StatefulWidget {
   final List<Makanan> value;
-  ListStock({super.key, required this.value});
+  const ListStock({super.key, required this.value});
 
   @override
   State<ListStock> createState() => _ListStockState();

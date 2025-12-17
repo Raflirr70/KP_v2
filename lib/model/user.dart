@@ -47,7 +47,7 @@ class Users extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print("Error editKaryawan: $e");
-      throw e;
+      rethrow;
     }
   }
 
@@ -56,11 +56,11 @@ class Users extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> Login(String _emailCtrl, String _passwordCtrl) async {
+  Future<bool> Login(String emailCtrl, String passwordCtrl) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailCtrl,
-        password: _passwordCtrl,
+        email: emailCtrl,
+        password: passwordCtrl,
       );
       return true;
     } on FirebaseAuthException catch (e) {

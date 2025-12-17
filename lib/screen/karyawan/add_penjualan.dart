@@ -78,8 +78,9 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
       body: StreamBuilder<List<Makanan>>(
         stream: context.read<Makanans>().streamMakanan(),
         builder: (context, makananSnap) {
-          if (!makananSnap.hasData)
+          if (!makananSnap.hasData) {
             return Center(child: CircularProgressIndicator());
+          }
           final listMakanan = makananSnap.data!;
 
           return StreamBuilder<List<Stock>>(
@@ -87,8 +88,9 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
               widget.idCabang,
             ),
             builder: (context, stockSnap) {
-              if (!stockSnap.hasData)
+              if (!stockSnap.hasData) {
                 return Center(child: CircularProgressIndicator());
+              }
               final listStock = stockSnap.data!;
 
               // Pencarian

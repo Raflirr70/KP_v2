@@ -20,7 +20,7 @@ class KonsumsiPage extends StatefulWidget {
 
 class _KonsumsiPageState extends State<KonsumsiPage> {
   String? x;
-  bool _showSummary = true;
+  final bool _showSummary = true;
   bool load = true;
   String formatTimeOfDay(TimeOfDay tod) {
     final hour = tod.hourOfPeriod.toString().padLeft(2, '0');

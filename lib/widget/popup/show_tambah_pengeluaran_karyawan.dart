@@ -5,8 +5,8 @@ import 'package:kerprak/model/pengeluaran.dart';
 
 void showTambahPengeluaranKaryawanPopup(
   BuildContext context,
-  String id_cabang,
-  String id_laporan,
+  String idCabang,
+  String idLaporan,
 ) {
   final namaC = TextEditingController();
   final jumlahC = TextEditingController();
@@ -143,8 +143,8 @@ void showTambahPengeluaranKaryawanPopup(
 
                   final newPengeluaran = Pengeluaran(
                     DateTime.now().millisecondsSinceEpoch.toString(),
-                    id_cabang,
-                    id_laporan,
+                    idCabang,
+                    idLaporan,
                     nama,
                     jumlah,
                     selectedSatuan!,

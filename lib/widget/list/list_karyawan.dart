@@ -73,7 +73,7 @@ class ListKaryawan extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: Colors.grey[700]),
         SizedBox(width: 10),
-        SizedBox(width: 60, child: Text("$label")),
+        SizedBox(width: 60, child: Text(label)),
         Expanded(
           child: Text(
             ": $value",

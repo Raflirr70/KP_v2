@@ -16,7 +16,7 @@ class DaftarStock extends StatefulWidget {
 }
 
 class _DaftarStockState extends State<DaftarStock> {
-  bool _showSummary = true;
+  final bool _showSummary = true;
   final _searchController = TextEditingController();
 
   @override

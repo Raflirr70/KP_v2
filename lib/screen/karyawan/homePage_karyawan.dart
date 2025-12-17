@@ -24,6 +24,7 @@ class HomepageKaryawan extends StatefulWidget {
 }
 
 class _HomepageKaryawanState extends State<HomepageKaryawan> {
+  String? idLaporan;
   String? id_cab;
   bool _show_info = true;
   bool? _akunBelumJadwal;
@@ -43,12 +44,6 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Cabangs>(context, listen: false).getCabang();
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Penjualans>(
-        context,
-        listen: false,
-      ).getPenjualanByIdCabang(id_cab!);
     });
   }
 
@@ -75,33 +70,42 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
   Future<void> _initData() async {
     final jadwalsProvider = Provider.of<Jadwals>(context, listen: false);
     await jadwalsProvider.getJadwal();
-    Jadwal? jadwalUser;
 
+    Jadwal? jadwalUser;
     try {
       jadwalUser = jadwalsProvider.datas.firstWhere(
         (j) => j.id_user == widget.id_user,
       );
     } catch (e) {
-      jadwalUser = null; // kalau tidak ada, jadwalUser tetap null
+      jadwalUser = null;
     }
+
     if (jadwalUser != null) {
       final idCabang = jadwalUser.id_cabang;
-      setState(() {
-        id_cab = idCabang;
-      });
+      setState(() => id_cab = idCabang);
+
       final laporanProvider = Provider.of<Laporans>(context, listen: false);
       await laporanProvider.getLaporanHariIni(idCabang);
-      await Future.delayed(Duration(milliseconds: 200));
-      String idLaporan = await laporanProvider.checkAndCreateLaporan(idCabang);
+      idLaporan = await laporanProvider.checkAndCreateLaporan(idCabang);
 
-      print("ID laporan hari ini: $idLaporan");
+      // Pastikan idLaporan tidak null
+      if (idLaporan != null) {
+        final penjualanProvider = Provider.of<Penjualans>(
+          context,
+          listen: false,
+        );
+        final pengeluaranProvider = Provider.of<Pengeluarans>(
+          context,
+          listen: false,
+        );
+        await penjualanProvider.getPenjualanByIdLaporan(idLaporan!);
+        // <-- GANTI getPenjualanByIdCabang
+        await pengeluaranProvider.fetchDataHariIni(idLaporan!);
 
-      // simpan kalau perlu:
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("id_laporan", idLaporan);
-      setState(() {
-        _akunBelumJadwal = false;
-      });
+        setState(() {
+          _akunBelumJadwal = false;
+        });
+      }
     } else {
       setState(() {
         _akunBelumJadwal = true;
@@ -111,8 +115,9 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
   @override
   Widget build(BuildContext context) {
-    if (_akunBelumJadwal == null)
+    if (_akunBelumJadwal == null) {
       return Center(child: CircularProgressIndicator());
+    }
     if (_akunBelumJadwal!) {
       return Scaffold(
         backgroundColor: Colors.grey,
@@ -160,18 +165,22 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
               backgroundColor: Colors.blueAccent,
               title: Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.temple_buddhist_outlined),
-                      SizedBox(width: 5),
-                      Text(
-                        "Cipanas",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
+                  Consumer<Cabangs>(
+                    builder: (context, value, child) {
+                      return Row(
+                        children: [
+                          Icon(Icons.temple_buddhist_outlined),
+                          SizedBox(width: 5),
+                          Text(
+                            value.datas.firstWhere((c) => c.id == id_cab!).nama,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   Spacer(),
                   Column(
@@ -247,6 +256,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                 child: _show_info
                     ? Consumer2<Penjualans, Pengeluarans>(
                         builder: (context, penjualan, pengeluaran, child) {
+                          print(id_cab);
                           return Card(
                             key: ValueKey("summaryCard"),
                             shape: RoundedRectangleBorder(),
@@ -268,7 +278,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                                       Expanded(
                                         child: _summaryBox(
                                           "Pengeluaran",
-                                          "Rp 54.500",
+                                          "Rp ${pengeluaran.totalPengeluaranLocal}",
                                           Colors.red,
                                           Icons.trending_down,
                                         ),
@@ -282,7 +292,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                                         flex: 2,
                                         child: _summaryBox(
                                           "Total",
-                                          "Rp 973.000",
+                                          "Rp ${penjualan.Pendapatan() - pengeluaran.totalPengeluaranLocal}",
                                           Colors.blueAccent,
                                           Icons.account_balance_wallet,
                                         ),

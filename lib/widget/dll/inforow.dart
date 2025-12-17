@@ -5,7 +5,7 @@ Widget infoRow(IconData icon, String label, String value) {
     children: [
       Icon(icon, size: 18, color: Colors.grey[700]),
       SizedBox(width: 8),
-      SizedBox(width: 80, child: Text("$label")),
+      SizedBox(width: 80, child: Text(label)),
       Expanded(
         child: Text(
           ": $value",

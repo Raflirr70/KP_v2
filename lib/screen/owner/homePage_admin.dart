@@ -18,6 +18,7 @@ class HomepageAdmin extends StatefulWidget {
 
 class _HomepageAdminState extends State<HomepageAdmin> {
   bool mode = true;
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,6 +59,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: 20),
             Container(
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -97,17 +99,19 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xff6c63ff),
+                            color: mode
+                                ? Color(0xff6c63ff)
+                                : Color.fromARGB(255, 216, 106, 55),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: InkWell(
                             onTap: () {
                               setState(() {
-                                mode != mode;
+                                mode = !mode;
                               });
                             },
                             child: Text(
-                              "rightButtonText",
+                              "mode",
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
@@ -119,23 +123,38 @@ class _HomepageAdminState extends State<HomepageAdmin> {
 
                     // ---- CHART CONTAINER ----
                     Container(
-                      height: 250,
+                      height: 170,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            const Color.fromARGB(
-                              255,
-                              17,
-                              49,
-                              255,
-                            ).withOpacity(0.2),
-                            const Color.fromARGB(
-                              255,
-                              24,
-                              77,
-                              251,
-                            ).withOpacity(0.05),
-                          ],
+                          colors: mode
+                              ? [
+                                  const Color.fromARGB(
+                                    255,
+                                    17,
+                                    49,
+                                    255,
+                                  ).withOpacity(0.4),
+                                  const Color.fromARGB(
+                                    255,
+                                    24,
+                                    77,
+                                    251,
+                                  ).withOpacity(0.1),
+                                ]
+                              : [
+                                  const Color.fromARGB(
+                                    255,
+                                    238,
+                                    96,
+                                    2,
+                                  ).withOpacity(0.3),
+                                  const Color.fromARGB(
+                                    255,
+                                    251,
+                                    172,
+                                    24,
+                                  ).withOpacity(0.07),
+                                ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -147,10 +166,93 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                       ),
                       child: Consumer<Cabangs>(
                         builder: (context, value, child) {
-                          print(pendapatan);
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              for (int a = 0; a < value.datas.length; a++)
+                                if (value.datas[a].nama != "Gudang" || !mode)
+                                  FutureBuilder(
+                                    future: Provider.of<Laporans>(
+                                      context,
+                                    ).getPendapatan(value.datas[a].id),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      } else {
+                                        return mode
+                                            ? _barPendapatan(
+                                                snapshot.data ?? 1,
+                                                value.datas[a].nama,
+                                                pendapatan ?? 1,
+                                              )
+                                            : _barPengeluaran(
+                                                snapshot.data ?? 1,
+                                                value.datas[a].nama,
+                                                pendapatan ?? 1,
+                                              );
+                                        ;
+                                      }
+                                    },
+                                  ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: mode
+                              ? [
+                                  const Color.fromARGB(
+                                    255,
+                                    17,
+                                    49,
+                                    255,
+                                  ).withOpacity(0.3),
+                                  const Color.fromARGB(
+                                    255,
+                                    24,
+                                    77,
+                                    251,
+                                  ).withOpacity(0.07),
+                                ]
+                              : [
+                                  const Color.fromARGB(
+                                    255,
+                                    238,
+                                    96,
+                                    2,
+                                  ).withOpacity(0.3),
+                                  const Color.fromARGB(
+                                    255,
+                                    251,
+                                    172,
+                                    24,
+                                  ).withOpacity(0.07),
+                                ],
+                          // begin: Alignment.topCenter,
+                          // end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      margin: EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      child: Consumer<Cabangs>(
+                        builder: (context, value, child) {
+                          print(pendapatan);
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               for (int a = 0; a < value.datas.length; a++)
                                 if (value.datas[a].nama != "Gudang")
@@ -160,39 +262,54 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                                     ).getPendapatan(value.datas[a].id),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
-                                          ConnectionState.waiting)
+                                          ConnectionState.waiting) {
                                         return Center(
-                                          child: CircularProgressIndicator(),
+                                          child: Center(
+                                            child: Text(
+                                              "-",
+                                              style: TextStyle(fontSize: 11),
+                                            ),
+                                          ),
                                         );
-                                      // return Text("data");
-                                      else
-                                        return _bar(
-                                          snapshot.data ?? 0,
-                                          value.datas[a].nama,
-                                          pendapatan ?? 0,
+                                      } else {
+                                        return Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 100,
+                                              child: Text(
+                                                value.datas[a].nama,
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                              child: Text(
+                                                ":",
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 100,
+                                              child: Text(
+                                                snapshot.data.toString(),
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ),
+                                          ],
                                         );
+                                      }
                                     },
                                   ),
                             ],
                           );
                         },
                       ),
-                      // child: Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //   crossAxisAlignment: CrossAxisAlignment.end,
-                      //   children: [
-                      //     if (true) _bar(80, "Gudang"),
-                      //     _bar(50, "Cipanas"),
-                      //     _bar(80, "Cimacan"),
-                      //     _bar(120, "GSP"),
-                      //     _bar(100, "Balakang"),
-                      //   ],
-                      // ),
                     ),
                   ],
                 ),
               ),
             ),
+
             SizedBox(
               height: 30,
               width: 200,
@@ -213,19 +330,40 @@ class _HomepageAdminState extends State<HomepageAdmin> {
 }
 
 // ---------- BAR ITEM ----------
-Widget _bar(double height, String nama_cabang, double pendapatan) {
+Widget _barPendapatan(double height, String namaCabang, double pendapatan) {
+  final safeTotal = pendapatan <= 0 ? 1 : pendapatan;
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
       Container(
         width: 20,
-        height: (height / pendapatan) * 100 * 2,
+        height: (height / safeTotal) * 100,
+        // height: 100,
         decoration: BoxDecoration(
           color: const Color(0xff6c63ff),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      Text(nama_cabang, style: TextStyle(fontSize: 10)),
+      Text(namaCabang, style: TextStyle(fontSize: 10)),
+    ],
+  );
+}
+
+Widget _barPengeluaran(double height, String namaCabang, double pendapatan) {
+  final safeTotal = pendapatan <= 0 ? 1 : pendapatan;
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      Container(
+        width: 20,
+        height: (height / safeTotal) * 100,
+        // height: 100,
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 240, 146, 38),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      Text(namaCabang, style: TextStyle(fontSize: 10)),
     ],
   );
 }

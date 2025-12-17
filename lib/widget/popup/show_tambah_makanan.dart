@@ -3,7 +3,7 @@ import 'package:kerprak/model/makanan.dart';
 import 'package:provider/provider.dart';
 
 void showTambahMakananDialog(BuildContext context) {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   String nama = '';
   int harga = 0;
 
@@ -23,7 +23,7 @@ void showTambahMakananDialog(BuildContext context) {
         content: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -93,7 +93,7 @@ void showTambahMakananDialog(BuildContext context) {
                       ),
                     ),
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (formKey.currentState!.validate()) {
                         try {
                           final messenger = ScaffoldMessenger.of(context);
 

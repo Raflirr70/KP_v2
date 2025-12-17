@@ -57,11 +57,11 @@ class Laporans extends ChangeNotifier {
   List<Laporan> get datas => _datas;
 
   /// Ambil semua data laporan untuk cabang tertentu
-  Future<void> getData(String id_cabang) async {
+  Future<void> getData(String idCabang) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection("laporan")
-          .where('id_cabang', isEqualTo: id_cabang)
+          .where('id_cabang', isEqualTo: idCabang)
           .get();
 
       _datas.clear();
@@ -188,7 +188,7 @@ class Laporans extends ChangeNotifier {
     }
   }
 
-  Future<Laporan?> getLaporanHariIni(String id_cabang) async {
+  Future<Laporan?> getLaporanHariIni(String idCabang) async {
     try {
       final now = DateTime.now();
 
@@ -197,7 +197,7 @@ class Laporans extends ChangeNotifier {
 
       final snapshot = await FirebaseFirestore.instance
           .collection("laporan")
-          .where("id_cabang", isEqualTo: id_cabang)
+          .where("id_cabang", isEqualTo: idCabang)
           .where("tanggal", isGreaterThanOrEqualTo: startOfDay)
           .where("tanggal", isLessThan: endOfDay)
           .get();
@@ -236,15 +236,15 @@ class Laporans extends ChangeNotifier {
     return _datas.fold(0, (sum, l) => sum + l.total_pengeluaran);
   }
 
-  Future<String> checkAndCreateLaporan(String id_cabang) async {
+  Future<String> checkAndCreateLaporan(String idCabang) async {
     // **LOAD DATA DULU**
-    await getData(id_cabang);
+    await getData(idCabang);
 
     final today = DateTime.now();
 
     final existingLaporan = _datas.where(
       (l) =>
-          l.id_cabang == id_cabang &&
+          l.id_cabang == idCabang &&
           l.tanggal != null &&
           l.tanggal!.year == today.year &&
           l.tanggal!.month == today.month &&
@@ -264,7 +264,7 @@ class Laporans extends ChangeNotifier {
       total_pengeluaran: 0,
       status: false,
       tanggal: today,
-      id_cabang: id_cabang,
+      id_cabang: idCabang,
     );
 
     await newRef.set(newData.toMap());

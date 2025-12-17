@@ -27,7 +27,7 @@ class _ListDistribusiState extends State<ListDistribusi> {
 
         return Column(
           children: [
-            Container(
+            SizedBox(
               height: 55,
               child: Card(
                 color: Colors.blue[100],

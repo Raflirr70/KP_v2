@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
+import 'package:kerprak/widget/popup/show_edit_makanan_dialog.dart';
 import 'package:kerprak/widget/popup/show_tambah_makanan.dart';
 import 'package:provider/provider.dart';
 
@@ -149,6 +150,7 @@ class ListMakanan extends StatelessWidget {
               color: Colors.blueAccent,
               onTap: () {
                 Navigator.pop(context);
+                showEditMakananDialog(context, makanan);
               },
             ),
             SizedBox(height: 12),

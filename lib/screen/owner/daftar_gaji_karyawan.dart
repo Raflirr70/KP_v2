@@ -39,8 +39,9 @@ class _DaftarGajiKaryawanState extends State<DaftarGajiKaryawan> {
       ),
       body: Consumer<Cabangs>(
         builder: (context, cabang, child) {
-          if (cabang.isLoading)
+          if (cabang.isLoading) {
             return Center(child: CircularProgressIndicator());
+          }
           return Column(
             children: [
               SizedBox(height: 16),

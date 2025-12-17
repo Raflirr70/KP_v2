@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
+import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:kerprak/widget/popup/show_tambah_pengeluaran_karyawan.dart';
 import 'package:provider/provider.dart';
 import 'package:kerprak/model/pengeluaran.dart';
@@ -39,7 +40,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50], // Lebih lembut dari grey[100]
-        bottomNavigationBar: NavbarKaryawan(id_cab: "widget.id_cabang", x: 1),
+        bottomNavigationBar: NavbarKaryawan(id_cab: widget.id_cabang, x: 1),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: AppbarKaryawan(id_cabang: widget.id_cabang),
@@ -177,7 +178,18 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                             itemBuilder: (context, index) {
                               final p = asyncSnapshot.data![index];
                               return InkWell(
-                                onTap: () {},
+                                onLongPress: () {
+                                  alertPenghapusan(
+                                    context,
+                                    onDelete: () async {
+                                      await Provider.of<Pengeluarans>(
+                                        context,
+                                        listen: false,
+                                      ).hapusData(p);
+                                      Navigator.pop(context); // tutup dialog
+                                    },
+                                  );
+                                },
                                 child: Card(
                                   elevation: 3,
                                   color: Colors.red[50],
@@ -207,7 +219,7 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                               ),
                                             ),
                                             Text(
-                                              "Rp ${p.jumlahUnit}",
+                                              "Rp ${p.totalHarga.toString()}",
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
@@ -223,13 +235,13 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                         Row(
                                           children: [
                                             Icon(
-                                              Icons.calendar_today,
+                                              Icons.unarchive_outlined,
                                               size: 14,
                                               color: Colors.grey,
                                             ),
                                             SizedBox(width: 6),
                                             Text(
-                                              p.totalHarga.toString(),
+                                              "${p.jumlahUnit.toString()} ${p.jenisSatuan}",
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: Colors.grey[700],

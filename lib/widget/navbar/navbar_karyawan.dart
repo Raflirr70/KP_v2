@@ -45,14 +45,6 @@ class NavbarKaryawan extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HomepageKaryawan(
-                  id_user: FirebaseAuth.instance.currentUser!.uid,
-                ),
-              ),
-            );
-            Navigator.push(
-              context,
-              MaterialPageRoute(
                 builder: (context) => PengeluaranPage(id_cabang: id_cab),
               ),
             );

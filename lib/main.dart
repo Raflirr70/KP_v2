@@ -86,8 +86,9 @@ class AuthCheck extends StatelessWidget {
             }
 
             final data = roleSnapshot.data!.data();
-            if (data == null)
+            if (data == null) {
               return Center(child: Text("User tidak ditemukan"));
+            }
 
             final role = data["role"];
             if (role == "admin") {

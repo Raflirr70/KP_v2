@@ -60,8 +60,9 @@ class _DaftarPengeluaranState extends State<DaftarPengeluaran> {
       ),
       body: Consumer<Pengeluarans>(
         builder: (context, pluars, child) {
-          if (pluars.isLoading)
+          if (pluars.isLoading) {
             return Center(child: CircularProgressIndicator());
+          }
 
           // Filter langsung tanpa provider
           List<Pengeluaran> filtered = pluars.datas

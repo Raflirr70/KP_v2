@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/makanan.dart';
 import 'package:provider/provider.dart';
-import 'package:kerprak/model/user.dart';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:kerprak/model/user.dart';
-
-void showTambahKaryawanDialog(BuildContext context) {
+void showEditMakananDialog(BuildContext context, Makanan makanan) {
   final formKey = GlobalKey<FormState>();
-  String nama = '';
-  String email = '';
-  String password = '';
+  String nama = makanan.nama;
+  int harga = makanan.harga;
 
   showDialog(
     context: context,
@@ -19,13 +14,11 @@ void showTambahKaryawanDialog(BuildContext context) {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: Colors.orange[50],
         insetPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-
         title: Text(
-          "Tambah Karyawan",
+          "Edit Makanan",
           textAlign: TextAlign.center,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-
         contentPadding: EdgeInsets.zero,
         content: Padding(
           padding: const EdgeInsets.all(16),
@@ -34,11 +27,12 @@ void showTambahKaryawanDialog(BuildContext context) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // NAMA
+                // Nama Makanan
                 TextFormField(
+                  initialValue: nama,
                   decoration: InputDecoration(
-                    hintText: "Nama Karyawan",
-                    prefixIcon: Icon(Icons.person),
+                    hintText: "Nama Makanan",
+                    prefixIcon: Icon(Icons.fastfood),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -50,50 +44,37 @@ void showTambahKaryawanDialog(BuildContext context) {
                       : null,
                   onChanged: (value) => nama = value,
                 ),
-
                 SizedBox(height: 12),
 
-                // EMAIL
+                // Harga
                 TextFormField(
+                  initialValue: harga.toString(),
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    hintText: "Email",
-                    prefixIcon: Icon(Icons.email),
+                    hintText: "Harga",
+                    prefixIcon: Icon(Icons.money),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value == null || !value.contains("@")
-                      ? "Email tidak valid"
-                      : null,
-                  onChanged: (value) => email = value,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Harga harus diisi";
+                    }
+                    if (int.tryParse(value) == null) {
+                      return "Harga harus berupa angka";
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    harga = int.tryParse(value) ?? 0;
+                  },
                 ),
-
-                SizedBox(height: 12),
-
-                // PASSWORD
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                    prefixIcon: Icon(Icons.key),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  obscureText: true,
-                  validator: (value) => value == null || value.length < 6
-                      ? "Password minimal 6 karakter"
-                      : null,
-                  onChanged: (value) => password = value,
-                ),
-
                 SizedBox(height: 20),
 
-                // TOMBOL SIMPAN
+                // Tombol Simpan
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -116,20 +97,22 @@ void showTambahKaryawanDialog(BuildContext context) {
                         try {
                           final messenger = ScaffoldMessenger.of(context);
 
-                          await Provider.of<Users>(
+                          // Update data makanan
+                          makanan.nama = nama;
+                          makanan.harga = harga;
+
+                          await Provider.of<Makanans>(
                             context,
                             listen: false,
-                          ).tambahKaryawan(
-                            nama: nama,
-                            email: email,
-                            password: password,
-                          );
+                          ).updateMakanan(
+                            makanan,
+                          ); // bisa diganti dengan update method jika ada
 
                           Navigator.of(context).pop();
 
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text("Berhasil menambahkan karyawan!"),
+                              content: Text("Berhasil mengubah makanan!"),
                               backgroundColor: Colors.green,
                               behavior: SnackBarBehavior.floating,
                               margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -139,7 +122,7 @@ void showTambahKaryawanDialog(BuildContext context) {
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text("Gagal menambahkan karyawan: $e"),
+                              content: Text("Gagal mengubah: $e"),
                               backgroundColor: Colors.red,
                               duration: Duration(seconds: 3),
                             ),

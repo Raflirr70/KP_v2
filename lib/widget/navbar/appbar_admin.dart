@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class AppbarAdmin extends StatelessWidget {
   final data;
-  AppbarAdmin({super.key, this.data = ""});
+  const AppbarAdmin({super.key, this.data = ""});
 
   @override
   Widget build(BuildContext context) {

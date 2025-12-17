@@ -3,7 +3,7 @@ import 'package:kerprak/model/user.dart';
 import 'package:provider/provider.dart';
 
 void showEditKaryawanDialog(BuildContext context, dynamic user) {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   String nama = user.nama;
   String email = user.email;
@@ -26,7 +26,7 @@ void showEditKaryawanDialog(BuildContext context, dynamic user) {
         content: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -90,7 +90,7 @@ void showEditKaryawanDialog(BuildContext context, dynamic user) {
                       ),
                     ),
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
+                      if (formKey.currentState!.validate()) {
                         try {
                           final messenger = ScaffoldMessenger.of(context);
 

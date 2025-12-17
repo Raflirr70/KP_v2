@@ -53,10 +53,10 @@ class Pengeluarans extends ChangeNotifier {
 
   List<Pengeluaran> get datas => _datas;
 
-  Stream<List<Pengeluaran>> streamPenjualanByIdLaporan(String id_laporan) {
+  Stream<List<Pengeluaran>> streamPenjualanByIdLaporan(String idLaporan) {
     final pengeluaranRef = FirebaseFirestore.instance
         .collection('pengeluaran')
-        .where('id_laporan', isEqualTo: id_laporan);
+        .where('id_laporan', isEqualTo: idLaporan);
 
     return pengeluaranRef.snapshots().asyncMap((snapshot) async {
       List<Pengeluaran> result = [];
@@ -78,7 +78,7 @@ class Pengeluarans extends ChangeNotifier {
   }
 
   /// Fetch data dari Firestore
-  Future<void> fetchDataHariIni(String id_laporan) async {
+  Future<void> fetchDataHariIni(String idLaporan) async {
     isLoading = true;
     notifyListeners();
 
@@ -89,7 +89,7 @@ class Pengeluarans extends ChangeNotifier {
 
       final snapshot = await FirebaseFirestore.instance
           .collection('pengeluaran')
-          .where('id_laporan', isEqualTo: id_laporan)
+          .where('id_laporan', isEqualTo: idLaporan)
           .get();
 
       _datas = snapshot.docs

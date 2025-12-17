@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
 
                     child: Text("data"),
                   ),
-                  Container(
+                  SizedBox(
                     height: 200,
                     child: ListView.builder(
                       itemCount: value.datas.length,

@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 void showPilihMakananPopup(
   BuildContext context,
   Makanans makananValue,
-  String id_cabang_dari,
-  String id_cabang_tujuan,
+  String idCabangDari,
+  String idCabangTujuan,
 ) {
   TextEditingController searchController = TextEditingController();
   List<Makanan> filteredList = List.from(makananValue.datas);
@@ -82,7 +82,7 @@ void showPilihMakananPopup(
                               listen: false,
                             ).datas.firstWhere(
                               (s) =>
-                                  s.idCabang == id_cabang_dari &&
+                                  s.idCabang == idCabangDari &&
                                   s.idMakanan == m.id,
                               orElse: () => Stock(
                                 id: "-",
@@ -116,7 +116,7 @@ void showPilihMakananPopup(
 
     final Makanan makanan = selectedMakanan;
     final stock = Provider.of<Stocks>(context, listen: false).datas.firstWhere(
-      (s) => s.idCabang == id_cabang_dari && s.idMakanan == selectedMakanan.id,
+      (s) => s.idCabang == idCabangDari && s.idMakanan == selectedMakanan.id,
       orElse: () =>
           Stock(id: "-", idCabang: "-", idMakanan: "-", jumlahStock: 0),
     );
@@ -138,7 +138,7 @@ void showPilihMakananPopup(
               backgroundColor: Colors.orange[50],
               title: Row(
                 children: [
-                  Text("${makanan.nama}", style: TextStyle(fontSize: 17)),
+                  Text(makanan.nama, style: TextStyle(fontSize: 17)),
                   Spacer(),
                   Text(
                     "Stock: ${stock.jumlahStock}",
@@ -201,18 +201,18 @@ void showPilihMakananPopup(
     final stockProvider = Provider.of<Stocks>(context, listen: false);
 
     await distribusiProvider.addDistribusi(
-      idCabangDari: id_cabang_dari,
-      idCabangTujuan: id_cabang_tujuan,
+      idCabangDari: idCabangDari,
+      idCabangTujuan: idCabangTujuan,
       idMakanan: makanan.id,
       jumlah: jumlah!,
     );
 
     // KURANGI STOCK CABANG ASAL
     final stockAsal = stockProvider.datas.firstWhere(
-      (s) => s.idCabang == id_cabang_dari && s.idMakanan == makanan.id,
+      (s) => s.idCabang == idCabangDari && s.idMakanan == makanan.id,
       orElse: () => Stock(
         id: "-",
-        idCabang: id_cabang_dari,
+        idCabang: idCabangDari,
         idMakanan: makanan.id,
         jumlahStock: 0,
       ),
@@ -221,23 +221,23 @@ void showPilihMakananPopup(
     if (stockAsal.id != "-") {
       await stockProvider.saveStock(
         idMakanan: makanan.id,
-        idCabang: id_cabang_dari,
+        idCabang: idCabangDari,
         jumlahStock: stockAsal.jumlahStock - jumlah!,
       );
     } else {
       await stockProvider.saveStock(
         idMakanan: makanan.id,
-        idCabang: id_cabang_dari,
+        idCabang: idCabangDari,
         jumlahStock: 0,
       );
     }
 
     // TAMBAH STOCK CABANG TUJUAN
     final stockTujuan = stockProvider.datas.firstWhere(
-      (s) => s.idCabang == id_cabang_tujuan && s.idMakanan == makanan.id,
+      (s) => s.idCabang == idCabangTujuan && s.idMakanan == makanan.id,
       orElse: () => Stock(
         id: "-",
-        idCabang: id_cabang_tujuan,
+        idCabang: idCabangTujuan,
         idMakanan: makanan.id,
         jumlahStock: 0,
       ),
@@ -245,7 +245,7 @@ void showPilihMakananPopup(
 
     await stockProvider.saveStock(
       idMakanan: makanan.id,
-      idCabang: id_cabang_tujuan,
+      idCabang: idCabangTujuan,
       jumlahStock: stockTujuan.jumlahStock + jumlah!,
     );
     Provider.of<Stocks>(context, listen: false).getAllStocks();

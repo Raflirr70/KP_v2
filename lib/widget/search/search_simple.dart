@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kerprak/model/search.dart';
-import 'package:provider/provider.dart';
 
 class SearchSimple extends StatefulWidget {
   final TextEditingController controller;

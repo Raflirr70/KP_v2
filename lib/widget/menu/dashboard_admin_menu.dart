@@ -6,7 +6,6 @@ import 'package:kerprak/screen/owner/daftar_makanan.dart';
 import 'package:kerprak/screen/owner/daftar_pengeluaran.dart';
 import 'package:kerprak/screen/owner/daftar_stock.dart';
 import 'package:kerprak/screen/owner/distribusi_page.dart';
-import 'package:kerprak/screen/owner/monitoring.dart';
 import 'package:kerprak/screen/owner/penjadwalan_page.dart';
 
 class DashboardAdminMenu extends StatelessWidget {
