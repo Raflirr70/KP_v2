@@ -25,19 +25,25 @@ class _HomepageAdminState extends State<HomepageAdmin> {
   }
 
   void pen() async {
-    final total = await Provider.of<Laporans>(
+    final totalPendapatan = await Provider.of<Laporans>(
       context,
       listen: false,
     ).getTotalPendapatan();
+    final totalPengeluaran = await Provider.of<Laporans>(
+      context,
+      listen: false,
+    ).getTotalPengeluaran();
 
     if (!mounted) return;
 
     setState(() {
-      pendapatan = total;
+      pendapatan = totalPendapatan;
+      pengeluaran = totalPengeluaran;
     });
   }
 
   double? pendapatan;
+  double? pengeluaran;
 
   void gantiModeChart() {
     setState(() {
@@ -169,31 +175,47 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                             children: [
                               for (int a = 0; a < value.datas.length; a++)
                                 if (value.datas[a].nama != "Gudang" || !mode)
-                                  FutureBuilder(
-                                    future: Provider.of<Laporans>(
-                                      context,
-                                    ).getPendapatan(value.datas[a].id),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      } else {
-                                        return mode
-                                            ? _barPendapatan(
-                                                snapshot.data ?? 1,
-                                                value.datas[a].nama,
-                                                pendapatan ?? 1,
-                                              )
-                                            : _barPengeluaran(
+                                  mode
+                                      ? FutureBuilder(
+                                          future: Provider.of<Laporans>(
+                                            context,
+                                          ).getPendapatan(value.datas[a].id),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            } else {
+                                              return _barPendapatan(
                                                 snapshot.data ?? 1,
                                                 value.datas[a].nama,
                                                 pendapatan ?? 1,
                                               );
-                                      }
-                                    },
-                                  ),
+                                            }
+                                          },
+                                        )
+                                      : FutureBuilder(
+                                          future: Provider.of<Laporans>(
+                                            context,
+                                          ).getPengeluaran(value.datas[a].id),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            } else {
+                                              return _barPengeluaran(
+                                                snapshot.data ?? 1,
+                                                value.datas[a].nama,
+                                                pengeluaran ?? 1,
+                                              );
+                                            }
+                                          },
+                                        ),
                             ],
                           );
                         },
@@ -243,13 +265,12 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                       ),
                       child: Consumer<Cabangs>(
                         builder: (context, value, child) {
-                          print(pendapatan);
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               for (int a = 0; a < value.datas.length; a++)
-                                if (value.datas[a].nama != "Gudang")
+                                if (value.datas[a].nama != "Gudang" || !mode)
                                   mode
                                       ? FutureBuilder(
                                           future: Provider.of<Laporans>(

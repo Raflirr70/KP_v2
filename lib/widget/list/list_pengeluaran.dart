@@ -4,18 +4,42 @@ import 'package:kerprak/widget/popup/alert_penghapusan.dart';
 import 'package:kerprak/widget/popup/show_edit_pengeluaran.dart';
 import 'package:kerprak/widget/popup/show_tambah_pengeluaran.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ListPengeluaran extends StatelessWidget {
+class ListPengeluaran extends StatefulWidget {
   final List<Pengeluaran> pluars;
   const ListPengeluaran({super.key, required this.pluars});
 
   @override
+  State<ListPengeluaran> createState() => _ListPengeluaranState();
+}
+
+class _ListPengeluaranState extends State<ListPengeluaran> {
+  String? id_laporan;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPref();
+  }
+
+  Future<void> _loadPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      id_laporan = prefs.getString('id_laporan');
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (id_laporan == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      itemCount: pluars.length + 1,
-      itemBuilder: (context, i) {
-        if (i == pluars.length) {
+      itemCount: widget.pluars.length + 1,
+      itemBuilder: (context, index) {
+        if (index == widget.pluars.length) {
           return InkWell(
             child: Card(
               color: Colors.red[100],
@@ -26,11 +50,11 @@ class ListPengeluaran extends StatelessWidget {
                 child: Icon(Icons.add_circle),
               ),
             ),
-            onTap: () => showTambahPengeluaranPopup(context, "asd"),
+            onTap: () => showTambahPengeluaranPopup(context, id_laporan!),
           );
         }
 
-        var pluar = pluars[i];
+        var pluar = widget.pluars[index];
 
         return Card(
           shape: RoundedRectangleBorder(),
@@ -44,7 +68,7 @@ class ListPengeluaran extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text((i + 1).toString()),
+                  Text((index + 1).toString()),
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     width: 2,

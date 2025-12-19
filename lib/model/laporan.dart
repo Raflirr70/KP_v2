@@ -194,6 +194,44 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<double> getTotalPengeluaran() async {
+    try {
+      final now = DateTime.now();
+
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      // 2️⃣ Ambil laporan berdasarkan cabang
+      final snapshotLaporan = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where("tanggal", isGreaterThanOrEqualTo: startOfDay)
+          .where("tanggal", isLessThan: endOfDay)
+          .get();
+
+      double totalPengeluaran = 0;
+
+      // 3️⃣ Loop setiap laporan → ambil penjualan
+      for (var laporanDoc in snapshotLaporan.docs) {
+        final idLaporan = laporanDoc.id;
+
+        final snapshotPenjualan = await FirebaseFirestore.instance
+            .collection("pengeluaran")
+            .where('id_laporan', isEqualTo: idLaporan)
+            .get();
+
+        for (var penjualan in snapshotPenjualan.docs) {
+          totalPengeluaran += (penjualan['total_harga'] ?? 0) as int;
+        }
+      }
+
+      // 4️⃣ Output final
+      return totalPengeluaran;
+    } catch (e) {
+      print("Error getPengeluaran: $e");
+      return 0;
+    }
+  }
+
   Future<double> getTotalPendapatan() async {
     try {
       final now = DateTime.now();

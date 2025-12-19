@@ -5,6 +5,7 @@ import 'package:kerprak/widget/list/list_pengeluaran.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DaftarPengeluaran extends StatefulWidget {
   const DaftarPengeluaran({super.key});
@@ -42,6 +43,9 @@ class _DaftarPengeluaranState extends State<DaftarPengeluaran> {
       context,
       listen: false,
     ).checkAndCreateLaporan("N7EjTNIMq5AgAEqN0ii5");
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('id_laporan', idLaporan!);
   }
 
   @override
