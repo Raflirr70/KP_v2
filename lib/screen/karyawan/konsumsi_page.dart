@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/konsumsi.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/user.dart';
@@ -20,7 +18,6 @@ class KonsumsiPage extends StatefulWidget {
 
 class _KonsumsiPageState extends State<KonsumsiPage> {
   String? x;
-  final bool _showSummary = true;
   bool load = true;
   String formatTimeOfDay(TimeOfDay tod) {
     final hour = tod.hourOfPeriod.toString().padLeft(2, '0');
@@ -246,39 +243,6 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // =================== SUMMARY BOX ===================
-  Widget _summaryBox(String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

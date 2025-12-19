@@ -1,9 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/cabang.dart';
 import 'package:kerprak/model/laporan.dart';
-import 'package:kerprak/widget/dll/legen_item.dart';
 import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
@@ -194,7 +191,6 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                                                 value.datas[a].nama,
                                                 pendapatan ?? 1,
                                               );
-                                        ;
                                       }
                                     },
                                   ),
@@ -237,8 +233,6 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                                     24,
                                   ).withOpacity(0.07),
                                 ],
-                          // begin: Alignment.topCenter,
-                          // end: Alignment.bottomCenter,
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -256,50 +250,111 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                             children: [
                               for (int a = 0; a < value.datas.length; a++)
                                 if (value.datas[a].nama != "Gudang")
-                                  FutureBuilder(
-                                    future: Provider.of<Laporans>(
-                                      context,
-                                    ).getPendapatan(value.datas[a].id),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: Center(
-                                            child: Text(
-                                              "-",
-                                              style: TextStyle(fontSize: 11),
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        return Row(
-                                          children: [
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                value.datas[a].nama,
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                              child: Text(
-                                                ":",
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                snapshot.data.toString(),
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      }
-                                    },
-                                  ),
+                                  mode
+                                      ? FutureBuilder(
+                                          future: Provider.of<Laporans>(
+                                            context,
+                                          ).getPendapatan(value.datas[a].id),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                child: Center(
+                                                  child: Text(
+                                                    "-",
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              return Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      value.datas[a].nama,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                    child: Text(
+                                                      ":",
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      snapshot.data.toString(),
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }
+                                          },
+                                        )
+                                      : FutureBuilder(
+                                          future: Provider.of<Laporans>(
+                                            context,
+                                          ).getPengeluaran(value.datas[a].id),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                child: Center(
+                                                  child: Text(
+                                                    "-",
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              return Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      value.datas[a].nama,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                    child: Text(
+                                                      ":",
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      snapshot.data.toString(),
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }
+                                          },
+                                        ),
                             ],
                           );
                         },

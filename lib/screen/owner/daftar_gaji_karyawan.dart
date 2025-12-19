@@ -4,7 +4,6 @@ import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/penggajian.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:kerprak/widget/list/list_gaji_karyawan.dart';
-import 'package:kerprak/widget/menu/dashboard_admin_menu.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
 

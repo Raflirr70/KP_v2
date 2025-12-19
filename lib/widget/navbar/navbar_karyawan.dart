@@ -5,17 +5,22 @@ import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
 import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
 import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 
-class NavbarKaryawan extends StatelessWidget {
+class NavbarKaryawan extends StatefulWidget {
   int x;
   final id_cab;
   NavbarKaryawan({super.key, required this.id_cab, required this.x});
 
   @override
+  State<NavbarKaryawan> createState() => _NavbarKaryawanState();
+}
+
+class _NavbarKaryawanState extends State<NavbarKaryawan> {
+  @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: x < 0 ? 0 : x,
+      currentIndex: widget.x < 0 ? 0 : widget.x,
       backgroundColor: Color(0xFF111118),
-      selectedItemColor: x < 0 ? Colors.grey[400] : Colors.blueAccent,
+      selectedItemColor: widget.x < 0 ? Colors.grey[400] : Colors.blueAccent,
       unselectedItemColor: Colors.grey[400],
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed, // Pastikan semua item terlihat
@@ -37,25 +42,32 @@ class NavbarKaryawan extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PenjualanPage(id_cabang: id_cab),
+                builder: (context) => PenjualanPage(id_cabang: widget.id_cab),
               ),
-            );
+            ).then((_) {
+              setState(() {}); // auto refresh
+            });
             break;
           case 1:
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PengeluaranPage(id_cabang: id_cab),
+                builder: (context) => PengeluaranPage(id_cabang: widget.id_cab),
               ),
-            );
+            ).then((_) {
+              setState(() {}); // auto refresh
+            });
             break;
           case 2:
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => KonsumsiPage(id_cabang: id_cab!),
+                builder: (context) => KonsumsiPage(id_cabang: widget.id_cab!),
               ),
-            );
+            ).then((_) {
+              setState(() {}); // auto refresh
+            });
+
             break;
         }
       },

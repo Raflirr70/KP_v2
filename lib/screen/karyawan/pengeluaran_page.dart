@@ -186,7 +186,6 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
                                         context,
                                         listen: false,
                                       ).hapusData(p);
-                                      Navigator.pop(context); // tutup dialog
                                     },
                                   );
                                 },

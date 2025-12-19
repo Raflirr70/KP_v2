@@ -7,9 +7,6 @@ import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/pengeluaran.dart';
 import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/model/user.dart';
-import 'package:kerprak/screen/karyawan/konsumsi_page.dart';
-import 'package:kerprak/screen/karyawan/pengeluaran_page.dart';
-import 'package:kerprak/screen/karyawan/penjualan_page.dart';
 import 'package:kerprak/widget/list/list_stock_karyawan.dart';
 import 'package:kerprak/widget/navbar/navbar_karyawan.dart';
 import 'package:provider/provider.dart';
@@ -104,6 +101,10 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
         setState(() {
           _akunBelumJadwal = false;
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.setString("id_laporan", idLaporan!);
+          });
+          print("idLaporan set: $idLaporan");
         });
       }
     } else {
