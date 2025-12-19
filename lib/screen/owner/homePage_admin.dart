@@ -223,7 +223,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                     ),
                     Container(
                       width: double.infinity,
-                      height: 100,
+                      height: mode ? 100 : 125,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: mode
@@ -385,12 +385,7 @@ class _HomepageAdminState extends State<HomepageAdmin> {
                 ),
               ),
             ),
-
-            SizedBox(
-              height: 30,
-              width: 200,
-              child: Divider(thickness: 4, radius: BorderRadius.circular(100)),
-            ),
+            SizedBox(height: 20),
             Expanded(
               child: Container(
                 padding: EdgeInsets.all(10),
