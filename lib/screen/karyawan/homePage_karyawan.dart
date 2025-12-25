@@ -119,7 +119,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
     if (_akunBelumJadwal == null) {
       return Center(child: CircularProgressIndicator());
     }
-    if (_akunBelumJadwal!) {
+    if (_akunBelumJadwal! || id_cab == "N7EjTNIMq5AgAEqN0ii5") {
       return Scaffold(
         backgroundColor: Colors.grey,
         body: Center(
@@ -135,8 +135,13 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
-                  Text("Akun belum dapat jadwal."),
-                  Text("Harap Lapor Ke Owner"),
+                  if (_akunBelumJadwal!) ...[
+                    Text("Akun belum dapat jadwal."),
+                    Text("Harap Lapor Ke Owner"),
+                  ] else ...[
+                    Text("Bagian Gudang tidak"),
+                    Text("tidak dapat mengakses aplikasi."),
+                  ],
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
