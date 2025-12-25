@@ -8,8 +8,6 @@ void showUpdateStock(
   required List<Cabang> cabang,
   required String idMakanan,
 }) async {
-  bool modeTetap = true;
-
   // Ambil ID cabang
   String idGudang = cabang.firstWhere((c) => c.nama == "Gudang").id;
   String idCipanas = cabang.firstWhere((c) => c.nama == "Cipanas").id;
@@ -37,7 +35,12 @@ void showUpdateStock(
   final stokBalakangAwal = ambilStock(idBalakang);
   final stokGspAwal = ambilStock(idGsp);
 
-  final stockTotalAwal = await stocks.getTotalStockByCabang(idMakanan);
+  final stockTotalAwal =
+      stokGudangAwal +
+      stokCipanasAwal +
+      stokCimacanAwal +
+      stokBalakangAwal +
+      stokGspAwal;
 
   final gudangC = TextEditingController(text: stokGudangAwal.toString());
   final cipanasC = TextEditingController(text: stokCipanasAwal.toString());
@@ -47,39 +50,16 @@ void showUpdateStock(
   final selisih = TextEditingController(text: "0");
 
   void hitungOtomatis() {
-    if (!modeTetap) {
-      int gudang = int.tryParse(gudangC.text) ?? stokGudangAwal;
-      int cipanas = int.tryParse(cipanasC.text) ?? stokCipanasAwal;
-      int cimacan = int.tryParse(cimacanC.text) ?? stokCimacanAwal;
-      int balakang = int.tryParse(balakangC.text) ?? stokBalakangAwal;
-      int gsp = int.tryParse(gspC.text) ?? stokGspAwal;
+    int gudang = int.tryParse(gudangC.text) ?? stokGudangAwal;
+    int cipanas = int.tryParse(cipanasC.text) ?? stokCipanasAwal;
+    int cimacan = int.tryParse(cimacanC.text) ?? stokCimacanAwal;
+    int balakang = int.tryParse(balakangC.text) ?? stokBalakangAwal;
+    int gsp = int.tryParse(gspC.text) ?? stokGspAwal;
 
-      int totalBaru = gudang + cipanas + cimacan + balakang + gsp;
-      selisih.text = (totalBaru - stockTotalAwal).toString();
-    } else {
-      int cipanas = int.tryParse(cipanasC.text) ?? stokCipanasAwal;
-      int cimacan = int.tryParse(cimacanC.text) ?? stokCimacanAwal;
-      int balakang = int.tryParse(balakangC.text) ?? stokBalakangAwal;
-      int gsp = int.tryParse(gspC.text) ?? stokGspAwal;
+    final totalBaru = gudang + cipanas + cimacan + balakang + gsp;
+    final delta = totalBaru - stockTotalAwal;
 
-      int perubahan =
-          (cipanas - stokCipanasAwal) +
-          (cimacan - stokCimacanAwal) +
-          (balakang - stokBalakangAwal) +
-          (gsp - stokGspAwal);
-
-      int gudangBaru = stokGudangAwal - perubahan;
-
-      selisih.text = "0";
-
-      if (gudangBaru < 0) {
-        selisih.text = gudangBaru.toString();
-        gudangC.text = "0";
-        return;
-      }
-
-      gudangC.text = gudangBaru.toString();
-    }
+    selisih.text = delta.toString();
   }
 
   gudangC.addListener(hitungOtomatis);
@@ -121,11 +101,7 @@ void showUpdateStock(
                   children: [
                     Expanded(
                       flex: 3,
-                      child: buildFieldOrange(
-                        "Gudang",
-                        gudangC,
-                        readOnly: modeTetap,
-                      ),
+                      child: buildFieldOrange("Gudang", gudangC),
                     ),
                     SizedBox(width: 10),
                     Expanded(
@@ -151,35 +127,39 @@ void showUpdateStock(
                   ],
                 ),
 
-                SizedBox(height: 15),
-
-                // MODE BUTTON
-                GestureDetector(
-                  onTap: () => setState(() => modeTetap = !modeTetap),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: modeTetap ? Colors.blue[400] : Colors.orange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        modeTetap ? "Mode: Tetap" : "Mode: Bebas",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
                 SizedBox(height: 20),
 
                 // SIMPAN BUTTON
                 ElevatedButton.icon(
                   onPressed: () async {
+                    if (selisih.text != "0") {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          insetPadding: EdgeInsets.all(16),
+                          title: Text("Simpan Perubahan"),
+                          content: Text(
+                            (int.tryParse(selisih.text) ?? 0) > 0
+                                ? "total penambahan stock ${selisih.text}"
+                                : "total pengurangan stock ${selisih.text.replaceFirst('-', '')}",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text("Batal"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text("Yakin"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm != true) {
+                        return; // Batalkan penyimpanan jika tidak yakin
+                      }
+                    }
                     final Map<String, int> updatedStocks = {
                       idGudang: int.tryParse(gudangC.text) ?? 0,
                       idCipanas: int.tryParse(cipanasC.text) ?? 0,

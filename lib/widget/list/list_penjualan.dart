@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/penjualan.dart';
+import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/screen/karyawan/add_penjualan.dart';
 import 'package:provider/provider.dart';
 
@@ -108,7 +109,62 @@ class ListPenjualan extends StatelessWidget {
 
                   return InkWell(
                     onLongPress: () {
-                      // delete di sini
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Hapus Penjualan?"),
+                          content: Text("Stock akan dikembalikan ke database"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text("Batal"),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                try {
+                                  // Kembalikan stock untuk setiap detail penjualan
+                                  final stocks = context.read<Stocks>();
+                                  for (var detail in p.detail) {
+                                    final currentStock = await stocks
+                                        .getCurrentStock(
+                                          id_cabang,
+                                          detail.id_makanan,
+                                        );
+                                    print("id makanan ${detail.id_makanan}");
+                                    print("jumlah ${detail.jumlah}");
+                                    await stocks.updateStock(
+                                      id_cabang,
+                                      detail.id_makanan,
+                                      currentStock + detail.jumlah,
+                                    );
+                                  }
+
+                                  // Hapus penjualan
+                                  await context
+                                      .read<Penjualans>()
+                                      .hapusPenjualan(p);
+
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Penjualan berhasil dihapus",
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  print("Error: $e");
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: Text(
+                                "Hapus",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     },
                     child: Card(
                       elevation: 3,

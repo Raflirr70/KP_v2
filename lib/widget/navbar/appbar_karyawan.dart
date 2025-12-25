@@ -21,8 +21,9 @@ class AppbarKaryawan extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.popUntil(context, (route) => route.isFirst);
                   },
+
                   child: Row(
                     children: [
                       Icon(Icons.temple_buddhist_outlined, color: Colors.white),

@@ -135,8 +135,10 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                         );
 
                         final qty = jumlahBeli[item.id] ?? 0;
+                        bool tersedia = stokSisa[item.id]! > 0;
 
                         return Card(
+                          color: tersedia ? Colors.white : Colors.blueGrey[100],
                           child: Padding(
                             padding: EdgeInsets.all(12),
                             child: Row(
@@ -164,20 +166,23 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                                 Row(
                                   children: [
                                     // MINUS
-                                    InkWell(
-                                      onTap: qty > 0
-                                          ? () {
-                                              jumlahBeli[item.id] = qty - 1;
-                                              stokSisa[item.id] =
-                                                  stokSisa[item.id]! + 1;
-                                              _hitungTotal(listMakanan);
-                                            }
-                                          : null,
-                                      child: _btn(
-                                        Icons.remove,
-                                        Colors.red[100],
+                                    if (qty > 0)
+                                      InkWell(
+                                        onTap: qty > 0
+                                            ? () {
+                                                jumlahBeli[item.id] = qty - 1;
+                                                stokSisa[item.id] =
+                                                    stokSisa[item.id]! + 1;
+                                                _hitungTotal(listMakanan);
+                                              }
+                                            : null,
+                                        child: _btn(
+                                          Icons.remove,
+                                          tersedia || qty > 0
+                                              ? Colors.red[100]
+                                              : Colors.grey[300],
+                                        ),
                                       ),
-                                    ),
 
                                     SizedBox(width: 10),
                                     Text(
@@ -199,7 +204,12 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                                               _hitungTotal(listMakanan);
                                             }
                                           : null,
-                                      child: _btn(Icons.add, Colors.green[100]),
+                                      child: _btn(
+                                        Icons.add,
+                                        tersedia
+                                            ? Colors.green[100]
+                                            : Colors.grey[300],
+                                      ),
                                     ),
                                   ],
                                 ),

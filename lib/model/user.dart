@@ -145,6 +145,11 @@ class Users extends ChangeNotifier {
       // 1. Buat akun di Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: "ampera@gmail.com",
+        password: "monitoring4ampera",
+      );
 
       // 2. Simpan data karyawan di Firestore
       DocumentReference docRef = FirebaseFirestore.instance
