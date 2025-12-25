@@ -354,4 +354,49 @@ class Laporans extends ChangeNotifier {
 
     return newData.id;
   }
+
+  Future<List<double>> getPendapatanHarianM({int jumlahHari = 14}) async {
+    final now = DateTime.now();
+    final startDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: jumlahHari - 1));
+
+    // 1️⃣ Siapkan map tanggal -> total
+    final Map<String, double> dailyTotals = {};
+
+    for (int i = 0; i < jumlahHari; i++) {
+      final date = startDate.add(Duration(days: i));
+      final key = "${date.year}-${date.month}-${date.day}";
+      dailyTotals[key] = 0;
+    }
+
+    // 2️⃣ Ambil laporan 14 hari
+    final laporanSnap = await FirebaseFirestore.instance
+        .collection("laporan")
+        .where("tanggal", isGreaterThanOrEqualTo: startDate)
+        .get();
+
+    // 3️⃣ Loop laporan → ambil penjualan
+    for (var laporanDoc in laporanSnap.docs) {
+      final laporan = Laporan.fromMap(laporanDoc.id, laporanDoc.data());
+      if (laporan.tanggal == null) continue;
+
+      final key =
+          "${laporan.tanggal!.year}-${laporan.tanggal!.month}-${laporan.tanggal!.day}";
+
+      final penjualanSnap = await FirebaseFirestore.instance
+          .collection("penjualan")
+          .where("id_laporan", isEqualTo: laporan.id)
+          .get();
+
+      for (var p in penjualanSnap.docs) {
+        dailyTotals[key] = (dailyTotals[key] ?? 0) + (p['total_harga'] ?? 0);
+      }
+    }
+
+    // 4️⃣ Convert ke List<double> (dibagi 1000 untuk chart)
+    return dailyTotals.values.map((e) => e / 1000).toList();
+  }
 }

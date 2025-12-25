@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kerprak/model/makanan.dart';
 import 'package:kerprak/model/stock.dart';
 import 'package:kerprak/model/penjualan.dart';
-import 'package:kerprak/widget/navbar/appbar_karyawan.dart';
 import 'package:kerprak/widget/search/search_simple.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

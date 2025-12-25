@@ -400,7 +400,6 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
       return;
     }
 
-    final makananList = await context.read<Makanans>().getMakanan();
     final konsumsi = context.read<Konsumsis>();
     final stockProvider = context.read<Stocks>();
 
