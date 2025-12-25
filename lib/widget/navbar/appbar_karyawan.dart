@@ -21,7 +21,10 @@ class AppbarKaryawan extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.of(context).pop(); // tutup dialog dulu
+                    Navigator.of(context).popUntil(
+                      (route) => route.isFirst,
+                    ); // baru ke halaman pertama
                   },
 
                   child: Row(

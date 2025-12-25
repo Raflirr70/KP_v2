@@ -151,86 +151,146 @@ class _KonsumsiPageState extends State<KonsumsiPage> {
                       final p = datas[index];
                       return Consumer<Users>(
                         builder: (context, value, child) {
-                          return Card(
-                            elevation: 3,
-                            color: Colors.deepOrange[50],
-                            margin: EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
+                          return InkWell(
+                            onLongPress: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  insetPadding: EdgeInsets.all(16),
+                                  title: Text("Hapus Data"),
+                                  content: Text(
+                                    "${value} akan dihapus dari data konsumsi. Lanjutkan?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Batal"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        await context
+                                            .read<Konsumsis>()
+                                            .hapusKonsumsiDanKembalikanStock(
+                                              konsumsi: p,
+                                              idCabang: widget.id_cabang,
+                                            );
+
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Hapus"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: Card(
+                              elevation: 3,
+                              color: Colors.deepOrange[50],
+                              margin: EdgeInsets.only(bottom: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Nama menu + total harga
-                                  Consumer<Users>(
-                                    builder: (context, vva, child) {
-                                      String u = vva.datas
-                                          .firstWhere(
-                                            (u) => u.id == p.idKaryawan,
-                                          )
-                                          .nama;
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              u,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Consumer<Users>(
+                                      builder: (context, vva, child) {
+                                        String u = vva.datas
+                                            .firstWhere(
+                                              (u) => u.id == p.idKaryawan,
+                                            )
+                                            .nama;
+
+                                        return Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            /// KIRI: Nama karyawan + jam
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    u,
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 2),
+                                                  Text(
+                                                    "Jam: ${p.jam}", // 🔥 JAM DITAMPILKAN
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: p.detailKonsumsi.map((d) {
-                                              return Consumer<Makanans>(
-                                                builder: (context, value, child) {
-                                                  final ms = value.datas
-                                                      .firstWhere(
-                                                        (m) =>
-                                                            m.id == d.idMakanan,
-                                                      );
-                                                  return Row(
-                                                    children: [
-                                                      Text(
-                                                        ms.nama,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color:
-                                                              Colors.deepOrange,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        "  x ${d.jumlah.toString()}",
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color:
-                                                              Colors.deepOrange,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
 
-                                  SizedBox(height: 6),
-                                ],
+                                            /// KANAN: daftar makanan
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: p.detailKonsumsi.map((
+                                                d,
+                                              ) {
+                                                return Consumer<Makanans>(
+                                                  builder:
+                                                      (context, value, child) {
+                                                        final ms = value.datas
+                                                            .firstWhere(
+                                                              (m) =>
+                                                                  m.id ==
+                                                                  d.idMakanan,
+                                                            );
+                                                        return Row(
+                                                          children: [
+                                                            Text(
+                                                              ms.nama,
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Colors
+                                                                    .deepOrange,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              "  x ${d.jumlah}",
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Colors
+                                                                    .deepOrange,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                    SizedBox(height: 6),
+                                  ],
+                                ),
                               ),
                             ),
                           );

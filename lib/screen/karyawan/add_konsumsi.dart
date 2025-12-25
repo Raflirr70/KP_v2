@@ -284,6 +284,9 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
                                 final qty = jumlahBeli[item.id] ?? 0;
 
                                 return Card(
+                                  color: stokSisa[item.id]! == 0
+                                      ? Colors.blueGrey[100]
+                                      : Colors.white,
                                   child: Padding(
                                     padding: EdgeInsets.all(12),
                                     child: Row(
@@ -310,22 +313,25 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
                                         ),
                                         Row(
                                           children: [
-                                            InkWell(
-                                              onTap: qty > 0
-                                                  ? () {
-                                                      jumlahBeli[item.id] =
-                                                          qty - 1;
-                                                      stokSisa[item.id] =
-                                                          stokSisa[item.id]! +
-                                                          1;
-                                                      _hitungTotal(listMakanan);
-                                                    }
-                                                  : null,
-                                              child: _btn(
-                                                Icons.remove,
-                                                Colors.red[100],
+                                            if (qty > 0)
+                                              InkWell(
+                                                onTap: qty > 0
+                                                    ? () {
+                                                        jumlahBeli[item.id] =
+                                                            qty - 1;
+                                                        stokSisa[item.id] =
+                                                            stokSisa[item.id]! +
+                                                            1;
+                                                        _hitungTotal(
+                                                          listMakanan,
+                                                        );
+                                                      }
+                                                    : null,
+                                                child: _btn(
+                                                  Icons.remove,
+                                                  Colors.red[100],
+                                                ),
                                               ),
-                                            ),
                                             SizedBox(width: 10),
                                             Text(
                                               "$qty",
@@ -348,7 +354,9 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
                                                   : null,
                                               child: _btn(
                                                 Icons.add,
-                                                Colors.orange[200],
+                                                stokSisa[item.id]! > 0
+                                                    ? Colors.green[100]
+                                                    : Colors.grey[300],
                                               ),
                                             ),
                                           ],
@@ -404,15 +412,21 @@ class _AddKonsumsiState extends State<AddKonsumsi> {
     }
 
     Konsumsi k = Konsumsi(
-      id: "",
       idLaporan: x!,
       idKaryawan: selectedKaryawan!,
+      jam: '',
       detailKonsumsi: [],
+      id: '',
     );
 
     jumlahBeli.forEach((idMakanan, qty) {
-      for (int i = 0; i < qty; i++) {
-        k.detailKonsumsi.add(DetailKonsumsi(id: "", idMakanan: idMakanan));
+      if (qty > 0) {
+        k.detailKonsumsi.add(
+          DetailKonsumsi(
+            idMakanan: idMakanan,
+            jumlah: qty, // 🔥 SIMPAN JUMLAH
+          ),
+        );
       }
     });
 

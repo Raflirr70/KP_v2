@@ -22,6 +22,10 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
   Map<String, int> stokSisa = {};
   int totalHarga = 0;
   String? x;
+  bool _isSubmitting = false;
+
+  List<Makanan> _allMakanan = [];
+
   @override
   void initState() {
     super.initState();
@@ -49,39 +53,174 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (x == null) return CircularProgressIndicator();
+    if (x == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50),
-        child: AppbarKaryawan(id_cabang: widget.idCabang),
-      ),
-
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(12),
-        child: ElevatedButton(
-          onPressed: () => _submitPenjualan(context),
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            backgroundColor: Colors.green,
+        preferredSize: const Size.fromHeight(50),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16), // atur radius sesukamu
           ),
-          child: Text(
-            "JUAL  •  Rp $totalHarga",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.blueAccent,
+            title: Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+                const SizedBox(width: 16),
+                const Text(
+                  "Tambah Penjualan",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
             ),
           ),
         ),
       ),
 
+      // ================== BOTTOM BUTTON ==================
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(12),
+        child: ElevatedButton(
+          onPressed: (_isSubmitting || jumlahBeli.isEmpty)
+              ? null
+              : () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        insetPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        content: SizedBox(
+                          width: double.maxFinite,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Daftar Makanan:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+
+                              // ===== LIST MAKANAN =====
+                              Flexible(
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  children: jumlahBeli.entries.map((entry) {
+                                    final makanan = _allMakanan.firstWhere(
+                                      (m) => m.id == entry.key,
+                                    );
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              "${makanan.nama} x${entry.value}",
+                                            ),
+                                          ),
+                                          Text(
+                                            "Rp ${makanan.harga * entry.value}",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+
+                              const Divider(),
+
+                              // ===== TOTAL =====
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    "Total",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Rp $totalHarga",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                            },
+                            child: const Text('Batal'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              _submitPenjualan(context);
+                            },
+                            child: const Text('Ya, Jual'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            backgroundColor: Colors.green,
+          ),
+          child: _isSubmitting
+              ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : Text(
+                  "JUAL  •  Rp $totalHarga",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+        ),
+      ),
+
+      // ================== BODY ==================
       body: StreamBuilder<List<Makanan>>(
         stream: context.read<Makanans>().streamMakanan(),
         builder: (context, makananSnap) {
           if (!makananSnap.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
+
           final listMakanan = makananSnap.data!;
+          _allMakanan = listMakanan; // ✅ simpan ke state
 
           return StreamBuilder<List<Stock>>(
             stream: context.read<Stocks>().streamStockByIdCabang(
@@ -89,11 +228,11 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
             ),
             builder: (context, stockSnap) {
               if (!stockSnap.hasData) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
+
               final listStock = stockSnap.data!;
 
-              // Pencarian
               List<Makanan> filtered = listMakanan
                   .where(
                     (m) => m.nama.toLowerCase().contains(
@@ -104,16 +243,16 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
 
               return Column(
                 children: [
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: SearchSimple(controller: _searchController),
                   ),
-                  Divider(),
+                  const Divider(),
 
                   Expanded(
                     child: ListView.builder(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final item = filtered[index];
@@ -128,7 +267,6 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                           ),
                         );
 
-                        // stok realtime
                         stokSisa.putIfAbsent(
                           item.id,
                           () => stockItem.jumlahStock,
@@ -140,7 +278,7 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                         return Card(
                           color: tersedia ? Colors.white : Colors.blueGrey[100],
                           child: Padding(
-                            padding: EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(12),
                             child: Row(
                               children: [
                                 Expanded(
@@ -150,51 +288,46 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
                                     children: [
                                       Text(
                                         item.nama,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Text("Rp ${item.harga}"),
                                       Text(
                                         "Stock: ${stokSisa[item.id]}",
-                                        style: TextStyle(color: Colors.red),
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
 
+                                // ===== BUTTON +/- =====
                                 Row(
                                   children: [
-                                    // MINUS
                                     if (qty > 0)
                                       InkWell(
-                                        onTap: qty > 0
-                                            ? () {
-                                                jumlahBeli[item.id] = qty - 1;
-                                                stokSisa[item.id] =
-                                                    stokSisa[item.id]! + 1;
-                                                _hitungTotal(listMakanan);
-                                              }
-                                            : null,
+                                        onTap: () {
+                                          jumlahBeli[item.id] = qty - 1;
+                                          stokSisa[item.id] =
+                                              stokSisa[item.id]! + 1;
+                                          _hitungTotal(listMakanan);
+                                        },
                                         child: _btn(
                                           Icons.remove,
-                                          tersedia || qty > 0
-                                              ? Colors.red[100]
-                                              : Colors.grey[300],
+                                          Colors.red[100],
                                         ),
                                       ),
-
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     Text(
                                       "$qty",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(width: 10),
-
-                                    // PLUS
+                                    const SizedBox(width: 10),
                                     InkWell(
                                       onTap: stokSisa[item.id]! > 0
                                           ? () {
@@ -231,7 +364,7 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
 
   Widget _btn(IconData icon, Color? color) {
     return Container(
-      padding: EdgeInsets.all(6),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
@@ -241,16 +374,10 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
   }
 
   Future<void> _submitPenjualan(BuildContext context) async {
+    setState(() => _isSubmitting = true);
     final makananList = await context.read<Makanans>().getMakanan();
     final penjualan = context.read<Penjualans>();
     final stockProvider = context.read<Stocks>();
-
-    if (jumlahBeli.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Tidak ada makanan dipilih")));
-      return;
-    }
 
     Penjualan p = Penjualan(
       id: "",
@@ -275,7 +402,6 @@ class _AddPenjualanPageState extends State<AddPenjualanPage> {
 
     await penjualan.tambahPenjualan(p);
 
-    // update stock
     for (var entry in stokSisa.entries) {
       await stockProvider.saveStock(
         idMakanan: entry.key,

@@ -1,19 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 class DetailKonsumsi {
-  String id;
   String idMakanan;
   int jumlah;
 
-  DetailKonsumsi({required this.id, required this.idMakanan, this.jumlah = 1});
+  DetailKonsumsi({required this.idMakanan, required this.jumlah});
 
   factory DetailKonsumsi.fromMap(String id, Map<String, dynamic> map) {
-    return DetailKonsumsi(
-      id: id,
-      idMakanan: map['id_makanan'] ?? '',
-      jumlah: map['jumlah'] ?? 1,
-    );
+    return DetailKonsumsi(idMakanan: map['id_makanan'], jumlah: map['jumlah']);
   }
 
   Map<String, dynamic> toMap() {
@@ -22,39 +18,29 @@ class DetailKonsumsi {
 }
 
 class Konsumsi {
-  String id;
+  String id; // 🔥 ID DOKUMEN FIRESTORE
   String idLaporan;
   String idKaryawan;
-  List<DetailKonsumsi> detailKonsumsi; // List detail
+  String jam;
+  List<DetailKonsumsi> detailKonsumsi;
 
   Konsumsi({
     required this.id,
     required this.idLaporan,
     required this.idKaryawan,
+    required this.jam,
     required this.detailKonsumsi,
   });
 
   factory Konsumsi.fromMap(String id, Map<String, dynamic> map) {
-    var details = <DetailKonsumsi>[];
-    if (map['detail_konsumsi'] != null) {
-      details = List<Map<String, dynamic>>.from(map['detail_konsumsi']).map((
-        d,
-      ) {
-        // Gunakan id dokumen dari map 'd' jika ada, atau buat kosong
-        final detailId = d['id'] ?? '';
-        return DetailKonsumsi(
-          id: detailId,
-          idMakanan: d['id_makanan'] ?? '',
-          jumlah: d['jumlah'] ?? 1,
-        );
-      }).toList();
-    }
-
     return Konsumsi(
       id: id,
-      idLaporan: map['id_laporan'] ?? '',
-      idKaryawan: map['id_karyawan'] ?? '',
-      detailKonsumsi: details,
+      idLaporan: map['id_laporan'],
+      idKaryawan: map['id_karyawan'],
+      jam: map['jam'],
+      detailKonsumsi: (map['detail_konsumsi'] as List)
+          .map((e) => DetailKonsumsi.fromMap('', e))
+          .toList(),
     );
   }
 
@@ -62,51 +48,65 @@ class Konsumsi {
     return {
       'id_laporan': idLaporan,
       'id_karyawan': idKaryawan,
-      'detail_konsumsi': detailKonsumsi
-          .map((d) => d.toMap()..['id'] = d.id)
-          .toList(),
+      'jam': jam,
+      'detail_konsumsi': detailKonsumsi.map((e) => e.toMap()).toList(),
     };
   }
 }
 
 class Konsumsis extends ChangeNotifier {
-  Stream<List<Konsumsi>> streamKonsumsi() {
-    return FirebaseFirestore.instance
-        .collection('konsumsi')
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Konsumsi.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
-  }
+  final _konsumsiRef = FirebaseFirestore.instance.collection('konsumsi');
+  final _stockRef = FirebaseFirestore.instance.collection('stock');
 
   Stream<List<Konsumsi>> streamKonsumsiByLaporan(String idLaporan) {
-    return FirebaseFirestore.instance
-        .collection('konsumsi')
+    return _konsumsiRef
         .where('id_laporan', isEqualTo: idLaporan)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Konsumsi.fromMap(doc.id, doc.data()))
-              .toList(),
+          (s) => s.docs.map((d) => Konsumsi.fromMap(d.id, d.data())).toList(),
         );
   }
 
+  // ================= TAMBAH =================
   Future<void> tambahKonsumsi(Konsumsi konsumsi) async {
     try {
       final doc = FirebaseFirestore.instance.collection('konsumsi').doc();
-      await doc.set(konsumsi.toMap());
+
+      final jamSekarang = DateFormat('HH:mm').format(DateTime.now());
+
+      await doc.set({...konsumsi.toMap(), 'jam': jamSekarang});
     } catch (e) {
       print("Error tambahKonsumsi: $e");
     }
   }
 
-  Future<void> hapusKonsumsi(String id) async {
+  // ================= HAPUS + KEMBALIKAN STOCK =================
+  Future<void> hapusKonsumsiDanKembalikanStock({
+    required Konsumsi konsumsi,
+    required String idCabang,
+  }) async {
     try {
-      await FirebaseFirestore.instance.collection('konsumsi').doc(id).delete();
+      for (var d in konsumsi.detailKonsumsi) {
+        final stockSnap = await _stockRef
+            .where('id_makanan', isEqualTo: d.idMakanan)
+            .where('id_cabang', isEqualTo: idCabang)
+            .limit(1)
+            .get();
+
+        if (stockSnap.docs.isNotEmpty) {
+          final doc = stockSnap.docs.first;
+          final currentStock = doc['jumlah_makanan'];
+
+          await _stockRef.doc(doc.id).update({
+            'jumlah_makanan': currentStock + d.jumlah, // 🔥 RESTORE
+          });
+        }
+      }
+
+      // 🔥 HAPUS DATA KONSUMSI
+      await _konsumsiRef.doc(konsumsi.id).delete();
     } catch (e) {
-      print("Error hapusKonsumsi: $e");
+      print("ERROR HAPUS KONSUMSI: $e");
     }
   }
 }
