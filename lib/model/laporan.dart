@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/konsumsi.dart';
 
 class Laporan {
   String id; // pakai string supaya aman dengan Firestore auto-id
@@ -397,6 +398,106 @@ class Laporans extends ChangeNotifier {
     }
 
     // 4️⃣ Convert ke List<double> (dibagi 1000 untuk chart)
+    return dailyTotals.values.map((e) => e / 1000).toList();
+  }
+
+  Future<List<double>> getPengeluaranHarianM({int jumlahHari = 14}) async {
+    final now = DateTime.now();
+
+    final startDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: jumlahHari - 1));
+
+    // 1️⃣ Map tanggal -> total pengeluaran
+    final Map<String, double> dailyTotals = {};
+
+    for (int i = 0; i < jumlahHari; i++) {
+      final date = startDate.add(Duration(days: i));
+      final key = "${date.year}-${date.month}-${date.day}";
+      dailyTotals[key] = 0;
+    }
+
+    // ================================
+    // 2️⃣ AMBIL SEMUA GAJI SEKALI (HARlAN)
+    // ================================
+    final jadwalSnap = await FirebaseFirestore.instance
+        .collection("jadwal")
+        .where("tanggal", isGreaterThanOrEqualTo: startDate)
+        .where(
+          "tanggal",
+          isLessThan: DateTime(now.year, now.month, now.day + 1),
+        )
+        .get();
+
+    // Map: tanggal+cabang -> total gaji
+    final Map<String, double> gajiHarianCabang = {};
+
+    for (var g in jadwalSnap.docs) {
+      final tgl = (g['tanggal'] as Timestamp).toDate();
+      final dateKey = "${tgl.year}-${tgl.month}-${tgl.day}";
+      final cabangKey = g['id_cabang'];
+
+      final key = "$dateKey-$cabangKey";
+
+      gajiHarianCabang[key] =
+          (gajiHarianCabang[key] ?? 0) +
+          ((g['nominal'] ?? 0) as num).toDouble();
+    }
+
+    // ================================
+    // 3️⃣ AMBIL LAPORAN
+    // ================================
+    final laporanSnap = await FirebaseFirestore.instance
+        .collection("laporan")
+        .where("tanggal", isGreaterThanOrEqualTo: startDate)
+        .get();
+
+    for (var laporanDoc in laporanSnap.docs) {
+      final laporan = Laporan.fromMap(laporanDoc.id, laporanDoc.data());
+      if (laporan.tanggal == null) continue;
+
+      final laporanDate = DateTime(
+        laporan.tanggal!.year,
+        laporan.tanggal!.month,
+        laporan.tanggal!.day,
+      );
+
+      final dateKey =
+          "${laporanDate.year}-${laporanDate.month}-${laporanDate.day}";
+
+      // 🔹 Pengeluaran
+      final pengeluaranSnap = await FirebaseFirestore.instance
+          .collection("pengeluaran")
+          .where("id_laporan", isEqualTo: laporan.id)
+          .get();
+
+      for (var p in pengeluaranSnap.docs) {
+        dailyTotals[dateKey] =
+            (dailyTotals[dateKey] ?? 0) +
+            ((p['total_harga'] ?? 0) as num).toDouble();
+      }
+
+      // 🔹 Konsumsi
+      final konsumsiSnap = await FirebaseFirestore.instance
+          .collection("konsumsi")
+          .where("id_laporan", isEqualTo: laporan.id)
+          .get();
+
+      for (var k in konsumsiSnap.docs) {
+        dailyTotals[dateKey] =
+            (dailyTotals[dateKey] ?? 0) +
+            ((k['total_harga'] ?? 0) as num).toDouble();
+      }
+
+      // 🔹 Gaji (AMBIL DARI MAP, BUKAN QUERY ULANG)
+      final gajiKey = "$dateKey-${laporan.id_cabang}";
+      dailyTotals[dateKey] =
+          (dailyTotals[dateKey] ?? 0) + (gajiHarianCabang[gajiKey] ?? 0);
+    }
+
+    // 4️⃣ Convert ke List<double (÷1000 untuk chart)
     return dailyTotals.values.map((e) => e / 1000).toList();
   }
 }

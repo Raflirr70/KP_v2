@@ -7,13 +7,13 @@ import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/screen/owner/monitoring.dart';
 import 'package:provider/provider.dart';
 
-class LineChartPendapatan14Hari extends StatelessWidget {
-  const LineChartPendapatan14Hari({super.key});
+class LineChartPengeluaran14Hari extends StatelessWidget {
+  const LineChartPengeluaran14Hari({super.key});
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<double>>(
-      future: context.read<Laporans>().getPendapatanHarianM(jumlahHari: 14),
+      future: context.read<Laporans>().getPengeluaranHarianM(jumlahHari: 365),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -111,7 +111,7 @@ class LineChartPendapatan14Hari extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueAccent,
+                              color: Colors.deepOrangeAccent,
                             ),
                           ),
                         Text(
@@ -147,7 +147,7 @@ class LineChartPendapatan14Hari extends StatelessWidget {
               ),
               // isCurved: true,
               curveSmoothness: 0.3,
-              color: Colors.blueAccent,
+              color: Colors.deepOrange,
               barWidth: 3,
               isStrokeCapRound: true,
               dotData: FlDotData(show: false),
@@ -155,8 +155,8 @@ class LineChartPendapatan14Hari extends StatelessWidget {
                 show: true,
                 gradient: LinearGradient(
                   colors: [
-                    Colors.blueAccent.withOpacity(0.3),
-                    Colors.blueAccent.withOpacity(0.05),
+                    Colors.orangeAccent.withOpacity(0.3),
+                    Colors.deepOrange.withOpacity(0.05),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
