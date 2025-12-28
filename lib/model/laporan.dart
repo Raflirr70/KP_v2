@@ -6,8 +6,6 @@ class Laporan {
   String id; // pakai string supaya aman dengan Firestore auto-id
   String? id_penjualan;
   String? id_pengeluaran;
-  int total_pendapatan;
-  int total_pengeluaran;
   bool status;
   DateTime? tanggal;
   String? id_cabang; // tambah field cabang
@@ -16,8 +14,6 @@ class Laporan {
     required this.id,
     this.id_penjualan,
     this.id_pengeluaran,
-    this.total_pendapatan = 0,
-    this.total_pengeluaran = 0,
     this.status = false,
     this.tanggal,
     this.id_cabang,
@@ -28,8 +24,6 @@ class Laporan {
       id: docId,
       id_penjualan: map['id_penjualan'],
       id_pengeluaran: map['id_pengeluaran'],
-      total_pendapatan: map['total_pendapatan'] ?? 0,
-      total_pengeluaran: map['total_pengeluaran'] ?? 0,
       status: map['status'] ?? false,
       tanggal: map['tanggal'] != null
           ? (map['tanggal'] is Timestamp
@@ -44,8 +38,6 @@ class Laporan {
     return {
       'id_penjualan': id_penjualan,
       'id_pengeluaran': id_pengeluaran,
-      'total_pendapatan': total_pendapatan,
-      'total_pengeluaran': total_pengeluaran,
       'status': status,
       'tanggal': tanggal != null ? Timestamp.fromDate(tanggal!) : null,
       'id_cabang': id_cabang,
@@ -80,26 +72,90 @@ class Laporans extends ChangeNotifier {
 
   Future<void> getAllData() async {
     try {
-      final now = DateTime.now();
-
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-      final snapshot = await FirebaseFirestore.instance
+      final laporanSnap = await FirebaseFirestore.instance
           .collection("laporan")
-          .where("tanggal", isGreaterThanOrEqualTo: startOfDay)
-          .where("tanggal", isLessThan: endOfDay)
           .get();
 
+      /// Map: yyyy-mm-dd -> {pendapatan, pengeluaran}
+      final Map<String, int> pendapatanHarian = {};
+      final Map<String, int> pengeluaranHarian = {};
+      final Map<String, DateTime> tanggalMap = {};
+
+      for (var doc in laporanSnap.docs) {
+        final laporan = Laporan.fromMap(doc.id, doc.data());
+        if (laporan.tanggal == null) continue;
+
+        final dateKey =
+            "${laporan.tanggal!.year}-${laporan.tanggal!.month}-${laporan.tanggal!.day}";
+
+        tanggalMap[dateKey] ??= DateTime(
+          laporan.tanggal!.year,
+          laporan.tanggal!.month,
+          laporan.tanggal!.day,
+        );
+
+        pendapatanHarian[dateKey] ??= 0;
+        pengeluaranHarian[dateKey] ??= 0;
+
+        // =====================
+        // PENDAPATAN
+        // =====================
+        final penjualanSnap = await FirebaseFirestore.instance
+            .collection("penjualan")
+            .where("id_laporan", isEqualTo: laporan.id)
+            .get();
+
+        for (var p in penjualanSnap.docs) {
+          pendapatanHarian[dateKey] =
+              pendapatanHarian[dateKey]! + ((p['total_harga'] ?? 0) as int);
+        }
+
+        // =====================
+        // PENGELUARAN
+        // =====================
+        final pengeluaranSnap = await FirebaseFirestore.instance
+            .collection("pengeluaran")
+            .where("id_laporan", isEqualTo: laporan.id)
+            .get();
+
+        for (var p in pengeluaranSnap.docs) {
+          pengeluaranHarian[dateKey] =
+              pengeluaranHarian[dateKey]! + ((p['total_harga'] ?? 0) as int);
+        }
+
+        final konsumsiSnap = await FirebaseFirestore.instance
+            .collection("konsumsi")
+            .where("id_laporan", isEqualTo: laporan.id)
+            .get();
+
+        for (var k in konsumsiSnap.docs) {
+          pengeluaranHarian[dateKey] =
+              pengeluaranHarian[dateKey]! + ((k['total_harga'] ?? 0) as int);
+        }
+      }
+
+      // =====================
+      // SIMPAN KE _datas
+      // =====================
       _datas.clear();
-      _datas.addAll(
-        snapshot.docs
-            .map((doc) => Laporan.fromMap(doc.id, doc.data()))
-            .toList(),
-      );
+
+      for (var key in tanggalMap.keys) {
+        _datas.add(
+          Laporan(
+            id: key, // 🔥 dateKey
+            tanggal: tanggalMap[key],
+            id_penjualan: pendapatanHarian[key].toString(),
+            id_pengeluaran: pengeluaranHarian[key].toString(),
+          ),
+        );
+      }
+
+      // urutkan terbaru
+      _datas.sort((a, b) => b.tanggal!.compareTo(a.tanggal!));
 
       notifyListeners();
     } catch (e) {
-      print("Error getData Laporan: $e");
+      print("Error getAllData (harian): $e");
     }
   }
 
@@ -311,12 +367,12 @@ class Laporans extends ChangeNotifier {
 
   /// Total pendapatan semua laporan
   int totalPendapatan() {
-    return _datas.fold(0, (sum, l) => sum + l.total_pendapatan);
+    return _datas.fold(0, (sum, l) => sum);
   }
 
   /// Total pengeluaran semua laporan
   int totalPengeluaran() {
-    return _datas.fold(0, (sum, l) => sum + l.total_pengeluaran);
+    return _datas.fold(0, (sum, l) => sum);
   }
 
   Future<String> checkAndCreateLaporan(String idCabang) async {
@@ -343,8 +399,6 @@ class Laporans extends ChangeNotifier {
 
     final newData = Laporan(
       id: newRef.id,
-      total_pendapatan: 0,
-      total_pengeluaran: 0,
       status: false,
       tanggal: today,
       id_cabang: idCabang,
@@ -499,5 +553,44 @@ class Laporans extends ChangeNotifier {
 
     // 4️⃣ Convert ke List<double (÷1000 untuk chart)
     return dailyTotals.values.map((e) => e / 1000).toList();
+  }
+
+  /// Total pendapatan per laporan
+  Future<int> getPendapatanByLaporan(String idLaporan) async {
+    final snap = await FirebaseFirestore.instance
+        .collection("penjualan")
+        .where("id_laporan", isEqualTo: idLaporan)
+        .get();
+
+    int total = 0;
+    for (var d in snap.docs) {
+      total += (d['total_harga'] ?? 0) as int;
+    }
+    return total;
+  }
+
+  /// Total pengeluaran per laporan
+  Future<int> getPengeluaranByLaporan(String idLaporan) async {
+    int total = 0;
+
+    final pengeluaranSnap = await FirebaseFirestore.instance
+        .collection("pengeluaran")
+        .where("id_laporan", isEqualTo: idLaporan)
+        .get();
+
+    for (var d in pengeluaranSnap.docs) {
+      total += (d['total_harga'] ?? 0) as int;
+    }
+
+    final konsumsiSnap = await FirebaseFirestore.instance
+        .collection("konsumsi")
+        .where("id_laporan", isEqualTo: idLaporan)
+        .get();
+
+    for (var d in konsumsiSnap.docs) {
+      total += (d['total_harga'] ?? 0) as int;
+    }
+
+    return total;
   }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/laporan.dart';
+import 'package:kerprak/widget/list/list_laporan.dart';
 import 'package:kerprak/widget/menu/LineChartPendapatanAll.dart';
 import 'package:kerprak/widget/menu/LineChartPengeluaran14Hari.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
+import 'package:provider/provider.dart';
 
 class Monitoring extends StatefulWidget {
   const Monitoring({super.key});
@@ -100,21 +103,17 @@ class _MonitoringState extends State<Monitoring> {
             ],
 
             Expanded(
-              child: FutureBuilder<void>(
-                future: _loadData(), // fungsi Future untuk load data
+              child: FutureBuilder(
+                future: Provider.of<Laporans>(
+                  context,
+                  listen: false,
+                ).getAllData(), // ambil laporan hari ini
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    ); // loading
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text("Terjadi kesalahan: ${snapshot.error}"),
-                    );
+                    return const Center(child: CircularProgressIndicator());
                   }
-                  return Center(
-                    child: Text("Pilih menu monitoring dari drawer"),
-                  );
+
+                  return const ListLaporanWidget();
                 },
               ),
             ),

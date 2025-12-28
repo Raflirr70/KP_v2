@@ -75,6 +75,7 @@ class Linechartpendapatanall extends StatelessWidget {
                 _leftAxis(batas),
                 Expanded(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(right: 20),
                     scrollDirection: Axis.horizontal,
                     reverse: true,
                     child: SizedBox(
