@@ -7,7 +7,6 @@ import 'package:kerprak/model/konsumsi.dart';
 
 class ListLaporanWidget extends StatelessWidget {
   const ListLaporanWidget({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Consumer<Laporans>(
@@ -15,17 +14,14 @@ class ListLaporanWidget extends StatelessWidget {
         if (laporans.datas.isEmpty) {
           return const Center(child: Text("Belum ada laporan"));
         }
-
         return ListView.builder(
           padding: const EdgeInsets.all(8),
           itemCount: laporans.datas.length,
           itemBuilder: (context, index) {
             final laporan = laporans.datas[index];
-
             final tanggal = laporan.tanggal != null
                 ? DateFormat('dd MMM yyyy').format(laporan.tanggal!)
                 : '-';
-
             final pendapatan = int.tryParse(laporan.id_penjualan ?? "0") ?? 0;
             final pengeluaran =
                 int.tryParse(laporan.id_pengeluaran ?? "0") ?? 0;
@@ -51,12 +47,9 @@ class ListLaporanWidget extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-
                       _rowItem("Pendapatan", pendapatan, Colors.green),
                       _rowItem("Pengeluaran", pengeluaran, Colors.red),
-
                       const Divider(),
-
                       _rowItem(
                         "Keuntungan",
                         keuntungan,

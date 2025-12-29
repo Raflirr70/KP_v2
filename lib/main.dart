@@ -70,29 +70,16 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder<Map<String, dynamic>>(
         future: getServerData(),
         builder: (context, snapshot) {
-          // ⏳ Loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
 
-          // ❌ Error
-          if (snapshot.hasError || !snapshot.hasData) {
-            return const Scaffold(
-              body: Center(
-                child: Text(
-                  "Gagal mengecek versi aplikasi",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            );
-          }
-
           final serverVersion = snapshot.data!['version'];
           final downloadLink = snapshot.data!['link'];
 
-          // 🚫 Versi tidak cocok
+          //jika versi tidak cocok
           if (serverVersion != localVersion) {
             return Scaffold(
               backgroundColor: Colors.grey[100],

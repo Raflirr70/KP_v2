@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:kerprak/model/jadwal.dart';
 import 'package:kerprak/model/konsumsi.dart';
 
 class Laporan {
@@ -76,10 +77,10 @@ class Laporans extends ChangeNotifier {
           .collection("laporan")
           .get();
 
-      /// Map: yyyy-mm-dd -> {pendapatan, pengeluaran}
       final Map<String, int> pendapatanHarian = {};
       final Map<String, int> pengeluaranHarian = {};
       final Map<String, DateTime> tanggalMap = {};
+      final Map<String, bool> jadwalSudahDihitung = {};
 
       for (var doc in laporanSnap.docs) {
         final laporan = Laporan.fromMap(doc.id, doc.data());
@@ -132,6 +133,34 @@ class Laporans extends ChangeNotifier {
           pengeluaranHarian[dateKey] =
               pengeluaranHarian[dateKey]! + ((k['total_harga'] ?? 0) as int);
         }
+
+        // =====================
+        // JADWAL (ANTI DOUBLE)
+        // =====================
+        if (jadwalSudahDihitung[dateKey] != true) {
+          final startOfDay = DateTime(
+            laporan.tanggal!.year,
+            laporan.tanggal!.month,
+            laporan.tanggal!.day,
+          );
+          final endOfDay = startOfDay.add(const Duration(days: 1));
+
+          final jadwalSnap = await FirebaseFirestore.instance
+              .collection("jadwal")
+              .where(
+                "tanggal",
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+              )
+              .where("tanggal", isLessThan: Timestamp.fromDate(endOfDay))
+              .get();
+
+          for (var j in jadwalSnap.docs) {
+            pengeluaranHarian[dateKey] =
+                pengeluaranHarian[dateKey]! + ((j['nominal'] ?? 0) as int);
+          }
+
+          jadwalSudahDihitung[dateKey] = true;
+        }
       }
 
       // =====================
@@ -142,7 +171,7 @@ class Laporans extends ChangeNotifier {
       for (var key in tanggalMap.keys) {
         _datas.add(
           Laporan(
-            id: key, // 🔥 dateKey
+            id: key,
             tanggal: tanggalMap[key],
             id_penjualan: pendapatanHarian[key].toString(),
             id_pengeluaran: pengeluaranHarian[key].toString(),
@@ -150,9 +179,7 @@ class Laporans extends ChangeNotifier {
         );
       }
 
-      // urutkan terbaru
       _datas.sort((a, b) => b.tanggal!.compareTo(a.tanggal!));
-
       notifyListeners();
     } catch (e) {
       print("Error getAllData (harian): $e");
@@ -203,6 +230,41 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<double> getPendapatanWaktu(String idCabang, DateTime date) async {
+    try {
+      // ===== RANGE HARI YANG DIPILIH =====
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+
+      // ===== AMBIL LAPORAN =====
+      final laporanSnapshot = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where('id_cabang', isEqualTo: idCabang)
+          .where("tanggal", isGreaterThanOrEqualTo: start)
+          .where("tanggal", isLessThan: end)
+          .get();
+
+      double total = 0;
+
+      // ===== HITUNG PENJUALAN =====
+      for (final laporan in laporanSnapshot.docs) {
+        final penjualanSnapshot = await FirebaseFirestore.instance
+            .collection("penjualan")
+            .where('id_laporan', isEqualTo: laporan.id)
+            .get();
+
+        for (final p in penjualanSnapshot.docs) {
+          total += (p.data()['total_harga'] ?? 0).toDouble();
+        }
+      }
+
+      return total;
+    } catch (e) {
+      debugPrint("Error getPendapatanWaktu: $e");
+      return 0;
+    }
+  }
+
   Future<double> getPendapatan(String idCabang) async {
     try {
       final now = DateTime.now();
@@ -242,7 +304,6 @@ class Laporans extends ChangeNotifier {
           totalPendapatan += (penjualan['total_harga'] ?? 0) as int;
         }
       }
-
       // 4️⃣ Output final
       return totalPendapatan;
     } catch (e) {
@@ -463,8 +524,11 @@ class Laporans extends ChangeNotifier {
       now.month,
       now.day,
     ).subtract(Duration(days: jumlahHari - 1));
+    final endDate = startDate.add(Duration(days: jumlahHari));
 
-    // 1️⃣ Map tanggal -> total pengeluaran
+    // ================================
+    // 1️⃣ INIT MAP HARIAN
+    // ================================
     final Map<String, double> dailyTotals = {};
 
     for (int i = 0; i < jumlahHari; i++) {
@@ -474,30 +538,20 @@ class Laporans extends ChangeNotifier {
     }
 
     // ================================
-    // 2️⃣ AMBIL SEMUA GAJI SEKALI (HARlAN)
+    // 2️⃣ AMBIL JADWAL (GAJI) — MASUKKAN LANGSUNG
     // ================================
     final jadwalSnap = await FirebaseFirestore.instance
         .collection("jadwal")
-        .where("tanggal", isGreaterThanOrEqualTo: startDate)
-        .where(
-          "tanggal",
-          isLessThan: DateTime(now.year, now.month, now.day + 1),
-        )
+        .where("tanggal", isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where("tanggal", isLessThan: Timestamp.fromDate(endDate))
         .get();
 
-    // Map: tanggal+cabang -> total gaji
-    final Map<String, double> gajiHarianCabang = {};
-
-    for (var g in jadwalSnap.docs) {
-      final tgl = (g['tanggal'] as Timestamp).toDate();
+    for (var j in jadwalSnap.docs) {
+      final tgl = (j['tanggal'] as Timestamp).toDate();
       final dateKey = "${tgl.year}-${tgl.month}-${tgl.day}";
-      final cabangKey = g['id_cabang'];
 
-      final key = "$dateKey-$cabangKey";
-
-      gajiHarianCabang[key] =
-          (gajiHarianCabang[key] ?? 0) +
-          ((g['nominal'] ?? 0) as num).toDouble();
+      dailyTotals[dateKey] =
+          (dailyTotals[dateKey] ?? 0) + ((j['nominal'] ?? 0) as num).toDouble();
     }
 
     // ================================
@@ -505,21 +559,16 @@ class Laporans extends ChangeNotifier {
     // ================================
     final laporanSnap = await FirebaseFirestore.instance
         .collection("laporan")
-        .where("tanggal", isGreaterThanOrEqualTo: startDate)
+        .where("tanggal", isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where("tanggal", isLessThan: Timestamp.fromDate(endDate))
         .get();
 
     for (var laporanDoc in laporanSnap.docs) {
       final laporan = Laporan.fromMap(laporanDoc.id, laporanDoc.data());
       if (laporan.tanggal == null) continue;
 
-      final laporanDate = DateTime(
-        laporan.tanggal!.year,
-        laporan.tanggal!.month,
-        laporan.tanggal!.day,
-      );
-
-      final dateKey =
-          "${laporanDate.year}-${laporanDate.month}-${laporanDate.day}";
+      final tgl = laporan.tanggal!;
+      final dateKey = "${tgl.year}-${tgl.month}-${tgl.day}";
 
       // 🔹 Pengeluaran
       final pengeluaranSnap = await FirebaseFirestore.instance
@@ -544,53 +593,11 @@ class Laporans extends ChangeNotifier {
             (dailyTotals[dateKey] ?? 0) +
             ((k['total_harga'] ?? 0) as num).toDouble();
       }
-
-      // 🔹 Gaji (AMBIL DARI MAP, BUKAN QUERY ULANG)
-      final gajiKey = "$dateKey-${laporan.id_cabang}";
-      dailyTotals[dateKey] =
-          (dailyTotals[dateKey] ?? 0) + (gajiHarianCabang[gajiKey] ?? 0);
     }
 
-    // 4️⃣ Convert ke List<double (÷1000 untuk chart)
+    // ================================
+    // 4️⃣ RETURN UNTUK CHART
+    // ================================
     return dailyTotals.values.map((e) => e / 1000).toList();
-  }
-
-  /// Total pendapatan per laporan
-  Future<int> getPendapatanByLaporan(String idLaporan) async {
-    final snap = await FirebaseFirestore.instance
-        .collection("penjualan")
-        .where("id_laporan", isEqualTo: idLaporan)
-        .get();
-
-    int total = 0;
-    for (var d in snap.docs) {
-      total += (d['total_harga'] ?? 0) as int;
-    }
-    return total;
-  }
-
-  /// Total pengeluaran per laporan
-  Future<int> getPengeluaranByLaporan(String idLaporan) async {
-    int total = 0;
-
-    final pengeluaranSnap = await FirebaseFirestore.instance
-        .collection("pengeluaran")
-        .where("id_laporan", isEqualTo: idLaporan)
-        .get();
-
-    for (var d in pengeluaranSnap.docs) {
-      total += (d['total_harga'] ?? 0) as int;
-    }
-
-    final konsumsiSnap = await FirebaseFirestore.instance
-        .collection("konsumsi")
-        .where("id_laporan", isEqualTo: idLaporan)
-        .get();
-
-    for (var d in konsumsiSnap.docs) {
-      total += (d['total_harga'] ?? 0) as int;
-    }
-
-    return total;
   }
 }
