@@ -65,6 +65,49 @@ class Jadwals extends ChangeNotifier {
     }
   }
 
+  Future<void> getJadwalLaporan(DateTime selectedDate) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      // ================= START & END LOCAL =================
+      // Ambil awal dan akhir hari sesuai timezone lokal
+      final startOfDay = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        0,
+        0,
+        0,
+      );
+
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      // ================= QUERY FIRESTORE =================
+      final snapshot = await _ref
+          .where(
+            "tanggal",
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
+          .where("tanggal", isLessThan: Timestamp.fromDate(endOfDay))
+          .orderBy("tanggal")
+          .get();
+
+      // ================= PARSE DATA =================
+      _datas
+        ..clear()
+        ..addAll(
+          snapshot.docs
+              .map((doc) => Jadwal.fromMap(doc.id, doc.data()))
+              .toList(),
+        );
+    } catch (e) {
+      debugPrint("Error getJadwal: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
   /// 🔹 Ambil semua jadwal
   Future<void> getJadwal(DateTime selectedDate) async {
     isLoading = true;

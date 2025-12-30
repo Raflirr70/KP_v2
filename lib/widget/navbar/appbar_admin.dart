@@ -54,18 +54,21 @@ class AppbarAdmin extends StatelessWidget {
                                   ? Icon(
                                       Icons.arrow_downward,
                                       color: Colors.red,
-                                      size: 10,
+                                      size: 14,
                                     )
                                   : Icon(
                                       Icons.arrow_upward,
                                       color: Colors.green,
-                                      size: 10,
+                                      size: 14,
                                     ),
                               Text(
                                 "Rp ${laba.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10,
+                                  color: laba.isNegative
+                                      ? Colors.red
+                                      : Colors.green,
                                 ),
                               ),
                             ],

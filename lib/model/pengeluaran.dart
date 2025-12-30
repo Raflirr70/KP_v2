@@ -77,6 +77,51 @@ class Pengeluarans extends ChangeNotifier {
     return total;
   }
 
+  Future<void> fetchDataLaporan(DateTime time) async {
+    print("time $time");
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      // ===== Tentukan range hari ini =====
+      final start = Timestamp.fromDate(
+        DateTime(time.year, time.month, time.day),
+      );
+      final end = Timestamp.fromDate(
+        DateTime(time.year, time.month, time.day).add(const Duration(days: 1)),
+      );
+
+      final lapSnapshot = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where('tanggal', isGreaterThanOrEqualTo: start)
+          .where('tanggal', isLessThan: end)
+          .get();
+
+      if (lapSnapshot.docs.isEmpty) {
+        print("Tidak ada laporan hari ini");
+        _datas = [];
+      } else {
+        final idLaporan = lapSnapshot.docs.first.id;
+
+        // ===== Ambil pengeluaran berdasarkan laporan ini =====
+        final snapshot = await FirebaseFirestore.instance
+            .collection('pengeluaran')
+            .where('id_laporan', isEqualTo: idLaporan)
+            .get();
+
+        _datas = snapshot.docs
+            .map((doc) => Pengeluaran.fromMap(doc.id, doc.data()))
+            .toList();
+      }
+    } catch (e) {
+      print("Error fetchDataHariIni Pengeluaran: $e");
+      _datas = [];
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
   /// Fetch data dari Firestore
   Future<void> fetchDataHariIni(String idLaporan) async {
     isLoading = true;

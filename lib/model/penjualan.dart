@@ -230,7 +230,6 @@ class Penjualans extends ChangeNotifier {
   }
 
   Future<void> getPenjualanByHari({required DateTime hari}) async {
-    debugPrint("Penjualan hari $hari");
     isLoading = true;
     notifyListeners();
 
@@ -273,8 +272,6 @@ class Penjualans extends ChangeNotifier {
         p.detail = await _getDetailPenjualan(doc.id);
         _datas.add(p);
       }
-
-      debugPrint("Total penjualan: ${_datas.length}");
     } catch (e) {
       debugPrint("Error getPenjualanByHari: $e");
     }
