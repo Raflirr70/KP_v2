@@ -3,6 +3,7 @@ import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/widget/list/list_laporan.dart';
 import 'package:kerprak/widget/menu/LineChartPendapatanAll.dart';
 import 'package:kerprak/widget/menu/bar_chart_pendapatan_pengeluaran_cabang.dart';
+import 'package:kerprak/widget/menu/laporan_harian.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -57,20 +58,26 @@ class _MonitoringState extends State<Monitoring> {
             ),
 
             // ================= LIST =================
-            Expanded(
-              child: FutureBuilder(
-                future: Provider.of<Laporans>(
-                  context,
-                  listen: false,
-                ).getAllData(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return const ListLaporanWidget();
-                },
+            if (_current == MonitoringType.keseluruhan) ...[
+              Expanded(
+                child: FutureBuilder(
+                  future: Provider.of<Laporans>(
+                    context,
+                    listen: false,
+                  ).getAllData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return const ListLaporanWidget();
+                  },
+                ),
               ),
-            ),
+            ] else if (_current == MonitoringType.perhari) ...[
+              Expanded(child: LaporanHarian()),
+            ] else
+              Expanded(child: Text("Data Penjualan")),
           ],
         ),
       ),
