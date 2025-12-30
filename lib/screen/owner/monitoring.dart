@@ -75,7 +75,12 @@ class _MonitoringState extends State<Monitoring> {
                 ),
               ),
             ] else if (_current == MonitoringType.perhari) ...[
-              Expanded(child: LaporanHarian()),
+              Expanded(
+                child: LaporanHarian(
+                  key: ValueKey(_selectedDate ?? DateTime.now()),
+                  time: _selectedDate ?? DateTime.now(),
+                ),
+              ),
             ] else
               Expanded(child: Text("Data Penjualan")),
           ],
@@ -184,10 +189,9 @@ class _MonitoringState extends State<Monitoring> {
         chart = const Linechartpendapatanall();
         break;
       case MonitoringType.perhari:
-        if (_selectedDate != null)
-          chart = BarChartPendapatanPengeluaranCabang(time: _selectedDate!);
-        else
-          chart = BarChartPendapatanPengeluaranCabang(time: DateTime.now());
+        chart = BarChartPendapatanPengeluaranCabang(
+          time: _selectedDate ?? DateTime.now(),
+        );
         break;
       case MonitoringType.penjualan:
         chart = const Linechartpendapatanall();

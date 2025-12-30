@@ -265,6 +265,51 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<double> getPengeluaranWaktu(String idCabang, DateTime date) async {
+    try {
+      // ===== RANGE HARI YANG DIPILIH =====
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+
+      // ===== AMBIL LAPORAN =====
+      final laporanSnapshot = await FirebaseFirestore.instance
+          .collection("laporan")
+          .where('id_cabang', isEqualTo: idCabang)
+          .where("tanggal", isGreaterThanOrEqualTo: start)
+          .where("tanggal", isLessThan: end)
+          .get();
+
+      double total = 0;
+
+      // ===== HITUNG PENJUALAN =====
+      for (final laporan in laporanSnapshot.docs) {
+        final penjualanSnapshot = await FirebaseFirestore.instance
+            .collection("pengeluaran")
+            .where('id_laporan', isEqualTo: laporan.id)
+            .get();
+
+        for (final p in penjualanSnapshot.docs) {
+          total += (p.data()['total_harga'] ?? 0).toDouble();
+        }
+      }
+
+      final jadwalSnapshot = await FirebaseFirestore.instance
+          .collection("jadwal")
+          .where('id_cabang', isEqualTo: idCabang)
+          .where("tanggal", isGreaterThanOrEqualTo: start)
+          .where("tanggal", isLessThan: end)
+          .get();
+      for (final jadwal in jadwalSnapshot.docs) {
+        total += (jadwal.data()['nominal'] ?? 0).toDouble();
+      }
+
+      return total;
+    } catch (e) {
+      debugPrint("Error getPendapatanWaktu: $e");
+      return 0;
+    }
+  }
+
   Future<double> getPendapatan(String idCabang) async {
     try {
       final now = DateTime.now();
@@ -312,10 +357,8 @@ class Laporans extends ChangeNotifier {
     }
   }
 
-  Future<double> getTotalPengeluaran() async {
+  Future<double> getTotalPengeluaran(DateTime now) async {
     try {
-      final now = DateTime.now();
-
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
@@ -350,10 +393,8 @@ class Laporans extends ChangeNotifier {
     }
   }
 
-  Future<double> getTotalPendapatan() async {
+  Future<double> getTotalPendapatan(DateTime now) async {
     try {
-      final now = DateTime.now();
-
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 

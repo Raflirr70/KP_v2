@@ -66,7 +66,7 @@ class _HomepageKaryawanState extends State<HomepageKaryawan> {
 
   Future<void> _initData() async {
     final jadwalsProvider = Provider.of<Jadwals>(context, listen: false);
-    await jadwalsProvider.getJadwal();
+    await jadwalsProvider.getJadwal(DateTime.now());
 
     Jadwal? jadwalUser;
     try {

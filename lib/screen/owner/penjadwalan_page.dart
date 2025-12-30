@@ -21,7 +21,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
       Provider.of<Users>(context, listen: false).fetchData();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Jadwals>(context, listen: false).getJadwal();
+      Provider.of<Jadwals>(context, listen: false).getJadwal(DateTime.now());
     });
   }
 

@@ -22,7 +22,7 @@ class _DaftarGajiKaryawanState extends State<DaftarGajiKaryawan> {
       Provider.of<Users>(context, listen: false).fetchData();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Jadwals>(context, listen: false).getJadwal();
+      Provider.of<Jadwals>(context, listen: false).getJadwal(DateTime.now());
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Penggajians>(context, listen: false).getPenggajian();

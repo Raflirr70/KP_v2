@@ -66,26 +66,37 @@ class Jadwals extends ChangeNotifier {
   }
 
   /// 🔹 Ambil semua jadwal
-  Future<void> getJadwal() async {
+  Future<void> getJadwal(DateTime selectedDate) async {
     isLoading = true;
     notifyListeners();
 
     try {
-      final today = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
+      final startOfDay = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
       );
+
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
       final snapshot = await _ref
-          .where("tanggal", isGreaterThanOrEqualTo: Timestamp.fromDate(today))
+          .where(
+            "tanggal",
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
+          .where("tanggal", isLessThan: Timestamp.fromDate(endOfDay))
+          .orderBy("tanggal")
           .get();
 
-      _datas.clear();
-      _datas.addAll(
-        snapshot.docs.map((doc) => Jadwal.fromMap(doc.id, doc.data())).toList(),
-      );
+      _datas
+        ..clear()
+        ..addAll(
+          snapshot.docs
+              .map((doc) => Jadwal.fromMap(doc.id, doc.data()))
+              .toList(),
+        );
     } catch (e) {
-      print("Error getJadwal: $e");
+      debugPrint("Error getJadwal: $e");
     }
 
     isLoading = false;

@@ -31,11 +31,11 @@ class _HomepageAdminState extends State<HomepageAdmin> {
     final totalPendapatan = await Provider.of<Laporans>(
       context,
       listen: false,
-    ).getTotalPendapatan();
+    ).getTotalPendapatan(DateTime.now());
     final totalPengeluaran = await Provider.of<Laporans>(
       context,
       listen: false,
-    ).getTotalPengeluaran();
+    ).getTotalPengeluaran(DateTime.now());
 
     if (!mounted) return;
 

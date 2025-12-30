@@ -45,12 +45,10 @@ class BarChartPendapatanPengeluaranCabang extends StatelessWidget {
     final List<Map<String, dynamic>> result = [];
 
     for (final c in cabangs) {
-      if (c.nama == "Gudang") continue;
+      // if (c.nama == "Gudang") continue;
 
       final pendapatan = await laporan.getPendapatanWaktu(c.id, time);
-      final pengeluaran = await laporan.getPendapatanWaktu(c.id, time);
-
-      print("${c.id} dengan tanggal : $time");
+      final pengeluaran = await laporan.getPengeluaranWaktu(c.id, time);
       // final pengeluaran = await laporan.getPengeluaranWaktu(c.id, "hari");
 
       result.add({
