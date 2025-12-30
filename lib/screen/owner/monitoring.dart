@@ -3,6 +3,7 @@ import 'package:kerprak/model/laporan.dart';
 import 'package:kerprak/widget/list/list_laporan.dart';
 import 'package:kerprak/widget/menu/LineChartPendapatanAll.dart';
 import 'package:kerprak/widget/menu/bar_chart_pendapatan_pengeluaran_cabang.dart';
+import 'package:kerprak/widget/menu/grafik_penjualan.dart';
 import 'package:kerprak/widget/menu/laporan_harian.dart';
 import 'package:kerprak/widget/navbar/appbar_admin.dart';
 import 'package:provider/provider.dart';
@@ -49,40 +50,47 @@ class _MonitoringState extends State<Monitoring> {
             ),
 
             // ================= INPUT TANGGAL =================
-            if (_current == MonitoringType.perhari) _datePicker(),
+            if (_current != MonitoringType.keseluruhan) _datePicker(),
 
-            // ================= CHART =================
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: _buildChart(),
-            ),
-
-            // ================= LIST =================
-            if (_current == MonitoringType.keseluruhan) ...[
-              Expanded(
-                child: FutureBuilder(
-                  future: Provider.of<Laporans>(
-                    context,
-                    listen: false,
-                  ).getAllData(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    return const ListLaporanWidget();
-                  },
-                ),
+            if (_current != MonitoringType.penjualan) ...[
+              // ================= CHART =================
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: _buildChart(),
               ),
-            ] else if (_current == MonitoringType.perhari) ...[
+
+              // ================= LIST =================
+              if (_current == MonitoringType.keseluruhan) ...[
+                Expanded(
+                  child: FutureBuilder(
+                    future: Provider.of<Laporans>(
+                      context,
+                      listen: false,
+                    ).getAllData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      return const ListLaporanWidget();
+                    },
+                  ),
+                ),
+              ] else if (_current == MonitoringType.perhari) ...[
+                Expanded(
+                  child: LaporanHarian(
+                    key: ValueKey(_selectedDate ?? DateTime.now()),
+                    time: _selectedDate ?? DateTime.now(),
+                  ),
+                ),
+              ],
+            ] else
               Expanded(
-                child: LaporanHarian(
+                child: GrafikPenjualan(
                   key: ValueKey(_selectedDate ?? DateTime.now()),
                   time: _selectedDate ?? DateTime.now(),
                 ),
               ),
-            ] else
-              Expanded(child: Text("Data Penjualan")),
           ],
         ),
       ),
@@ -194,7 +202,7 @@ class _MonitoringState extends State<Monitoring> {
         );
         break;
       case MonitoringType.penjualan:
-        chart = const Linechartpendapatanall();
+        chart = GrafikPenjualan(time: _selectedDate ?? DateTime.now());
         break;
     }
 

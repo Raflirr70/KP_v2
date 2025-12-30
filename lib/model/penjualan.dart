@@ -229,6 +229,60 @@ class Penjualans extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getPenjualanByHari({required DateTime hari}) async {
+    debugPrint("Penjualan hari $hari");
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final start = DateTime(hari.year, hari.month, hari.day);
+      final end = start.add(const Duration(days: 1));
+
+      // ===============================
+      // 1️⃣ Ambil LAPORAN berdasarkan tanggal
+      // ===============================
+      final laporanSnapshot = await FirebaseFirestore.instance
+          .collection('laporan')
+          .where('tanggal', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('tanggal', isLessThan: Timestamp.fromDate(end))
+          .get();
+
+      if (laporanSnapshot.docs.isEmpty) {
+        _datas.clear();
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      final List<String> idLaporanList = laporanSnapshot.docs
+          .map((e) => e.id)
+          .toList();
+
+      // ===============================
+      // 2️⃣ Ambil PENJUALAN berdasarkan id_laporan
+      // ===============================
+      final penjualanSnapshot = await FirebaseFirestore.instance
+          .collection('penjualan')
+          .where('id_laporan', whereIn: idLaporanList)
+          .get();
+
+      _datas.clear();
+
+      for (var doc in penjualanSnapshot.docs) {
+        final p = Penjualan.fromMap(doc.id, doc.data());
+        p.detail = await _getDetailPenjualan(doc.id);
+        _datas.add(p);
+      }
+
+      debugPrint("Total penjualan: ${_datas.length}");
+    } catch (e) {
+      debugPrint("Error getPenjualanByHari: $e");
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
   Future<List<DetailPenjualan>> _getDetailPenjualan(String idPenjualan) async {
     List<DetailPenjualan> details = [];
 

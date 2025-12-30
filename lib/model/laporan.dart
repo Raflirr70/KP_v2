@@ -310,6 +310,57 @@ class Laporans extends ChangeNotifier {
     }
   }
 
+  Future<double> getLaba() async {
+    try {
+      double totalPenjualan = 0;
+      double totalPengeluaran = 0;
+      double totalBiayaJadwal = 0;
+
+      // ===============================
+      // 🔥 HITUNG PENJUALAN
+      // ===============================
+      final penjualanSnapshot = await FirebaseFirestore.instance
+          .collection("penjualan")
+          .get();
+
+      for (final p in penjualanSnapshot.docs) {
+        totalPenjualan += (p.data()['total_harga'] ?? 0).toDouble();
+      }
+
+      // ===============================
+      // 🔥 HITUNG PENGELUARAN
+      // ===============================
+      final pengeluaranSnapshot = await FirebaseFirestore.instance
+          .collection("pengeluaran")
+          .get();
+
+      for (final p in pengeluaranSnapshot.docs) {
+        totalPengeluaran += (p.data()['total_harga'] ?? 0).toDouble();
+      }
+
+      // ===============================
+      // 🔥 HITUNG BIAYA JADWAL
+      // ===============================
+      final jadwalSnapshot = await FirebaseFirestore.instance
+          .collection("jadwal")
+          .get();
+
+      for (final j in jadwalSnapshot.docs) {
+        totalBiayaJadwal += (j.data()['nominal'] ?? 0).toDouble();
+      }
+
+      // ===============================
+      // ✅ LABA BERSIH
+      // ===============================
+      final laba = totalPenjualan - totalPengeluaran - totalBiayaJadwal;
+
+      return laba;
+    } catch (e) {
+      debugPrint("Error getLaba: $e");
+      return 0;
+    }
+  }
+
   Future<double> getPendapatan(String idCabang) async {
     try {
       final now = DateTime.now();
