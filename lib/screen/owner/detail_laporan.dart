@@ -10,6 +10,7 @@ import 'package:kerprak/model/penjualan.dart';
 import 'package:kerprak/model/user.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:intl/intl.dart';
 
 // Hanya untuk mobile/desktop
 import 'dart:io' show File;
@@ -30,7 +31,6 @@ class DetailLaporan extends StatefulWidget {
   static const double colTotal = 35;
   static const double colTotalRp = 50;
 
-  // ===== BORDER =====
   static const BorderSide _border = BorderSide(color: Colors.grey, width: 0.4);
 
   @override
@@ -38,7 +38,6 @@ class DetailLaporan extends StatefulWidget {
 }
 
 class _DetailLaporanState extends State<DetailLaporan> {
-  // ===== DAFTAR CABANG =====
   final List<String> daftarCabang = const [
     "Cimacan",
     "Cipanas",
@@ -49,7 +48,6 @@ class _DetailLaporanState extends State<DetailLaporan> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Users>(context, listen: false).fetchData();
@@ -70,14 +68,26 @@ class _DetailLaporanState extends State<DetailLaporan> {
     });
   }
 
+  // ===================== FORMAT UANG =====================
+  String formatRupiah(int value) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 0,
+    );
+    return formatter.format(value);
+  }
+
+  // ===================== BUILD =====================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Laporan ${widget.laporan.tanggal}",
+          "Laporan ${widget.laporan.id}",
           style: const TextStyle(fontSize: 14),
         ),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
@@ -99,7 +109,7 @@ class _DetailLaporanState extends State<DetailLaporan> {
                   SnackBar(content: Text("Gagal membuat PDF: $e")),
                 );
               } finally {
-                Navigator.of(context).pop(); // hilangkan loading
+                Navigator.of(context).pop();
               }
             },
           ),
@@ -117,8 +127,6 @@ class _DetailLaporanState extends State<DetailLaporan> {
             _penjualanSection(),
             const SizedBox(height: 24),
             _pengeluaranSection(),
-            const SizedBox(height: 24),
-            _kesimpulanSection(),
           ],
         ),
       ),
@@ -127,29 +135,44 @@ class _DetailLaporanState extends State<DetailLaporan> {
 
   // ===================== HEADER =====================
   Widget _headerSummary() {
-    return Row(
-      children: [
-        _summaryCard(
-          title: "Pendapatan",
-          value: "Rp 2.860.000",
-          color: Colors.green,
-          icon: Icons.trending_up,
-        ),
-        const SizedBox(width: 6),
-        _summaryCard(
-          title: "Pengeluaran",
-          value: "Rp 167.000",
-          color: Colors.red,
-          icon: Icons.trending_down,
-        ),
-        const SizedBox(width: 6),
-        _summaryCard(
-          title: "Laba Bersih",
-          value: "Rp 2.693.000",
-          color: Colors.blue,
-          icon: Icons.account_balance_wallet,
-        ),
-      ],
+    return Consumer3<Penjualans, Jadwals, Pengeluarans>(
+      builder: (context, penjualan, jadwal, pengeluaran, child) {
+        int totalPendapatan = 0, totalPengeluaran = 0, labaBersih = 0;
+
+        for (int a = 0; a < penjualan.datas.length; a++) {
+          totalPendapatan += penjualan.datas[a].totalHarga;
+        }
+        for (int a = 0; a < jadwal.datas.length; a++) {
+          totalPengeluaran += jadwal.datas[a].nominal;
+        }
+        for (int a = 0; a < pengeluaran.datas.length; a++) {
+          totalPengeluaran += pengeluaran.datas[a].totalHarga;
+        }
+        return Row(
+          children: [
+            _summaryCard(
+              title: "Pendapatan",
+              value: "Rp ${formatRupiah(totalPendapatan)}",
+              color: Colors.green,
+              icon: Icons.trending_up,
+            ),
+            const SizedBox(width: 6),
+            _summaryCard(
+              title: "Pengeluaran",
+              value: "Rp ${formatRupiah(totalPengeluaran)}",
+              color: Colors.red,
+              icon: Icons.trending_down,
+            ),
+            const SizedBox(width: 6),
+            _summaryCard(
+              title: "Laba Bersih",
+              value: "Rp ${formatRupiah(labaBersih)}",
+              color: Colors.blue,
+              icon: Icons.account_balance_wallet,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -187,22 +210,21 @@ class _DetailLaporanState extends State<DetailLaporan> {
   Widget _jadwalKaryawan() {
     return Consumer3<Jadwals, Users, Cabangs>(
       builder: (context, jadwal, user, cabang, child) {
-        int total = 0;
-        for (int a = 0; a < jadwal.datas.length; a++)
-          total += jadwal.datas[a].nominal;
+        int total = jadwal.datas.fold(0, (sum, e) => sum + e.nominal);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitleWithValue("Jadwal Karyawan", "Rp $total"),
+            _sectionTitleWithValue(
+              "Jadwal Karyawan",
+              "Rp ${formatRupiah(total)}",
+            ),
             Card(
               child: Column(
                 children: [
                   _jadwalHeader(),
                   ListView.builder(
-                    shrinkWrap:
-                        true, // penting agar ListView menyesuaikan tinggi isinya
-                    physics:
-                        const NeverScrollableScrollPhysics(), // biar scroll hanya di SingleChildScrollView parent
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: jadwal.datas.length,
                     itemBuilder: (context, index) {
                       for (int a = 0; a < user.datas.length; a++) {
@@ -216,10 +238,11 @@ class _DetailLaporanState extends State<DetailLaporan> {
                           return _jadwalRow(
                             user.datas[a].nama,
                             namaCabang,
-                            "Rp ${jadwal.datas[index].nominal}",
+                            "Rp ${formatRupiah(jadwal.datas[index].nominal)}",
                           );
                         }
                       }
+                      return const SizedBox();
                     },
                   ),
                 ],
@@ -295,13 +318,13 @@ class _DetailLaporanState extends State<DetailLaporan> {
     return Consumer3<Makanans, Penjualans, Cabangs>(
       builder:
           (context, makananProvider, penjualanProvider, cabangProvider, child) {
-            int rowIndex = 0; // counter untuk zebra striping
+            int rowIndex = 0;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _sectionTitleWithValue(
                   "Penjualan",
-                  "Rp ${penjualanProvider.Pendapatan()}",
+                  "Rp ${formatRupiah(penjualanProvider.Pendapatan())}",
                   valueColor: Colors.green,
                 ),
                 Card(
@@ -314,13 +337,11 @@ class _DetailLaporanState extends State<DetailLaporan> {
                           if (makanan.nama != "Gudangs") ...[
                             Builder(
                               builder: (context) {
-                                // Ambil jumlah per cabang
                                 List<String> jumlahPerCabang = [];
                                 int totalPorsi = 0;
                                 int totalHarga = 0;
 
                                 for (var cabang in cabangProvider.datas) {
-                                  // cari Penjualan di cabang ini
                                   int jumlah = 0;
                                   int harga = 0;
 
@@ -347,10 +368,10 @@ class _DetailLaporanState extends State<DetailLaporan> {
 
                                 return _tableRow(
                                   nama: makanan.nama,
-                                  harga: makanan.harga.toString(),
+                                  harga: formatRupiah(makanan.harga),
                                   cabang: jumlahPerCabang,
                                   total: totalPorsi.toString(),
-                                  totalHarga: totalHarga.toString(),
+                                  totalHarga: formatRupiah(totalHarga),
                                   index: rowIndex++,
                                 );
                               },
@@ -389,9 +410,8 @@ class _DetailLaporanState extends State<DetailLaporan> {
     required List<String> cabang,
     required String total,
     required String totalHarga,
-    required int index, // tambahkan index
+    required int index,
   }) {
-    // Warna latar untuk baris genap
     final bgColor = index % 2 == 1 ? Colors.grey.shade300 : Colors.white;
 
     return Container(
@@ -436,9 +456,7 @@ class _DetailLaporanState extends State<DetailLaporan> {
         text,
         textAlign: center
             ? TextAlign.center
-            : l == "l"
-            ? TextAlign.left
-            : TextAlign.right,
+            : (l == "l" ? TextAlign.left : TextAlign.right),
         style: const TextStyle(fontSize: 8),
       ),
     );
@@ -446,28 +464,61 @@ class _DetailLaporanState extends State<DetailLaporan> {
 
   // ===================== PENGELUARAN =====================
   Widget _pengeluaranSection() {
-    return Consumer<Pengeluarans>(
-      builder: (context, pengeluaran, child) {
-        print(
-          "Pengeluaran ${pengeluaran.datas.length} ${widget.laporan.tanggal}",
+    return Consumer2<Pengeluarans, Cabangs>(
+      builder: (context, pengeluaranProvider, cabangProvider, child) {
+        Map<String, List<Pengeluaran>> pengeluaranPerCabang = {};
+        for (var p in pengeluaranProvider.datas) {
+          pengeluaranPerCabang.putIfAbsent(p.idCabang, () => []).add(p);
+        }
+        int total = pengeluaranProvider.datas.fold(
+          0,
+          (sum, p) => sum + p.totalHarga,
         );
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionTitleWithValue(
               "Pengeluaran",
-              "Rp 167.000",
+              "Rp ${formatRupiah(total)}",
               valueColor: Colors.red,
             ),
             Card(
               child: Column(
                 children: [
-                  for (int a = 0; a < pengeluaran.datas.length; a++) ...[
-                    ListTile(
-                      title: Text(pengeluaran.datas[a].namaPengeluaran),
-                      trailing: Text("Rp 150.000"),
-                    ),
-                    Divider(height: 0),
+                  for (var cabang in cabangProvider.datas) ...[
+                    if (pengeluaranPerCabang[cabang.id] != null) ...[
+                      Container(
+                        width: double.infinity,
+                        color: Colors.grey.shade200,
+                        child: Text(
+                          cabang.nama,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      for (var p in pengeluaranPerCabang[cabang.id]!) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 5,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                p.namaPengeluaran,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              const Spacer(),
+                              Text(
+                                "Rp ${formatRupiah(p.totalHarga)}",
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 0),
+                      ],
+                    ],
                   ],
                 ],
               ),
@@ -478,42 +529,7 @@ class _DetailLaporanState extends State<DetailLaporan> {
     );
   }
 
-  // ===================== KESIMPULAN =====================
-  Widget _kesimpulanSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionTitle("Kesimpulan"),
-        Card(
-          color: Colors.green.shade50,
-          child: const ListTile(
-            leading: Icon(Icons.check_circle, color: Colors.green),
-            title: Text(
-              "Laba Bersih",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            trailing: Text(
-              "Rp 2.693.000",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   // ===================== UTIL =====================
-  Widget _sectionTitle(String title) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Text(
-      title,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-    ),
-  );
-
   Widget _sectionTitleWithValue(
     String title,
     String value, {
@@ -540,45 +556,294 @@ class _DetailLaporanState extends State<DetailLaporan> {
     ),
   );
 
-  // ===================== PDF EXPORT CROSS-PLATFORM =====================
+  // ===================== PDF EXPORT =====================
   Future<void> _downloadPDF() async {
     final pdf = pw.Document();
 
+    final penjualans = Provider.of<Penjualans>(context, listen: false);
+    final pengeluarans = Provider.of<Pengeluarans>(context, listen: false);
+    final jadwals = Provider.of<Jadwals>(context, listen: false);
+    final users = Provider.of<Users>(context, listen: false);
+    final cabangs = Provider.of<Cabangs>(context, listen: false);
+    final makanans = Provider.of<Makanans>(context, listen: false);
+
+    int totalPendapatan = penjualans.Pendapatan();
+    int totalPengeluaran = pengeluarans.datas.fold(
+      0,
+      (sum, p) => sum + p.totalHarga,
+    );
+    int totalGaji = jadwals.datas.fold(0, (sum, p) => sum + p.nominal);
+    int labaBersih = totalPendapatan - (totalPengeluaran + totalGaji);
+
+    const double fontSize = 8;
+
     pdf.addPage(
-      pw.Page(
-        build: (context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              "Laporan ${widget.laporan.tanggal}",
-              style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(15),
+        build: (context) {
+          return [
+            pw.Center(
+              child: pw.Text(
+                "Laporan ${widget.laporan.id}",
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 5),
+            pw.Column(
+              children: [
+                pw.Row(
+                  children: [
+                    pw.SizedBox(
+                      width: 80,
+                      child: pw.Text(
+                        "Pendapatan",
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                    pw.Text(": Rp", style: pw.TextStyle(fontSize: fontSize)),
+                    pw.SizedBox(
+                      width: 50,
+                      child: pw.Text(
+                        formatRupiah(totalPendapatan),
+                        textAlign: pw.TextAlign.end,
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.SizedBox(
+                      width: 80,
+                      child: pw.Text(
+                        "Pengeluaran",
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                    pw.Text(": Rp", style: pw.TextStyle(fontSize: fontSize)),
+                    pw.SizedBox(
+                      width: 50,
+                      child: pw.Text(
+                        formatRupiah(totalPengeluaran),
+                        textAlign: pw.TextAlign.end,
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.SizedBox(
+                      width: 80,
+                      child: pw.Text(
+                        "Gaji",
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                    pw.Text(": Rp", style: pw.TextStyle(fontSize: fontSize)),
+                    pw.SizedBox(
+                      width: 50,
+                      child: pw.Text(
+                        formatRupiah(totalGaji),
+                        textAlign: pw.TextAlign.end,
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  children: [
+                    pw.SizedBox(
+                      width: 80,
+                      child: pw.Text(
+                        "Laba Bersih",
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                    pw.Text(": Rp", style: pw.TextStyle(fontSize: fontSize)),
+                    pw.SizedBox(
+                      width: 50,
+                      child: pw.Text(
+                        formatRupiah(labaBersih),
+                        textAlign: pw.TextAlign.end,
+                        style: pw.TextStyle(fontSize: fontSize),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             pw.SizedBox(height: 10),
-            pw.Text("Pendapatan: Rp 2.860.000"),
-            pw.Text("Pengeluaran: Rp 167.000"),
-            pw.Text("Laba Bersih: Rp 2.693.000"),
+
+            // ==== Penjualan ====
+            pw.Text(
+              "Penjualan",
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: fontSize,
+              ),
+            ),
+            pw.SizedBox(height: 3),
+            pw.Table.fromTextArray(
+              headers: [
+                "Makanan",
+                "Harga",
+                ...cabangs.datas.map((c) => c.nama),
+                "Total Porsi",
+                "Total Rp",
+              ],
+              data: [
+                for (var m in makanans.datas)
+                  [
+                    m.nama,
+                    formatRupiah(m.harga),
+                    for (var c in cabangs.datas)
+                      penjualans.datas
+                          .where((p) => p.id_cabang == c.id)
+                          .map((p) {
+                            var detail = p.detail.firstWhere(
+                              (d) => d.id_makanan == m.id,
+                              orElse: () => DetailPenjualan(
+                                id: "",
+                                id_makanan: "",
+                                jumlah: 0,
+                                totalHarga: 0,
+                              ),
+                            );
+                            return detail.jumlah.toString();
+                          })
+                          .fold<int>(0, (prev, e) => prev + int.parse(e))
+                          .toString(),
+                    penjualans.datas
+                        .map((p) {
+                          var detail = p.detail.firstWhere(
+                            (d) => d.id_makanan == m.id,
+                            orElse: () => DetailPenjualan(
+                              id: "",
+                              id_makanan: "",
+                              jumlah: 0,
+                              totalHarga: 0,
+                            ),
+                          );
+                          return detail.jumlah;
+                        })
+                        .fold<int>(0, (a, b) => a + b)
+                        .toString(),
+                    formatRupiah(
+                      penjualans.datas
+                          .map((p) {
+                            var detail = p.detail.firstWhere(
+                              (d) => d.id_makanan == m.id,
+                              orElse: () => DetailPenjualan(
+                                id: "",
+                                id_makanan: "",
+                                jumlah: 0,
+                                totalHarga: 0,
+                              ),
+                            );
+                            return detail.totalHarga;
+                          })
+                          .fold<int>(0, (a, b) => a + b),
+                    ),
+                  ],
+              ],
+              cellAlignment: pw.Alignment.center,
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: fontSize,
+              ),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              border: pw.TableBorder.all(color: PdfColors.grey),
+              cellStyle: pw.TextStyle(fontSize: fontSize),
+              cellHeight: 15,
+            ),
+
+            // ==== Jadwal Karyawan ====
             pw.SizedBox(height: 10),
             pw.Text(
               "Jadwal Karyawan",
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: fontSize,
+              ),
             ),
             pw.Table.fromTextArray(
               headers: ["Nama", "Cabang", "Gaji"],
               data: [
-                ["Budi", "Cimacan", "Rp 20.000"],
-                ["Ani", "Cipanas", "Rp 20.000"],
-                ["Doni", "GSP", "Rp 15.000"],
+                for (var jadwal in jadwals.datas)
+                  for (var user in users.datas)
+                    if (user.id == jadwal.id_user)
+                      [
+                        user.nama,
+                        cabangs.datas
+                            .firstWhere(
+                              (c) => c.id == jadwal.id_cabang,
+                              orElse: () => Cabang(id: "", nama: "Unknown"),
+                            )
+                            .nama,
+                        formatRupiah(jadwal.nominal),
+                      ],
               ],
+              cellAlignment: pw.Alignment.centerLeft,
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: fontSize,
+              ),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              border: pw.TableBorder.all(color: PdfColors.grey),
+              cellStyle: pw.TextStyle(fontSize: fontSize),
+              cellHeight: 15,
             ),
-          ],
-        ),
+
+            // ==== Pengeluaran ====
+            pw.SizedBox(height: 10),
+            pw.Text(
+              "Pengeluaran",
+              style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: fontSize,
+              ),
+            ),
+            for (var cabang in cabangs.datas) ...[
+              pw.Text(
+                cabang.nama,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: fontSize,
+                ),
+              ),
+              pw.Table.fromTextArray(
+                headers: ["Nama Pengeluaran", "Total Rp"],
+                data: [
+                  for (var p in pengeluarans.datas.where(
+                    (e) => e.idCabang == cabang.id,
+                  ))
+                    [p.namaPengeluaran, formatRupiah(p.totalHarga)],
+                ],
+                cellAlignment: pw.Alignment.centerLeft,
+                headerStyle: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: fontSize,
+                ),
+                headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+                border: pw.TableBorder.all(color: PdfColors.grey),
+                cellStyle: pw.TextStyle(fontSize: fontSize),
+                cellHeight: 15,
+              ),
+              pw.SizedBox(height: 5),
+            ],
+          ];
+        },
       ),
     );
 
     final bytes = await pdf.save();
 
     if (kIsWeb) {
-      // Web download via Blob
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.AnchorElement(href: url)
@@ -586,7 +851,6 @@ class _DetailLaporanState extends State<DetailLaporan> {
         ..click();
       html.Url.revokeObjectUrl(url);
     } else {
-      // Mobile/Desktop save to file
       final dir = await getApplicationDocumentsDirectory();
       final safeDate = widget.laporan.tanggal.toString().replaceAll('/', '-');
       final file = File("${dir.path}/Laporan_$safeDate.pdf");

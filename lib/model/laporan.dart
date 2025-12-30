@@ -532,7 +532,11 @@ class Laporans extends ChangeNotifier {
     // **LOAD DATA DULU**
     await getData(idCabang);
 
-    final today = DateTime.now();
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
 
     final existingLaporan = _datas.where(
       (l) =>

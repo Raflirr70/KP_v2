@@ -78,7 +78,6 @@ class Pengeluarans extends ChangeNotifier {
   }
 
   Future<void> fetchDataLaporan(DateTime time) async {
-    print("time $time");
     isLoading = true;
     notifyListeners();
 
@@ -90,6 +89,8 @@ class Pengeluarans extends ChangeNotifier {
       final end = Timestamp.fromDate(
         DateTime(time.year, time.month, time.day).add(const Duration(days: 1)),
       );
+      print("time $start sampao ke $end");
+      print("Apakah masuk ke sini ");
 
       final lapSnapshot = await FirebaseFirestore.instance
           .collection("laporan")
