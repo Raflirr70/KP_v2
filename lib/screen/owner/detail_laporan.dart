@@ -11,13 +11,14 @@ import 'package:kerprak/model/user.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 
 // Hanya untuk mobile/desktop
 import 'dart:io' show File;
 import 'package:path_provider/path_provider.dart';
 
 // Hanya untuk web
-import 'dart:html' as html;
+// import 'dart:html' as html;
 
 import 'package:provider/provider.dart';
 
@@ -843,19 +844,18 @@ class _DetailLaporanState extends State<DetailLaporan> {
 
     final bytes = await pdf.save();
 
-    if (kIsWeb) {
-      final blob = html.Blob([bytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute("download", "Laporan_${widget.laporan.tanggal}.pdf")
-        ..click();
-      html.Url.revokeObjectUrl(url);
-    } else {
-      final dir = await getApplicationDocumentsDirectory();
-      final safeDate = widget.laporan.tanggal.toString().replaceAll('/', '-');
-      final file = File("${dir.path}/Laporan_$safeDate.pdf");
-      await file.writeAsBytes(bytes);
-      print("PDF berhasil disimpan di: ${file.path}");
-    }
+    // final dir = await getApplicationDocumentsDirectory();
+    // final file = File("${dir.path}/Laporan_$safeDate.pdf");
+    // await file.writeAsBytes(bytes);
+    // print("PDF berhasil disimpan di: ${file.path}");
+
+    final dir = await getExternalStorageDirectory();
+    final safeDate = widget.laporan.tanggal.toString().replaceAll('/', '-');
+    final downloadPath = "${dir!.path}/Laporan_$safeDate.pdf";
+    final file = File(downloadPath);
+    await file.writeAsBytes(bytes);
+    await OpenFile.open(file.path);
+
+    print("PDF berhasil disimpan di: $downloadPath");
   }
 }

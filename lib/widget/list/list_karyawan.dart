@@ -128,17 +128,6 @@ class ListKaryawan extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12),
-            _actionButton(
-              icon: Icons.edit,
-              label: "Edit",
-              color: Colors.blueAccent,
-              onTap: () {
-                Navigator.pop(context);
-                showEditKaryawanDialog(context, user);
-                print("object");
-              },
-            ),
-            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
