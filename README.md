@@ -1,6 +1,12 @@
-# kerprak
+# Kerja Praktek
 
-A new Flutter project.
+Project aplikasi mobile untuk sistem oprasional dan monitoring cabang di rumah makan
+project ini berfokus pada
+
+- monitoring stock real time
+- monitoring penjualan real time
+- monitoring penghasilan tiap cabang secara real time
+- membantu oprasional cabang
 
 ## Getting Started
 
